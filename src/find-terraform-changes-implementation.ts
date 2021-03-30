@@ -28,6 +28,7 @@ export function findAffectedModules({
 
 export async function findTerraformChanges(): Promise<void> {
   const marker = core.getInput('marker')
+  core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
   const moduleHits = await globber.glob()
   const moduleDirs = moduleHits.map(dirname)
