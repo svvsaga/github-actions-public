@@ -1,0 +1,17 @@
+name: Find Terraform changes
+description: Find changes in terraform modules.
+runs:
+  using: 'node12'
+  main: './index.js'
+inputs:
+  token:
+    description: GitHub token. Defaults to `github.token`.
+    required: true
+    default: ${{ github.token }}
+  glob:
+    description: A glob that identifies Terraform modules. Defaults to folders with a `terragrunt.hcl` file.
+    required: true
+    default: '**/terragrunt.hcl'
+outputs:
+  matrix:
+    description: Matrix of terraform paths with changes in this PR. Use `matrix.path`.

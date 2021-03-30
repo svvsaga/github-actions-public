@@ -1,0 +1,5 @@
+dist/
+lib/
+node_modules/
+lint-staged.config.cjs
+*.js
