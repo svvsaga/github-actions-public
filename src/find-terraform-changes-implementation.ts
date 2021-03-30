@@ -19,9 +19,11 @@ export function findAffectedModules({
 }: {
   filesInPr: string[]
   moduleDirs: string[]
-}) {
+}): string[] {
   const dirsInPr = uniq(filesInPr.map(dirname))
-  return uniq(dirsInPr.map((dir) => findClosest(dir, moduleDirs)))
+  return uniq(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter(
+    (path) => !!path
+  ) as string[]
 }
 
 export async function findTerraformChanges(): Promise<void> {
@@ -32,7 +34,10 @@ export async function findTerraformChanges(): Promise<void> {
   const filesInPr = await listFilesInPullRequest()
   const modulesInPr = findAffectedModules({ filesInPr, moduleDirs })
 
-  core.info(`Found ${modulesInPr.length} Terraform modules`)
+  core.info(`Found ${modulesInPr.length} Terraform modules:`)
+  for (const module of modulesInPr) {
+    core.info(module)
+  }
 
   const matrix = {
     include: Array.from(modulesInPr).map((path) => ({ path })),
