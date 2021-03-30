@@ -62,6 +62,7 @@ exports.findAffectedModules = findAffectedModules;
 function findTerraformChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         const marker = core.getInput('marker');
+        core.debug(`Module marker: ${marker}`);
         const globber = yield glob.create(`**/${marker}`);
         const moduleHits = yield globber.glob();
         const moduleDirs = moduleHits.map(path_1.dirname);
