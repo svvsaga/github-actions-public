@@ -1,5 +1,5 @@
 name: Find Terraform changes
-description: Find changes in Terraform modules. NOTE: Requires checking out the code beforehand.
+description: Find changes in Terraform modules. Requires checking out the code beforehand.
 runs:
   using: 'node12'
   main: './index.js'
