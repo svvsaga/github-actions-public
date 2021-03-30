@@ -56,7 +56,7 @@ function findClosest(path, prefixes) {
 }
 function findAffectedModules({ filesInPr, moduleDirs, }) {
     const dirsInPr = uniq_1.default(filesInPr.map(path_1.dirname));
-    return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs)));
+    return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
 function findTerraformChanges() {
@@ -65,9 +65,20 @@ function findTerraformChanges() {
         const globber = yield glob.create(`**/${marker}`);
         const moduleHits = yield globber.glob();
         const moduleDirs = moduleHits.map(path_1.dirname);
+        if (core.isDebug()) {
+            core.debug(`Modules in repo:`);
+            for (const module of moduleDirs) {
+                core.debug(module);
+            }
+        }
         const filesInPr = yield utils_1.listFilesInPullRequest();
         const modulesInPr = findAffectedModules({ filesInPr, moduleDirs });
-        core.info(`Found ${modulesInPr.length} Terraform modules`);
+        if (core.isDebug()) {
+            core.debug(`Found ${modulesInPr.length} Terraform modules:`);
+            for (const module of modulesInPr) {
+                core.debug(module);
+            }
+        }
         const matrix = {
             include: Array.from(modulesInPr).map((path) => ({ path })),
         };
