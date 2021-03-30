@@ -31,12 +31,20 @@ export async function findTerraformChanges(): Promise<void> {
   const globber = await glob.create(`**/${marker}`)
   const moduleHits = await globber.glob()
   const moduleDirs = moduleHits.map(dirname)
+  if (core.isDebug()) {
+    core.debug(`Modules in repo:`)
+    for (const module of moduleDirs) {
+      core.debug(module)
+    }
+  }
   const filesInPr = await listFilesInPullRequest()
   const modulesInPr = findAffectedModules({ filesInPr, moduleDirs })
 
-  core.info(`Found ${modulesInPr.length} Terraform modules:`)
-  for (const module of modulesInPr) {
-    core.info(module)
+  if (core.isDebug()) {
+    core.debug(`Found ${modulesInPr.length} Terraform modules:`)
+    for (const module of modulesInPr) {
+      core.debug(module)
+    }
   }
 
   const matrix = {
