@@ -15,9 +15,11 @@ module.exports = {
   testRunner: 'jest-circus/runner',
   transform: {
     '^.+\\.ts$': 'ts-jest',
+    '^.+\\.js$': 'babel-jest',
   },
   verbose: true,
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: '<rootDir>/',
   }),
+  transformIgnorePatterns: ['/node_modules/(?!lodash-es)'],
 }
