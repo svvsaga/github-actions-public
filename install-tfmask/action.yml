@@ -1,0 +1,5 @@
+name: Install tfmask
+description: Install `tfmask` and make it available to path.
+runs:
+  using: 'node12'
+  main: './index.js'

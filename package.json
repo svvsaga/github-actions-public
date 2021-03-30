@@ -9,6 +9,7 @@
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
     "package:find-terraform-changes": "ncc build lib/find-terraform-changes.js --source-map -o find-terraform-changes",
+    "package:install-tfmask": "ncc build lib/install-tfmask.js --source-map -o install-tfmask",
     "package": "run-p package:*",
     "test:unit": "jest unit --passWithNoTests",
     "test:int": "jest integration --passWithNoTests",
