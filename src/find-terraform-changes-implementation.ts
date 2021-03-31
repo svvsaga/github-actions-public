@@ -26,26 +26,29 @@ export function findAffectedModules({
   ) as string[]
 }
 
-export async function findTerraformChanges(): Promise<void> {
-  const marker = core.getInput('marker')
+export async function findModules(marker: string) {
   core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
+  core.debug(`Search paths: ${globber.getSearchPaths().join()}`)
   const moduleHits = await globber.glob()
-  const moduleDirs = moduleHits.map(dirname)
-  if (core.isDebug()) {
-    core.debug(`Modules in repo:`)
-    for (const module of moduleDirs) {
-      core.debug(module)
-    }
+  return uniq(moduleHits.map(dirname))
+}
+
+export async function findTerraformChanges(): Promise<void> {
+  const marker = core.getInput('marker')
+  const moduleDirs = await findModules(marker)
+
+  core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`)
+  for (const module of moduleDirs) {
+    core.debug(module)
   }
+
   const filesInPr = await listFilesInPullRequest()
   const modulesInPr = findAffectedModules({ filesInPr, moduleDirs })
 
-  if (core.isDebug()) {
-    core.debug(`Found ${modulesInPr.length} Terraform modules:`)
-    for (const module of modulesInPr) {
-      core.debug(module)
-    }
+  core.debug(`Found ${modulesInPr.length} Terraform affected modules:`)
+  for (const module of modulesInPr) {
+    core.debug(module)
   }
 
   const matrix = {

@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findTerraformChanges = exports.findAffectedModules = void 0;
+exports.findTerraformChanges = exports.findModules = exports.findAffectedModules = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const orderBy_1 = __importDefault(__nccwpck_require__(3225));
@@ -59,26 +59,29 @@ function findAffectedModules({ filesInPr, moduleDirs, }) {
     return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
+function findModules(marker) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug(`Module marker: ${marker}`);
+        const globber = yield glob.create(`**/${marker}`);
+        core.debug(`Search paths: ${globber.getSearchPaths().join()}`);
+        const moduleHits = yield globber.glob();
+        return uniq_1.default(moduleHits.map(path_1.dirname));
+    });
+}
+exports.findModules = findModules;
 function findTerraformChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         const marker = core.getInput('marker');
-        core.debug(`Module marker: ${marker}`);
-        const globber = yield glob.create(`**/${marker}`);
-        const moduleHits = yield globber.glob();
-        const moduleDirs = moduleHits.map(path_1.dirname);
-        if (core.isDebug()) {
-            core.debug(`Modules in repo:`);
-            for (const module of moduleDirs) {
-                core.debug(module);
-            }
+        const moduleDirs = yield findModules(marker);
+        core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`);
+        for (const module of moduleDirs) {
+            core.debug(module);
         }
         const filesInPr = yield utils_1.listFilesInPullRequest();
         const modulesInPr = findAffectedModules({ filesInPr, moduleDirs });
-        if (core.isDebug()) {
-            core.debug(`Found ${modulesInPr.length} Terraform modules:`);
-            for (const module of modulesInPr) {
-                core.debug(module);
-            }
+        core.debug(`Found ${modulesInPr.length} Terraform affected modules:`);
+        for (const module of modulesInPr) {
+            core.debug(module);
         }
         const matrix = {
             include: Array.from(modulesInPr).map((path) => ({ path })),
