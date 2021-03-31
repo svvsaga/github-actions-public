@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import orderBy from 'lodash-es/orderBy'
 import uniq from 'lodash-es/uniq'
-import { dirname, resolve } from 'path'
+import { dirname } from 'path'
 import { listFilesInPullRequest } from './utils'
 
 function findClosest(path: string, prefixes: string[]): string | null {
@@ -20,7 +20,7 @@ export function findAffectedModules({
   filesInPr: string[]
   moduleDirs: string[]
 }): string[] {
-  const dirsInPr = uniq(filesInPr.map((file) => resolve(dirname(file))))
+  const dirsInPr = uniq(filesInPr.map((file) => './' + dirname(file)))
   return uniq(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter(
     (path) => !!path
   ) as string[]
@@ -29,9 +29,12 @@ export function findAffectedModules({
 export async function findModules(marker: string) {
   core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
-  core.debug(`Search paths: ${globber.getSearchPaths().join()}`)
+  const searchPath = globber.getSearchPaths()[0]
+  core.debug(`Search path: ${searchPath}`)
   const moduleHits = await globber.glob()
-  return uniq(moduleHits.map(dirname))
+  return uniq(
+    moduleHits.map(dirname).map((dir) => dir.replace(searchPath, '.'))
+  )
 }
 
 export async function findTerraformChanges(): Promise<void> {

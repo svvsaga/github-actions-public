@@ -55,7 +55,7 @@ function findClosest(path, prefixes) {
     return null;
 }
 function findAffectedModules({ filesInPr, moduleDirs, }) {
-    const dirsInPr = uniq_1.default(filesInPr.map((file) => path_1.resolve(path_1.dirname(file))));
+    const dirsInPr = uniq_1.default(filesInPr.map((file) => './' + path_1.dirname(file)));
     return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
@@ -63,9 +63,10 @@ function findModules(marker) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Module marker: ${marker}`);
         const globber = yield glob.create(`**/${marker}`);
-        core.debug(`Search paths: ${globber.getSearchPaths().join()}`);
+        const searchPath = globber.getSearchPaths()[0];
+        core.debug(`Search path: ${searchPath}`);
         const moduleHits = yield globber.glob();
-        return uniq_1.default(moduleHits.map(path_1.dirname));
+        return uniq_1.default(moduleHits.map(path_1.dirname).map((dir) => dir.replace(searchPath, '.')));
     });
 }
 exports.findModules = findModules;
