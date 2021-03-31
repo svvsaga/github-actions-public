@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as glob from '@actions/glob'
+import difference from 'lodash-es/difference'
 import orderBy from 'lodash-es/orderBy'
 import uniq from 'lodash-es/uniq'
 import { dirname } from 'path'
@@ -26,20 +27,28 @@ export function findAffectedModules({
   ) as string[]
 }
 
-export async function findModules(marker: string) {
+export async function findModules(
+  marker: string,
+  ignoreModules: string[] = []
+) {
   core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
   const searchPath = globber.getSearchPaths()[0]
   core.debug(`Search path: ${searchPath}`)
   const moduleHits = await globber.glob()
-  return uniq(
+  const moduleDirs = uniq(
     moduleHits.map(dirname).map((dir) => dir.replace(searchPath, '.'))
   )
+  return difference(moduleDirs, ignoreModules)
 }
 
 export async function findTerraformChanges(): Promise<void> {
   const marker = core.getInput('marker')
-  const moduleDirs = await findModules(marker)
+  const ignoreModules = (core.getInput('ignore_modules') ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => !!s)
+  const moduleDirs = await findModules(marker, ignoreModules)
 
   core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`)
   for (const module of moduleDirs) {

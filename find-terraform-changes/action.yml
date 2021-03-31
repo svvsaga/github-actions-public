@@ -12,6 +12,8 @@ inputs:
     description: A file that marks the root of a Terraform module. Defaults to `terragrunt.hcl`.
     required: true
     default: terragrunt.hcl
+  ignore_modules:
+    description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
 outputs:
   matrix:
     description: Matrix of terraform paths with changes in this PR. Use `matrix.path`.
