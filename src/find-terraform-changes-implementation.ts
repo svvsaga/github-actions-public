@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import orderBy from 'lodash-es/orderBy'
 import uniq from 'lodash-es/uniq'
-import { dirname } from 'path'
+import { dirname, resolve } from 'path'
 import { listFilesInPullRequest } from './utils'
 
 function findClosest(path: string, prefixes: string[]): string | null {
@@ -20,7 +20,7 @@ export function findAffectedModules({
   filesInPr: string[]
   moduleDirs: string[]
 }): string[] {
-  const dirsInPr = uniq(filesInPr.map(dirname))
+  const dirsInPr = uniq(filesInPr.map((file) => resolve(dirname(file))))
   return uniq(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter(
     (path) => !!path
   ) as string[]

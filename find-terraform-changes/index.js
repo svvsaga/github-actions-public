@@ -55,7 +55,7 @@ function findClosest(path, prefixes) {
     return null;
 }
 function findAffectedModules({ filesInPr, moduleDirs, }) {
-    const dirsInPr = uniq_1.default(filesInPr.map(path_1.dirname));
+    const dirsInPr = uniq_1.default(filesInPr.map((file) => path_1.resolve(path_1.dirname(file))));
     return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
