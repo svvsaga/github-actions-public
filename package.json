@@ -1,6 +1,6 @@
 {
   "name": "github-actions-public",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "GitHub Actions",
   "scripts": {
