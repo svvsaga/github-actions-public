@@ -77,6 +77,9 @@ function findTerraformChanges() {
         for (const module of moduleDirs) {
             core.debug(module);
         }
+        if (moduleDirs.length === 0) {
+            core.warning('Could not find any modules for the given marker; have you remembered to checkout the code?');
+        }
         const filesInPr = yield utils_1.listFilesInPullRequest();
         const modulesInPr = findAffectedModules({ filesInPr, moduleDirs });
         core.debug(`Found ${modulesInPr.length} Terraform affected modules:`);
