@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findTerraformChanges = exports.findModules = exports.findAffectedModules = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const glob = __importStar(__nccwpck_require__(8090));
 const difference_1 = __importDefault(__nccwpck_require__(6936));
 const orderBy_1 = __importDefault(__nccwpck_require__(9104));
@@ -55,8 +56,8 @@ function findClosest(path, prefixes) {
     }
     return null;
 }
-function findAffectedModules({ filesInPr, moduleDirs, }) {
-    const dirsInPr = uniq_1.default(filesInPr.map((file) => './' + path_1.dirname(file)));
+function findAffectedModules({ affectedFiles, moduleDirs, }) {
+    const dirsInPr = uniq_1.default(affectedFiles.map((file) => `./${path_1.dirname(file)}`));
     return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
@@ -88,8 +89,14 @@ function findTerraformChanges() {
         if (moduleDirs.length === 0) {
             core.warning('Could not find any modules for the given marker; have you remembered to checkout the code?');
         }
-        const filesInPr = yield utils_1.listFilesInPullRequest();
-        const modulesInPr = findAffectedModules({ filesInPr, moduleDirs });
+        const affectedFiles = github.context.eventName === 'pull_request'
+            ? yield utils_1.listFilesInPullRequest()
+            : github.context.eventName === 'push'
+                ? yield utils_1.listFilesInPush()
+                : null;
+        if (affectedFiles === null)
+            throw new Error(`Unsupported webhook event: ${github.context.eventName}`);
+        const modulesInPr = findAffectedModules({ affectedFiles, moduleDirs });
         core.debug(`Found ${modulesInPr.length} Terraform affected modules:`);
         for (const module of modulesInPr) {
             core.debug(module);
@@ -151,7 +158,7 @@ function run() {
         }
     });
 }
-run();
+void run();
 
 
 /***/ }),
@@ -190,33 +197,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.listFilesInPullRequest = void 0;
+exports.listFilesInPush = exports.listFilesInPullRequest = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const fs_1 = __nccwpck_require__(5747);
+function parseGithubEvent() {
+    const eventPath = process.env.GITHUB_EVENT_PATH;
+    if (!eventPath) {
+        throw new Error('GITHUB_EVENT_PATH not set');
+    }
+    const event = JSON.parse(fs_1.readFileSync(eventPath, 'utf8'));
+    return event;
+}
 function listFilesInPullRequest(includeRemoved = false) {
     return __awaiter(this, void 0, void 0, function* () {
+        const event = parseGithubEvent();
+        if (!event.number) {
+            throw new Error('Webhook is not a `pull_request` event');
+        }
+        const { number: pull_number } = event;
         const token = core.getInput('token');
         const octokit = github.getOctokit(token);
-        const eventPath = process.env.GITHUB_EVENT_PATH;
-        if (!eventPath) {
-            throw new Error('GITHUB_EVENT_PATH not set');
-        }
-        const event = JSON.parse(fs_1.readFileSync(eventPath, 'utf8'));
-        const { number: pull_number } = event;
         const { repo, owner } = github.context.repo;
-        const files = yield octokit.pulls.listFiles({
+        const response = yield octokit.pulls.listFiles({
             owner,
             repo,
             pull_number,
-            per_page: 3000,
+            per_page: 100,
         });
-        if (files.status >= 300) {
-            throw new Error(`Non-success status code when retrieving PR files: ${files.status}`);
+        if (response.status >= 300) {
+            throw new Error(`Non-success status code when retrieving PR files: ${response.status}`);
         }
         const filteredFiles = includeRemoved
-            ? files.data
-            : files.data.filter((file) => file.status !== 'removed');
+            ? response.data
+            : response.data.filter((file) => file.status !== 'removed');
         if (core.isDebug()) {
             core.debug(`${filteredFiles.length} files:`);
             for (const file of filteredFiles) {
@@ -227,6 +241,39 @@ function listFilesInPullRequest(includeRemoved = false) {
     });
 }
 exports.listFilesInPullRequest = listFilesInPullRequest;
+function listFilesInPush(includeRemoved = false) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const event = parseGithubEvent();
+        const { before, after } = event;
+        if (!before || !after) {
+            throw new Error('Webhook is not a `push` event');
+        }
+        const token = core.getInput('token');
+        const octokit = github.getOctokit(token);
+        const { repo, owner } = github.context.repo;
+        const response = yield octokit.repos.compareCommits({
+            repo,
+            owner,
+            base: before,
+            head: after,
+            per_page: 100,
+        });
+        if (response.status >= 300) {
+            throw new Error(`Non-success status code when retrieving pushed files: ${response.status}`);
+        }
+        const filteredFiles = includeRemoved
+            ? response.data.files
+            : response.data.files.filter((file) => file.status !== 'removed');
+        if (core.isDebug()) {
+            core.debug(`${filteredFiles.length} files:`);
+            for (const file of filteredFiles) {
+                core.debug(file.filename);
+            }
+        }
+        return filteredFiles.map(({ filename }) => filename);
+    });
+}
+exports.listFilesInPush = listFilesInPush;
 
 
 /***/ }),

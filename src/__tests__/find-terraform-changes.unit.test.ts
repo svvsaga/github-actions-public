@@ -23,13 +23,13 @@ describe('find-terraform-changes', () => {
       expect(
         findAffectedModules({
           moduleDirs,
-          filesInPr: ['system/charlie/main.tf'],
+          affectedFiles: ['system/charlie/main.tf'],
         })
       ).toEqual(['.'])
       expect(
         findAffectedModules({
           moduleDirs,
-          filesInPr: ['system/alpha/main.tf'],
+          affectedFiles: ['system/alpha/main.tf'],
         })
       ).toEqual(['./system/alpha'])
     })

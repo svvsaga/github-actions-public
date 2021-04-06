@@ -1,10 +1,11 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import difference from 'lodash-es/difference'
 import orderBy from 'lodash-es/orderBy'
 import uniq from 'lodash-es/uniq'
 import { dirname } from 'path'
-import { listFilesInPullRequest } from './utils'
+import { listFilesInPullRequest, listFilesInPush } from './utils'
 
 function findClosest(path: string, prefixes: string[]): string | null {
   const orderedPrefixes = orderBy(prefixes, (p) => p.length, 'desc')
@@ -15,13 +16,13 @@ function findClosest(path: string, prefixes: string[]): string | null {
 }
 
 export function findAffectedModules({
-  filesInPr,
+  affectedFiles,
   moduleDirs,
 }: {
-  filesInPr: string[]
+  affectedFiles: string[]
   moduleDirs: string[]
 }): string[] {
-  const dirsInPr = uniq(filesInPr.map((file) => './' + dirname(file)))
+  const dirsInPr = uniq(affectedFiles.map((file) => `./${dirname(file)}`))
   return uniq(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter(
     (path) => !!path
   ) as string[]
@@ -30,7 +31,7 @@ export function findAffectedModules({
 export async function findModules(
   marker: string,
   ignoreModules: string[] = []
-) {
+): Promise<string[]> {
   core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
   const searchPath = globber.getSearchPaths()[0]
@@ -60,8 +61,16 @@ export async function findTerraformChanges(): Promise<void> {
     )
   }
 
-  const filesInPr = await listFilesInPullRequest()
-  const modulesInPr = findAffectedModules({ filesInPr, moduleDirs })
+  const affectedFiles =
+    github.context.eventName === 'pull_request'
+      ? await listFilesInPullRequest()
+      : github.context.eventName === 'push'
+      ? await listFilesInPush()
+      : null
+  if (affectedFiles === null)
+    throw new Error(`Unsupported webhook event: ${github.context.eventName}`)
+
+  const modulesInPr = findAffectedModules({ affectedFiles, moduleDirs })
 
   core.debug(`Found ${modulesInPr.length} Terraform affected modules:`)
   for (const module of modulesInPr) {
