@@ -70,15 +70,18 @@ export async function findTerraformChanges(): Promise<void> {
   if (affectedFiles === null)
     throw new Error(`Unsupported webhook event: ${github.context.eventName}`)
 
-  const modulesInPr = findAffectedModules({ affectedFiles, moduleDirs })
+  const affectedModules = findAffectedModules({ affectedFiles, moduleDirs })
 
-  core.debug(`Found ${modulesInPr.length} Terraform affected modules:`)
-  for (const module of modulesInPr) {
+  core.debug(`Found ${affectedModules.length} affected Terraform modules:`)
+  for (const module of affectedModules) {
     core.debug(module)
   }
 
   const matrix = {
-    include: Array.from(modulesInPr).map((path) => ({ path })),
+    include: Array.from(affectedModules).map((path) => ({
+      path,
+      segments: path.split('/').filter((x) => !!x),
+    })),
   }
 
   core.setOutput('matrix', JSON.stringify(matrix))

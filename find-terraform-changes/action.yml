@@ -1,5 +1,5 @@
 name: Find Terraform changes
-description: Find changes in Terraform modules. Requires checking out the code beforehand.
+description: Find changes in Terraform modules in a pull request or push. Requires checking out the code beforehand.
 runs:
   using: 'node12'
   main: './index.js'
@@ -16,4 +16,4 @@ inputs:
     description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
 outputs:
   matrix:
-    description: Matrix of terraform paths with changes in this PR. Use `matrix.path`.
+    description: Matrix of terraform paths with changes in this PR/push. Use `matrix.path` for full path, or `matrix.segments` for an array of each path segment.
