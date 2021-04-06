@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import difference from 'lodash-es/difference'
+import last from 'lodash-es/last'
 import orderBy from 'lodash-es/orderBy'
 import uniq from 'lodash-es/uniq'
 import { dirname } from 'path'
@@ -78,10 +79,14 @@ export async function findTerraformChanges(): Promise<void> {
   }
 
   const matrix = {
-    include: Array.from(affectedModules).map((path) => ({
-      path,
-      segments: path.split('/').filter((x) => !!x),
-    })),
+    include: Array.from(affectedModules).map((path) => {
+      const segments = path.split('/').filter((x) => !!x)
+      return {
+        path,
+        segments,
+        folder: last(segments),
+      }
+    }),
   }
 
   core.setOutput('matrix', JSON.stringify(matrix))

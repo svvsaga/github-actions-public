@@ -44,6 +44,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const glob = __importStar(__nccwpck_require__(8090));
 const difference_1 = __importDefault(__nccwpck_require__(6936));
+const last_1 = __importDefault(__nccwpck_require__(6110));
 const orderBy_1 = __importDefault(__nccwpck_require__(9104));
 const uniq_1 = __importDefault(__nccwpck_require__(6051));
 const path_1 = __nccwpck_require__(5622);
@@ -102,10 +103,14 @@ function findTerraformChanges() {
             core.debug(module);
         }
         const matrix = {
-            include: Array.from(affectedModules).map((path) => ({
-                path,
-                segments: path.split('/').filter((x) => !!x),
-            })),
+            include: Array.from(affectedModules).map((path) => {
+                const segments = path.split('/').filter((x) => !!x);
+                return {
+                    path,
+                    segments,
+                    folder: last_1.default(segments),
+                };
+            }),
         };
         core.setOutput('matrix', JSON.stringify(matrix));
     });
@@ -7548,6 +7553,38 @@ function isObjectLike(value) {
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (isObjectLike);
+
+
+/***/ }),
+
+/***/ 6110:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
+/**
+ * Gets the last element of `array`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Array
+ * @param {Array} array The array to query.
+ * @returns {*} Returns the last element of `array`.
+ * @example
+ *
+ * _.last([1, 2, 3]);
+ * // => 3
+ */
+function last(array) {
+  var length = array == null ? 0 : array.length;
+  return length ? array[length - 1] : undefined;
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (last);
 
 
 /***/ }),
