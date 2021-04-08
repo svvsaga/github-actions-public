@@ -112,7 +112,8 @@ function findTerraformChanges() {
                 };
             }),
         };
-        core.setOutput('matrix', JSON.stringify(matrix));
+        core.setOutput('matrix', matrix);
+        core.setOutput('empty_matrix', !affectedModules.length);
     });
 }
 exports.findTerraformChanges = findTerraformChanges;
