@@ -32,7 +32,7 @@ export async function listFilesInPullRequest(
   const octokit = github.getOctokit(token)
   const { repo, owner } = github.context.repo
 
-  const response = await octokit.pulls.listFiles({
+  const response = await octokit.rest.pulls.listFiles({
     owner,
     repo,
     pull_number,
@@ -73,7 +73,7 @@ export async function listFilesInPush(
   const octokit = github.getOctokit(token)
   const { repo, owner } = github.context.repo
 
-  const response = await octokit.repos.compareCommits({
+  const response = await octokit.rest.repos.compareCommits({
     repo,
     owner,
     base: before,
@@ -87,9 +87,10 @@ export async function listFilesInPush(
     )
   }
 
-  const filteredFiles = includeRemoved
-    ? response.data.files
-    : response.data.files.filter((file) => file.status !== 'removed')
+  const filteredFiles =
+    (includeRemoved
+      ? response.data.files
+      : response.data.files?.filter((file) => file.status !== 'removed')) ?? []
 
   if (core.isDebug()) {
     core.debug(`${filteredFiles.length} files:`)
