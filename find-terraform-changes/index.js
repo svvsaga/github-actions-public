@@ -49,22 +49,28 @@ const uniq_1 = __importDefault(__nccwpck_require__(6051));
 const path_1 = __nccwpck_require__(5622);
 const utils_1 = __nccwpck_require__(918);
 function findClosest(path, prefixes) {
-    const orderedPrefixes = orderBy_1.default(prefixes, (p) => p.length, 'desc');
+    const orderedPrefixes = orderBy_1.default(prefixes, (p) => p.length, 'desc').map((dir) => relativizePath(dir));
+    const relativePath = relativizePath(path);
     for (const prefix of orderedPrefixes) {
-        if (path.startsWith(prefix))
+        if (relativePath.startsWith(prefix))
             return prefix;
     }
     return null;
 }
-function findAffectedModules({ affectedFiles, moduleDirs, }) {
-    const dirsInPr = uniq_1.default(affectedFiles.map((file) => `./${path_1.dirname(file)}`));
-    return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
+function relativizePath(path, prefix = '.') {
+    return path.startsWith(prefix) ? path : `${prefix}/${path}`;
+}
+function findAffectedModules({ affectedFiles, moduleDirs, cwd = '.', }) {
+    const dirsInPr = uniq_1.default(affectedFiles.map(path_1.dirname)).map(path_1.normalize);
+    const affectedModules = uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs.map((moduleDir) => path_1.join(cwd, moduleDir))))).filter((path) => path != null);
+    return affectedModules.map((module) => module.replace(RegExp(`^${relativizePath(cwd)}`), '.'));
 }
 exports.findAffectedModules = findAffectedModules;
-function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, } = {}) {
+function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, cwd = '.', } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Module marker: ${marker}`);
-        const globber = yield glob.create(`**/${marker}`);
+        core.debug(`cwd: ${cwd}`);
+        const globber = yield glob.create(`${cwd}/**/${marker}`);
         const searchPath = globber.getSearchPaths()[0];
         core.debug(`Search path: ${searchPath}`);
         const moduleHits = yield globber.glob();
@@ -79,17 +85,22 @@ exports.findModules = findModules;
 function findTerraformChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         const marker = core.getInput('marker');
+        if (!marker) {
+            throw new Error('No module marker specified');
+        }
         const ignoreModules = core
             .getInput('ignore_modules')
             .split(',')
             .map((s) => s.trim())
             .filter((s) => !!s);
         const ignoreModulesRegex = core.getInput('ignore_modules_regex');
+        const cwd = core.getInput('cwd') || '.';
         const moduleDirs = yield findModules(marker, {
             ignoreModules,
             ignoreModulesRegex: ignoreModulesRegex
                 ? RegExp(ignoreModulesRegex)
                 : undefined,
+            cwd,
         });
         core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`);
         for (const module of moduleDirs) {

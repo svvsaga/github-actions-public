@@ -22,6 +22,10 @@ describe('find-terraform-changes', () => {
         await findModules('.gitignore', { ignoreModulesRegex: /husky/ })
       ).toEqual(['.'])
     })
+
+    it('includes only subfolders of cwd', async () => {
+      expect(await findModules('.gitignore', { cwd: '.husky' })).toEqual(['.'])
+    })
   })
 
   describe('findAffectedModules', () => {
@@ -40,6 +44,17 @@ describe('find-terraform-changes', () => {
           affectedFiles: ['system/alpha/main.tf'],
         })
       ).toEqual(['./system/alpha'])
+    })
+    it('finds only files in cwd', () => {
+      const moduleDirs = ['.', './alpha', './beta']
+
+      expect(
+        findAffectedModules({
+          moduleDirs,
+          affectedFiles: ['system/alpha/main.tf', 'beta/main.tf'],
+          cwd: 'system',
+        })
+      ).toEqual(['./alpha'])
     })
   })
 })
