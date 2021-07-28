@@ -31,7 +31,13 @@ export function findAffectedModules({
 
 export async function findModules(
   marker: string,
-  ignoreModules: string[] = []
+  {
+    ignoreModules = [],
+    ignoreModulesRegex = undefined,
+  }: {
+    ignoreModules?: string[]
+    ignoreModulesRegex?: RegExp | undefined
+  } = {}
 ): Promise<string[]> {
   core.debug(`Module marker: ${marker}`)
   const globber = await glob.create(`**/${marker}`)
@@ -39,18 +45,28 @@ export async function findModules(
   core.debug(`Search path: ${searchPath}`)
   const moduleHits = await globber.glob()
   const moduleDirs = uniq(
-    moduleHits.map(dirname).map((dir) => dir.replace(searchPath, '.'))
+    moduleHits
+      .map(dirname)
+      .filter((dir) => !ignoreModulesRegex || !ignoreModulesRegex.test(dir))
+      .map((dir) => dir.replace(searchPath, '.'))
   )
   return difference(moduleDirs, ignoreModules)
 }
 
 export async function findTerraformChanges(): Promise<void> {
   const marker = core.getInput('marker')
-  const ignoreModules = (core.getInput('ignore_modules') ?? '')
+  const ignoreModules = core
+    .getInput('ignore_modules')
     .split(',')
     .map((s) => s.trim())
     .filter((s) => !!s)
-  const moduleDirs = await findModules(marker, ignoreModules)
+  const ignoreModulesRegex = core.getInput('ignore_modules_regex')
+  const moduleDirs = await findModules(marker, {
+    ignoreModules,
+    ignoreModulesRegex: ignoreModulesRegex
+      ? RegExp(ignoreModulesRegex)
+      : undefined,
+  })
 
   core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`)
   for (const module of moduleDirs) {

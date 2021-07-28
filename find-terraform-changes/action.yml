@@ -14,6 +14,8 @@ inputs:
     default: terragrunt.hcl
   ignore_modules:
     description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
+  ignore_modules_regex:
+    description: Regex of modules to ignore, e.g. 'utils/.*'.
 outputs:
   matrix:
     description: Matrix of terraform paths with changes in this PR/push. Use `matrix.path` for full path, `matrix.segments` for an array of each path segment, or `matrix.folder` for the single folder containing the module.

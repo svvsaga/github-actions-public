@@ -12,7 +12,15 @@ describe('find-terraform-changes', () => {
     })
 
     it('ignores ignored modules', async () => {
-      expect(await findModules('.gitignore', ['.'])).toEqual(['./.husky'])
+      expect(await findModules('.gitignore', { ignoreModules: ['.'] })).toEqual(
+        ['./.husky']
+      )
+    })
+
+    it('ignores ignored modules by regex', async () => {
+      expect(
+        await findModules('.gitignore', { ignoreModulesRegex: /husky/ })
+      ).toEqual(['.'])
     })
   })
 

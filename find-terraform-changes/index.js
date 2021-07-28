@@ -61,27 +61,36 @@ function findAffectedModules({ affectedFiles, moduleDirs, }) {
     return uniq_1.default(dirsInPr.map((dir) => findClosest(dir, moduleDirs))).filter((path) => !!path);
 }
 exports.findAffectedModules = findAffectedModules;
-function findModules(marker, ignoreModules = []) {
+function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Module marker: ${marker}`);
         const globber = yield glob.create(`**/${marker}`);
         const searchPath = globber.getSearchPaths()[0];
         core.debug(`Search path: ${searchPath}`);
         const moduleHits = yield globber.glob();
-        const moduleDirs = uniq_1.default(moduleHits.map(path_1.dirname).map((dir) => dir.replace(searchPath, '.')));
+        const moduleDirs = uniq_1.default(moduleHits
+            .map(path_1.dirname)
+            .filter((dir) => !ignoreModulesRegex || !ignoreModulesRegex.test(dir))
+            .map((dir) => dir.replace(searchPath, '.')));
         return difference_1.default(moduleDirs, ignoreModules);
     });
 }
 exports.findModules = findModules;
 function findTerraformChanges() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const marker = core.getInput('marker');
-        const ignoreModules = ((_a = core.getInput('ignore_modules')) !== null && _a !== void 0 ? _a : '')
+        const ignoreModules = core
+            .getInput('ignore_modules')
             .split(',')
             .map((s) => s.trim())
             .filter((s) => !!s);
-        const moduleDirs = yield findModules(marker, ignoreModules);
+        const ignoreModulesRegex = core.getInput('ignore_modules_regex');
+        const moduleDirs = yield findModules(marker, {
+            ignoreModules,
+            ignoreModulesRegex: ignoreModulesRegex
+                ? RegExp(ignoreModulesRegex)
+                : undefined,
+        });
         core.debug(`Found ${moduleDirs.length} Terraform modules in repo:`);
         for (const module of moduleDirs) {
             core.debug(module);
