@@ -97,3 +97,6 @@ lib/**/*
 
 # VS Code
 .vscode/*
+
+# Intellij
+.idea/

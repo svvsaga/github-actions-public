@@ -27,7 +27,7 @@
     "@actions/glob": "^0.2.0",
     "@actions/io": "^1.1.1",
     "@actions/tool-cache": "^1.7.1",
-    "@hashicorp/js-releases": "git+https://git@github.com/LangdalP/js-releases.git#a4884e6a2f0ca55e66cc301b8a6de66bd2921883",
+    "@hashicorp/js-releases": "^1.4.0",
     "@octokit/webhooks-definitions": "^3.67.0",
     "find-up": "^5.0.0",
     "lodash-es": "^4.17.21",
