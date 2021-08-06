@@ -2,7 +2,7 @@
 
 import fs from 'fs'
 
-const maxFileSize = 1024 * 100
+const maxFileSize = 1024 * 1024
 
 for (const file of process.argv.slice(2)) {
   const stats = fs.statSync(file)

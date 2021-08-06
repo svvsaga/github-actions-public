@@ -6,15 +6,15 @@ import {
 describe('find-terraform-changes', () => {
   describe('findModules', () => {
     it('finds all modules in repo', async () => {
-      const expectedModules = ['.', './.husky']
+      const expectedModules = ['.', './.husky', './.husky/_']
 
       expect(await findModules('.gitignore')).toEqual(expectedModules)
     })
 
     it('ignores ignored modules', async () => {
-      expect(await findModules('.gitignore', { ignoreModules: ['.'] })).toEqual(
-        ['./.husky']
-      )
+      expect(
+        await findModules('.gitignore', { ignoreModules: ['.', './.husky/_'] })
+      ).toEqual(['./.husky'])
     })
 
     it('ignores ignored modules by regex', async () => {
@@ -24,7 +24,10 @@ describe('find-terraform-changes', () => {
     })
 
     it('includes only subfolders of cwd', async () => {
-      expect(await findModules('.gitignore', { cwd: '.husky' })).toEqual(['.'])
+      expect(await findModules('.gitignore', { cwd: '.husky' })).toEqual([
+        '.',
+        './_',
+      ])
     })
   })
 

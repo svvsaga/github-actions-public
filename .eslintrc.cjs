@@ -6,7 +6,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 9,
     sourceType: 'module',
-    project: './tsconfig.json',
+    project: ['./tsconfig.json', './tsconfig.scripts.json'],
   },
   overrides: [
     {
@@ -29,6 +29,7 @@ module.exports = {
     'eslint-comments/no-use': 'off',
     'import/no-namespace': 'off',
     'no-unused-vars': 'off',
+    'no-console': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/explicit-member-accessibility': [
       'error',
