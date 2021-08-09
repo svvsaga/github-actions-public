@@ -1,63 +1,84 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { WebhookPayload } from '@actions/github/lib/interfaces'
+import fetch from 'node-fetch'
 
-function getBoardAndCardId(body: string): string[] {
-  const regexp = new RegExp(core.getInput('cardIdRegExp'))
+function getPrefixAndCardId(
+  body: string,
+  cardIdRegex: string
+): { prefix: string; cardId: string } | undefined {
+  const regexp = new RegExp(cardIdRegex)
   const matches = body.match(regexp)
   if (matches) {
-    return matches[1].split('-')
+    const [prefix, cardId] = matches[0].split('-')
+    return { prefix, cardId }
   }
-  return []
+  return undefined
 }
 
-let teamToBoardIdMap = new Map([['KB', '9']])
+const boardIdByPrefix = new Map([['KB', '9']])
 
-async function getPrNumber(
-  boardId: string,
-  cardId: string,
+export function findNextPr(card: any): number {
+  return card.customfields
+    .filter((field: any) => field.name.startsWith('Relatert PR'))
+    .filter((field: any) => field.value !== null).length
+}
+
+async function getPrNumber({
+  boardId,
+  cardId,
+  url,
+  apikey,
+}: {
+  boardId: string
+  cardId: string
   url: string
-): Promise<string> {
-  return await fetch(url, {
+  apikey: string
+}): Promise<number | undefined> {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: core.getInput('apikey'),
+      apikey,
       Accept: 'json',
     },
     body: JSON.stringify({
-      boardId: boardId,
-      cardId: cardId,
+      boardId,
+      cardId,
     }),
   })
-    .then((response) => {
-      if (!response.ok) {
-        return ''
-      }
-      return response.json()
-    })
-    .then((response) => {
-      return response.customfields.length
-    })
+
+  if (!response.ok) {
+    return undefined
+  }
+  const json = await response.json()
+
+  return findNextPr(json)
 }
 
-async function editCustomField(
-  cardId: string,
-  prNumber: string,
-  issueURL: string,
+async function editCustomField({
+  cardId,
+  prNumber,
+  issueURL,
+  url,
+  apikey,
+}: {
+  cardId: string
+  prNumber: number
+  issueURL: string
   url: string
-): Promise<void> {
+  apikey: string
+}): Promise<void> {
   await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: core.getInput('apikey'),
+      apikey,
     },
     body: JSON.stringify({
       cardid: cardId,
       fields: [
         {
-          name: 'Relatert PR ${prNumber}',
+          name: `Relatert PR ${prNumber ? prNumber + 1 : ''}`.trim(),
           value: issueURL,
         },
       ],
@@ -67,30 +88,41 @@ async function editCustomField(
 
 export default async function run(): Promise<void> {
   if (github.context.eventName === 'pull_request') {
-    const prPayload = github.context.payload as WebhookPayload
-    const issueNumber = prPayload.number
-    const issueUrl = prPayload.html_url
+    const prPayload = github.context.payload
+    //const issueNumber = prPayload.number
+    const issueURL = prPayload.html_url
     const body = prPayload.body
-    const ids = getBoardAndCardId(body)
-    if (ids.length !== 0) {
+    const ids = getPrefixAndCardId(body, core.getInput('cardIdRegex'))
+    if (!ids) {
+      return
+    }
+    const { prefix, cardId } = ids
+
+    const boardId = boardIdByPrefix.get(prefix)
+    if (!boardId) {
       return
     }
 
-    const boardId = teamToBoardIdMap.get(ids[0])
-    if (boardId === undefined) {
+    const subdomain = core.getInput('kanbanizeSubdomain')
+    const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
+    const apikey = core.getInput('apikey')
+    const prNumber = await getPrNumber({
+      boardId,
+      cardId,
+      url: getCardDetailsURL,
+      apikey,
+    })
+    if (!prNumber) {
       return
     }
 
-    const cardId = ids[1]
-    const editCustomFieldURL =
-      'https://norwegianpublicroadsadmin.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/'
-    const getCardDetailsURL =
-      'https://norwegianpublicroadsadmin.kanbanize.com/index.php/api/kanbanize/get_task_details/'
-    const prNumber = await getPrNumber(boardId, cardId, getCardDetailsURL)
-    if (prNumber === '') {
-      return
-    }
-
-    editCustomField(cardId, prNumber, issueUrl, editCustomFieldURL)
+    const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
+    await editCustomField({
+      cardId,
+      prNumber,
+      issueURL,
+      url: editCustomFieldURL,
+      apikey,
+    })
   }
 }
