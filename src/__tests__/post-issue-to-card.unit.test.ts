@@ -16,7 +16,7 @@ describe('post-issue-to-card', () => {
         ] 
       }`)
 
-      expect(findNextPr(card)).toEqual(expectedPrNumber)
+      expect(findNextPr(card, '')).toEqual(expectedPrNumber)
     })
 
     it('find next PR number when field is pressent and value is not null', () => {
@@ -34,7 +34,7 @@ describe('post-issue-to-card', () => {
       }
       `)
 
-      expect(findNextPr(card)).toEqual(expectedPrNumber)
+      expect(findNextPr(card, '')).toEqual(expectedPrNumber)
     })
 
     it('find next PR number when 2 fields are pressent with values', () => {
@@ -55,7 +55,7 @@ describe('post-issue-to-card', () => {
         ] 
       }`)
 
-      expect(findNextPr(card)).toEqual(expectedPrNumber)
+      expect(findNextPr(card, '')).toEqual(expectedPrNumber)
     })
 
     it('find next PR number when 2 fields are present, but first value is null', () => {
@@ -76,7 +76,28 @@ describe('post-issue-to-card', () => {
         ] 
       }`)
 
-      expect(findNextPr(card)).toEqual(expectedPrNumber)
+      expect(findNextPr(card, '')).toEqual(expectedPrNumber)
+    })
+
+    it('dont add PR when it already exists on the card', () => {
+      const expectedPrNumber = undefined
+      const card = JSON.parse(`
+      { 
+        "taskid": "3061", 
+        "boardid": "9", 
+        "customfields": [ 
+          { 
+            "name": "Relatert PR", 
+            "value": null 
+          }, 
+          { 
+            "name": "Relatert PR 2", 
+            "value": "test.pr2" 
+          } 
+        ] 
+      }`)
+
+      expect(findNextPr(card, 'test.pr2')).toEqual(expectedPrNumber)
     })
   })
 })

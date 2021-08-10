@@ -11,7 +11,7 @@ inputs:
   apikey:
     description: API key to Kanbanize.
     required: true
-  cardIdRegExp:
+  cardIdRegex:
     description: Regular expresion for obtaining cardId from pull request description.
     default: 'KB-\d+'
   kanbanizeSubdomain:
