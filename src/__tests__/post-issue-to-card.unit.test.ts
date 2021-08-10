@@ -37,7 +37,7 @@ describe('post-issue-to-card', () => {
       expect(findNextPr(card)).toEqual(expectedPrNumber)
     })
 
-    it('find next PR number when 2 fileds are pressent with values', () => {
+    it('find next PR number when 2 fields are pressent with values', () => {
       const expectedPrNumber = 2
       const card = JSON.parse(`
       { 
@@ -47,6 +47,27 @@ describe('post-issue-to-card', () => {
           { 
             "name": "Relatert PR", 
             "value": "test.pr" 
+          }, 
+          { 
+            "name": "Relatert PR 2", 
+            "value": "test.pr2" 
+          } 
+        ] 
+      }`)
+
+      expect(findNextPr(card)).toEqual(expectedPrNumber)
+    })
+
+    it('find next PR number when 2 fields are present, but first value is null', () => {
+      const expectedPrNumber = 0
+      const card = JSON.parse(`
+      { 
+        "taskid": "3061", 
+        "boardid": "9", 
+        "customfields": [ 
+          { 
+            "name": "Relatert PR", 
+            "value": null 
           }, 
           { 
             "name": "Relatert PR 2", 

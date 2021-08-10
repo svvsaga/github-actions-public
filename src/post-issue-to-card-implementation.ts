@@ -17,10 +17,21 @@ function getPrefixAndCardId(
 
 const boardIdByPrefix = new Map([['KB', '9']])
 
-export function findNextPr(card: any): number {
-  return card.customfields
-    .filter((field: any) => field.name.startsWith('Relatert PR'))
-    .filter((field: any) => field.value !== null).length
+interface Card {
+  customfields: CustomField[]
+}
+
+interface CustomField {
+  name: string
+  value: string
+}
+
+export function findNextPr(card: Card): number {
+  const filtered = card.customfields.filter((field) =>
+    field.name.startsWith('Relatert PR')
+  )
+  const firstIndex = filtered.findIndex((field) => field.value === null)
+  return firstIndex < 0 ? filtered.length : firstIndex
 }
 
 async function getPrNumber({
@@ -87,42 +98,45 @@ async function editCustomField({
 }
 
 export default async function run(): Promise<void> {
-  if (github.context.eventName === 'pull_request') {
-    const prPayload = github.context.payload
-    //const issueNumber = prPayload.number
-    const issueURL = prPayload.html_url
-    const body = prPayload.body
-    const ids = getPrefixAndCardId(body, core.getInput('cardIdRegex'))
-    if (!ids) {
-      return
-    }
-    const { prefix, cardId } = ids
-
-    const boardId = boardIdByPrefix.get(prefix)
-    if (!boardId) {
-      return
-    }
-
-    const subdomain = core.getInput('kanbanizeSubdomain')
-    const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
-    const apikey = core.getInput('apikey')
-    const prNumber = await getPrNumber({
-      boardId,
-      cardId,
-      url: getCardDetailsURL,
-      apikey,
-    })
-    if (!prNumber) {
-      return
-    }
-
-    const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
-    await editCustomField({
-      cardId,
-      prNumber,
-      issueURL,
-      url: editCustomFieldURL,
-      apikey,
-    })
+  if (github.context.eventName !== 'pull_request') {
+    return
   }
+  const prPayload = github.context.payload
+
+  const subdomain = core.getInput('kanbanizeSubdomain')
+  const cardIdRegex = core.getInput('cardIdRegex')
+  const apikey = core.getInput('apikey')
+  //const issueNumber = prPayload.number
+  const issueURL = prPayload.html_url
+  const body = prPayload.body
+  const ids = getPrefixAndCardId(body, cardIdRegex)
+  if (!ids) {
+    return
+  }
+
+  const { prefix, cardId } = ids
+  const boardId = boardIdByPrefix.get(prefix)
+  if (!boardId) {
+    return
+  }
+
+  const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
+  const prNumber = await getPrNumber({
+    boardId,
+    cardId,
+    url: getCardDetailsURL,
+    apikey,
+  })
+  if (!prNumber) {
+    return
+  }
+
+  const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
+  await editCustomField({
+    cardId,
+    prNumber,
+    issueURL,
+    url: editCustomFieldURL,
+    apikey,
+  })
 }

@@ -53,9 +53,9 @@ function getPrefixAndCardId(body, cardIdRegex) {
 }
 const boardIdByPrefix = new Map([['KB', '9']]);
 function findNextPr(card) {
-    return card.customfields
-        .filter((field) => field.name.startsWith('Relatert PR'))
-        .filter((field) => field.value !== null).length;
+    const filtered = card.customfields.filter((field) => field.name.startsWith('Relatert PR'));
+    const firstIndex = filtered.findIndex((field) => field.value === null);
+    return firstIndex < 0 ? filtered.length : firstIndex;
 }
 exports.findNextPr = findNextPr;
 function getPrNumber({ boardId, cardId, url, apikey, }) {
@@ -101,41 +101,43 @@ function editCustomField({ cardId, prNumber, issueURL, url, apikey, }) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (github.context.eventName === 'pull_request') {
-            const prPayload = github.context.payload;
-            //const issueNumber = prPayload.number
-            const issueURL = prPayload.html_url;
-            const body = prPayload.body;
-            const ids = getPrefixAndCardId(body, core.getInput('cardIdRegex'));
-            if (!ids) {
-                return;
-            }
-            const { prefix, cardId } = ids;
-            const boardId = boardIdByPrefix.get(prefix);
-            if (!boardId) {
-                return;
-            }
-            const subdomain = core.getInput('kanbanizeSubdomain');
-            const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
-            const apikey = core.getInput('apikey');
-            const prNumber = yield getPrNumber({
-                boardId,
-                cardId,
-                url: getCardDetailsURL,
-                apikey,
-            });
-            if (!prNumber) {
-                return;
-            }
-            const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
-            yield editCustomField({
-                cardId,
-                prNumber,
-                issueURL,
-                url: editCustomFieldURL,
-                apikey,
-            });
+        if (github.context.eventName !== 'pull_request') {
+            return;
         }
+        const prPayload = github.context.payload;
+        const subdomain = core.getInput('kanbanizeSubdomain');
+        const cardIdRegex = core.getInput('cardIdRegex');
+        const apikey = core.getInput('apikey');
+        //const issueNumber = prPayload.number
+        const issueURL = prPayload.html_url;
+        const body = prPayload.body;
+        const ids = getPrefixAndCardId(body, cardIdRegex);
+        if (!ids) {
+            return;
+        }
+        const { prefix, cardId } = ids;
+        const boardId = boardIdByPrefix.get(prefix);
+        if (!boardId) {
+            return;
+        }
+        const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
+        const prNumber = yield getPrNumber({
+            boardId,
+            cardId,
+            url: getCardDetailsURL,
+            apikey,
+        });
+        if (!prNumber) {
+            return;
+        }
+        const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
+        yield editCustomField({
+            cardId,
+            prNumber,
+            issueURL,
+            url: editCustomFieldURL,
+            apikey,
+        });
     });
 }
 exports.default = run;
