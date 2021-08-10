@@ -10,6 +10,7 @@
     "lint": "eslint src/**/*.ts",
     "package:find-terraform-changes": "ncc build lib/find-terraform-changes.js --source-map -o find-terraform-changes",
     "package:install-tfmask": "ncc build lib/install-tfmask.js --source-map -o install-tfmask",
+    "package:post-issue-to-card": "ncc build lib/post-issue-to-card.js --source-map -o post-issue-to-card",
     "package": "run-p package:*",
     "test:unit": "jest unit --passWithNoTests",
     "test:int": "jest integration --passWithNoTests",
@@ -56,6 +57,7 @@
     "strip-json-comments": "^3.1.1",
     "svg-element-attributes": "^2.0.0",
     "ts-jest": "^27.0.4",
+    "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
   }
 }
