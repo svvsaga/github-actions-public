@@ -52,13 +52,17 @@ function getPrefixAndCardId(body, cardIdRegex) {
     return undefined;
 }
 const boardIdByPrefix = new Map([['KB', '9']]);
-function findNextPr(card) {
+function findNextPr(card, html_url) {
     const filtered = card.customfields.filter((field) => field.name.startsWith('Relatert PR'));
+    // Don't do anything if PR allready on card
+    if (filtered.some((field) => field.value === html_url)) {
+        return undefined;
+    }
     const firstIndex = filtered.findIndex((field) => field.value === null);
     return firstIndex < 0 ? filtered.length : firstIndex;
 }
 exports.findNextPr = findNextPr;
-function getPrNumber({ boardid, taskid, url, apikey, }) {
+function getPrNumber({ boardid, taskid, url, apikey, html_url, }) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield node_fetch_1.default(url, {
             method: 'POST',
@@ -76,7 +80,7 @@ function getPrNumber({ boardid, taskid, url, apikey, }) {
             return undefined;
         }
         const json = yield response.json();
-        return findNextPr(json);
+        return findNextPr(json, html_url);
     });
 }
 function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
@@ -126,6 +130,7 @@ function run() {
             taskid,
             url: getCardDetailsURL,
             apikey,
+            html_url,
         });
         if (!prNumber) {
             return;
@@ -138,6 +143,7 @@ function run() {
             url: editCustomFieldURL,
             apikey,
         });
+        console.log('Added PR to card!');
     });
 }
 exports.default = run;

@@ -27,10 +27,16 @@ interface CustomField {
   value: string
 }
 
-export function findNextPr(card: Card): number {
+export function findNextPr(card: Card, html_url: string): number | undefined {
   const filtered = card.customfields.filter((field) =>
     field.name.startsWith('Relatert PR')
   )
+
+  // Don't do anything if PR allready on card
+  if (filtered.some((field) => field.value === html_url)) {
+    return undefined
+  }
+
   const firstIndex = filtered.findIndex((field) => field.value === null)
   return firstIndex < 0 ? filtered.length : firstIndex
 }
@@ -40,11 +46,13 @@ async function getPrNumber({
   taskid,
   url,
   apikey,
+  html_url,
 }: {
   boardid: string
   taskid: string
   url: string
   apikey: string
+  html_url: string
 }): Promise<number | undefined> {
   const response = await fetch(url, {
     method: 'POST',
@@ -64,7 +72,7 @@ async function getPrNumber({
   }
   const json = await response.json()
 
-  return findNextPr(json)
+  return findNextPr(json, html_url)
 }
 
 async function editCustomField({
@@ -129,6 +137,7 @@ export default async function run(): Promise<void> {
     taskid,
     url: getCardDetailsURL,
     apikey,
+    html_url,
   })
   if (!prNumber) {
     return
@@ -142,4 +151,5 @@ export default async function run(): Promise<void> {
     url: editCustomFieldURL,
     apikey,
   })
+  console.log('Added PR to card!')
 }
