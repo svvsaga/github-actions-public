@@ -95,6 +95,7 @@ function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
             headers: {
                 'Content-Type': 'application/json',
                 apikey,
+                Accept: 'json',
             },
             body: JSON.stringify({
                 cardid: taskid,
@@ -109,6 +110,7 @@ function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
         if (!response.ok) {
             return undefined;
         }
+        return yield response.json();
     });
 }
 function run() {

@@ -97,6 +97,7 @@ async function editCustomField({
     headers: {
       'Content-Type': 'application/json',
       apikey,
+      Accept: 'json',
     },
     body: JSON.stringify({
       cardid: taskid,
@@ -112,6 +113,8 @@ async function editCustomField({
   if (!response.ok) {
     return undefined
   }
+
+  return await response.json()
 }
 
 export default async function run(): Promise<void> {
