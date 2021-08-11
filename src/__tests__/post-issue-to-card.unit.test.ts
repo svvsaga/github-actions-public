@@ -1,4 +1,7 @@
-import { findNextPr } from '~/post-issue-to-card-implementation'
+import {
+  findNextPr,
+  getPrefixAndCardId,
+} from '~/post-issue-to-card-implementation'
 
 describe('post-issue-to-card', () => {
   describe('findNextPr', () => {
@@ -98,6 +101,17 @@ describe('post-issue-to-card', () => {
       }`)
 
       expect(findNextPr(card, 'test.pr2')).toEqual(expectedPrNumber)
+    })
+
+    it('find all autolinks', () => {
+      const expectedIds = [
+        { prefix: 'KB', taskid: '123' },
+        { prefix: 'KB', taskid: '4567' },
+      ]
+
+      const body = 'KB-123 this is a test KB-4567'
+      const regex = 'KB-\\d+'
+      expect(getPrefixAndCardId(body, regex)).toEqual(expectedIds)
     })
   })
 })

@@ -38,19 +38,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findNextPr = void 0;
+exports.findNextPr = exports.getPrefixAndCardId = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const github = __importStar(__nccwpck_require__(438));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 function getPrefixAndCardId(body, cardIdRegex) {
-    const regex = new RegExp(cardIdRegex);
+    const regex = new RegExp(cardIdRegex, 'g');
     const matches = body.match(regex);
     if (matches) {
-        const [prefix, taskid] = matches[0].split('-');
-        return { prefix, taskid };
+        return matches
+            .map((match) => match.split('-'))
+            .map((match) => ({
+            prefix: match[0],
+            taskid: match[1],
+        }));
     }
     return undefined;
 }
+exports.getPrefixAndCardId = getPrefixAndCardId;
 const boardIdByPrefix = new Map([['KB', '9']]);
 function findNextPr(card, html_url) {
     const filtered = card.customfields.filter((field) => field.name.startsWith('Relatert PR'));
@@ -85,7 +90,7 @@ function getPrNumber({ boardid, taskid, url, apikey, html_url, }) {
 }
 function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield node_fetch_1.default(url, {
+        const response = yield node_fetch_1.default(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -101,6 +106,9 @@ function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
                 ],
             }),
         });
+        if (!response.ok) {
+            return undefined;
+        }
     });
 }
 function run() {
@@ -119,31 +127,36 @@ function run() {
         if (!ids) {
             return;
         }
-        const { prefix, taskid } = ids;
-        const boardid = boardIdByPrefix.get(prefix);
-        if (!boardid) {
-            return;
+        for (const id of ids) {
+            const { prefix, taskid } = id;
+            const boardid = boardIdByPrefix.get(prefix);
+            if (!boardid) {
+                continue;
+            }
+            const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
+            const prNumber = yield getPrNumber({
+                boardid,
+                taskid,
+                url: getCardDetailsURL,
+                apikey,
+                html_url,
+            });
+            if (!prNumber) {
+                continue;
+            }
+            const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
+            const editResponse = yield editCustomField({
+                taskid,
+                prNumber,
+                html_url,
+                url: editCustomFieldURL,
+                apikey,
+            });
+            if (!editResponse) {
+                continue;
+            }
+            console.log(`Added PR to card ${taskid}`);
         }
-        const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
-        const prNumber = yield getPrNumber({
-            boardid,
-            taskid,
-            url: getCardDetailsURL,
-            apikey,
-            html_url,
-        });
-        if (!prNumber) {
-            return;
-        }
-        const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
-        yield editCustomField({
-            taskid,
-            prNumber,
-            html_url,
-            url: editCustomFieldURL,
-            apikey,
-        });
-        console.log('Added PR to card!');
     });
 }
 exports.default = run;

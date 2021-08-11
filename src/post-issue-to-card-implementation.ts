@@ -3,15 +3,19 @@ import * as github from '@actions/github'
 import { PullRequestEvent } from '@octokit/webhooks-definitions/schema'
 import fetch from 'node-fetch'
 
-function getPrefixAndCardId(
+export function getPrefixAndCardId(
   body: string,
   cardIdRegex: string
-): { prefix: string; taskid: string } | undefined {
-  const regex = new RegExp(cardIdRegex)
+): { prefix: string; taskid: string }[] | undefined {
+  const regex = new RegExp(cardIdRegex, 'g')
   const matches = body.match(regex)
   if (matches) {
-    const [prefix, taskid] = matches[0].split('-')
-    return { prefix, taskid }
+    return matches
+      .map((match) => match.split('-'))
+      .map((match) => ({
+        prefix: match[0],
+        taskid: match[1],
+      }))
   }
   return undefined
 }
@@ -87,8 +91,8 @@ async function editCustomField({
   html_url: string
   url: string
   apikey: string
-}): Promise<void> {
-  await fetch(url, {
+}): Promise<void | undefined> {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -104,6 +108,10 @@ async function editCustomField({
       ],
     }),
   })
+
+  if (!response.ok) {
+    return undefined
+  }
 }
 
 export default async function run(): Promise<void> {
@@ -125,31 +133,37 @@ export default async function run(): Promise<void> {
     return
   }
 
-  const { prefix, taskid } = ids
-  const boardid = boardIdByPrefix.get(prefix)
-  if (!boardid) {
-    return
-  }
+  for (const id of ids) {
+    const { prefix, taskid } = id
+    const boardid = boardIdByPrefix.get(prefix)
+    if (!boardid) {
+      continue
+    }
 
-  const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
-  const prNumber = await getPrNumber({
-    boardid,
-    taskid,
-    url: getCardDetailsURL,
-    apikey,
-    html_url,
-  })
-  if (!prNumber) {
-    return
-  }
+    const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
+    const prNumber = await getPrNumber({
+      boardid,
+      taskid,
+      url: getCardDetailsURL,
+      apikey,
+      html_url,
+    })
+    if (!prNumber) {
+      continue
+    }
 
-  const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
-  await editCustomField({
-    taskid,
-    prNumber,
-    html_url,
-    url: editCustomFieldURL,
-    apikey,
-  })
-  console.log('Added PR to card!')
+    const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
+    const editResponse = await editCustomField({
+      taskid,
+      prNumber,
+      html_url,
+      url: editCustomFieldURL,
+      apikey,
+    })
+    if (!editResponse) {
+      continue
+    }
+
+    console.log(`Added PR to card ${taskid}`)
+  }
 }
