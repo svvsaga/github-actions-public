@@ -123,13 +123,16 @@ function run() {
         const subdomain = core.getInput('kanbanizeSubdomain');
         const cardIdRegex = core.getInput('cardIdRegex');
         const apikey = core.getInput('apikey');
+        console.log(html_url, body, subdomain, cardIdRegex);
         const ids = getPrefixAndCardId(body, cardIdRegex);
+        console.log(`ids ${ids}`);
         if (!ids) {
             return;
         }
         for (const id of ids) {
             const { prefix, taskid } = id;
             const boardid = boardIdByPrefix.get(prefix);
+            console.log(`boardid ${boardid}`);
             if (!boardid) {
                 continue;
             }
@@ -141,6 +144,7 @@ function run() {
                 apikey,
                 html_url,
             });
+            console.log(`prNumber ${prNumber}`);
             if (!prNumber) {
                 continue;
             }
@@ -152,6 +156,7 @@ function run() {
                 url: editCustomFieldURL,
                 apikey,
             });
+            console.log(`editResponse ${editResponse}`);
             if (!editResponse) {
                 continue;
             }
