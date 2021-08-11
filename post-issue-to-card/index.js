@@ -46,15 +46,12 @@ function getPrefixAndCardId(body, cardIdRegex) {
     const regex = new RegExp(cardIdRegex, 'g');
     const matches = body.match(regex);
     if (matches) {
-        console.log(matches);
         return matches
             .map((match) => match.split('-'))
             .map((match) => ({
             prefix: match[0],
             taskid: match[1],
         }));
-        //const [prefix, taskid] = matches[0].split('-')
-        //return { prefix, taskid }
     }
     return undefined;
 }
@@ -134,7 +131,7 @@ function run() {
             const { prefix, taskid } = id;
             const boardid = boardIdByPrefix.get(prefix);
             if (!boardid) {
-                return;
+                continue;
             }
             const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
             const prNumber = yield getPrNumber({
@@ -145,7 +142,7 @@ function run() {
                 html_url,
             });
             if (!prNumber) {
-                return;
+                continue;
             }
             const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
             const editResponse = yield editCustomField({
@@ -156,13 +153,9 @@ function run() {
                 apikey,
             });
             if (!editResponse) {
-                return;
+                continue;
             }
-            if (ids.length > 1) {
-                console.log('Added PR to cards!');
-            }
-            else
-                console.log('Added PR to card!');
+            console.log(`Added PR to card ${taskid}`);
         }
     });
 }
