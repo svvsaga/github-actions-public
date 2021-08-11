@@ -130,10 +130,8 @@ export default async function run(): Promise<void> {
   const subdomain = core.getInput('kanbanizeSubdomain')
   const cardIdRegex = core.getInput('cardIdRegex')
   const apikey = core.getInput('apikey')
-  console.log(html_url, body, subdomain, cardIdRegex)
 
   const ids = getPrefixAndCardId(body, cardIdRegex)
-  console.log(`ids ${ids}`)
   if (!ids) {
     return
   }
@@ -141,7 +139,6 @@ export default async function run(): Promise<void> {
   for (const id of ids) {
     const { prefix, taskid } = id
     const boardid = boardIdByPrefix.get(prefix)
-    console.log(`boardid ${boardid}`)
     if (!boardid) {
       continue
     }
@@ -154,7 +151,6 @@ export default async function run(): Promise<void> {
       apikey,
       html_url,
     })
-    console.log(`prNumber ${prNumber}`)
     if (!prNumber) {
       continue
     }
@@ -167,7 +163,6 @@ export default async function run(): Promise<void> {
       url: editCustomFieldURL,
       apikey,
     })
-    console.log(`editResponse ${editResponse}`)
     if (!editResponse) {
       continue
     }
