@@ -110,7 +110,7 @@ describe('post-issue-to-card', () => {
       ]
 
       const body = 'KB-123 this is a test KB-4567'
-      const regex = 'KB-\\d+'
+      const regex = 'KB-[0-9]+'
       expect(getPrefixAndCardId(body, regex)).toEqual(expectedIds)
     })
   })
