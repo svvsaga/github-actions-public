@@ -1,6 +1,6 @@
 # GitHub Actions
 
-Useful GitHub Actions
+Useful GitHub Actions!
 
 ## Add new actions
 
