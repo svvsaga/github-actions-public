@@ -132,7 +132,7 @@ export default async function run(): Promise<void> {
 
   const ids = getPrefixAndCardId(body, cardIdRegex)
   if (!ids) {
-    console.log("Couldn't get prefixes and card ids")
+    core.debug("Couldn't get prefixes and card ids")
     return
   }
 
@@ -140,7 +140,7 @@ export default async function run(): Promise<void> {
     const { prefix, taskid } = id
     const boardid = boardIdByPrefix.get(prefix)
     if (!boardid) {
-      console.log("Couldn't get board id")
+      core.debug("Couldn't get board id")
       continue
     }
 
@@ -153,7 +153,7 @@ export default async function run(): Promise<void> {
       html_url,
     })
     if (prIndex === undefined) {
-      console.log("Couldn't get PR index")
+      core.debug("Couldn't get PR index")
       continue
     }
 
@@ -166,10 +166,10 @@ export default async function run(): Promise<void> {
       apikey,
     })
     if (!editResponse) {
-      console.log("Couldn't edit custom field")
+      core.debug("Couldn't edit custom field")
       continue
     }
 
-    console.log(`Added PR to card ${taskid}`)
+    core.debug(`Added PR to card ${taskid}`)
   }
 }

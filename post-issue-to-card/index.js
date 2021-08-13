@@ -127,14 +127,14 @@ function run() {
         const apikey = core.getInput('apikey');
         const ids = getPrefixAndCardId(body, cardIdRegex);
         if (!ids) {
-            console.log("Couldn't get prefixes and card ids");
+            core.debug("Couldn't get prefixes and card ids");
             return;
         }
         for (const id of ids) {
             const { prefix, taskid } = id;
             const boardid = boardIdByPrefix.get(prefix);
             if (!boardid) {
-                console.log("Couldn't get board id");
+                core.debug("Couldn't get board id");
                 continue;
             }
             const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
@@ -146,7 +146,7 @@ function run() {
                 html_url,
             });
             if (prIndex === undefined) {
-                console.log("Couldn't get PR index");
+                core.debug("Couldn't get PR index");
                 continue;
             }
             const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
@@ -158,10 +158,10 @@ function run() {
                 apikey,
             });
             if (!editResponse) {
-                console.log("Couldn't edit custom field");
+                core.debug("Couldn't edit custom field");
                 continue;
             }
-            console.log(`Added PR to card ${taskid}`);
+            core.debug(`Added PR to card ${taskid}`);
         }
     });
 }
