@@ -125,7 +125,7 @@ export default async function run(): Promise<void> {
   }
   const prPayload = github.context.payload as PullRequestEvent
   const html_url = prPayload.pull_request.html_url
-  const body = prPayload.pull_request.body
+  const body = prPayload.pull_request.body ?? ''
   const subdomain = core.getInput('kanbanizeSubdomain')
   const cardIdRegex = core.getInput('cardIdRegex')
   const apikey = core.getInput('apikey')

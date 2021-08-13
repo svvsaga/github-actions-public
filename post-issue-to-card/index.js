@@ -114,6 +114,7 @@ function editCustomField({ taskid, prIndex, html_url, url, apikey, }) {
     });
 }
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (github.context.eventName !== 'pull_request' &&
             github.context.payload.pull_request === undefined) {
@@ -121,7 +122,7 @@ function run() {
         }
         const prPayload = github.context.payload;
         const html_url = prPayload.pull_request.html_url;
-        const body = prPayload.pull_request.body;
+        const body = (_a = prPayload.pull_request.body) !== null && _a !== void 0 ? _a : '';
         const subdomain = core.getInput('kanbanizeSubdomain');
         const cardIdRegex = core.getInput('cardIdRegex');
         const apikey = core.getInput('apikey');
