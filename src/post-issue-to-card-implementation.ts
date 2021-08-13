@@ -45,7 +45,7 @@ export function findNextPr(card: Card, html_url: string): number | undefined {
   return firstIndex < 0 ? filtered.length : firstIndex
 }
 
-async function getPrNumber({
+async function getPrIndex({
   boardid,
   taskid,
   url,
@@ -80,13 +80,13 @@ async function getPrNumber({
 
 async function editCustomField({
   taskid,
-  prNumber,
+  prIndex,
   html_url,
   url,
   apikey,
 }: {
   taskid: string
-  prNumber: number
+  prIndex: number
   html_url: string
   url: string
   apikey: string
@@ -102,7 +102,7 @@ async function editCustomField({
       cardid: taskid,
       fields: [
         {
-          name: `Relatert PR ${prNumber ? prNumber + 1 : ''}`.trim(),
+          name: `Relatert PR ${prIndex ? prIndex + 1 : ''}`.trim(),
           value: html_url,
         },
       ],
@@ -144,25 +144,23 @@ export default async function run(): Promise<void> {
       continue
     }
 
-    console.log(prefix, taskid)
     const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
-    const prNumber = await getPrNumber({
+    const prIndex = await getPrIndex({
       boardid,
       taskid,
       url: getCardDetailsURL,
       apikey,
       html_url,
     })
-    console.log(prNumber)
-    if (!prNumber) {
-      console.log("Couldn't get PR number")
+    if (prIndex === undefined) {
+      console.log("Couldn't get PR index")
       continue
     }
 
     const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`
     const editResponse = await editCustomField({
       taskid,
-      prNumber,
+      prIndex,
       html_url,
       url: editCustomFieldURL,
       apikey,

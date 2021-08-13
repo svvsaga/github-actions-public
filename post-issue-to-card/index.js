@@ -67,7 +67,7 @@ function findNextPr(card, html_url) {
     return firstIndex < 0 ? filtered.length : firstIndex;
 }
 exports.findNextPr = findNextPr;
-function getPrNumber({ boardid, taskid, url, apikey, html_url, }) {
+function getPrIndex({ boardid, taskid, url, apikey, html_url, }) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield node_fetch_1.default(url, {
             method: 'POST',
@@ -88,7 +88,7 @@ function getPrNumber({ boardid, taskid, url, apikey, html_url, }) {
         return findNextPr(json, html_url);
     });
 }
-function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
+function editCustomField({ taskid, prIndex, html_url, url, apikey, }) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield node_fetch_1.default(url, {
             method: 'POST',
@@ -101,7 +101,7 @@ function editCustomField({ taskid, prNumber, html_url, url, apikey, }) {
                 cardid: taskid,
                 fields: [
                     {
-                        name: `Relatert PR ${prNumber ? prNumber + 1 : ''}`.trim(),
+                        name: `Relatert PR ${prIndex ? prIndex + 1 : ''}`.trim(),
                         value: html_url,
                     },
                 ],
@@ -137,24 +137,22 @@ function run() {
                 console.log("Couldn't get board id");
                 continue;
             }
-            console.log(prefix, taskid);
             const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
-            const prNumber = yield getPrNumber({
+            const prIndex = yield getPrIndex({
                 boardid,
                 taskid,
                 url: getCardDetailsURL,
                 apikey,
                 html_url,
             });
-            console.log(prNumber);
-            if (!prNumber) {
-                console.log("Couldn't get PR number");
+            if (prIndex === undefined) {
+                console.log("Couldn't get PR index");
                 continue;
             }
             const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
             const editResponse = yield editCustomField({
                 taskid,
-                prNumber,
+                prIndex,
                 html_url,
                 url: editCustomFieldURL,
                 apikey,
