@@ -127,14 +127,17 @@ function run() {
         const apikey = core.getInput('apikey');
         const ids = getPrefixAndCardId(body, cardIdRegex);
         if (!ids) {
+            console.log("Couldn't get prefixes and card ids");
             return;
         }
         for (const id of ids) {
             const { prefix, taskid } = id;
             const boardid = boardIdByPrefix.get(prefix);
             if (!boardid) {
+                console.log("Couldn't get board id");
                 continue;
             }
+            console.log(prefix, taskid);
             const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`;
             const prNumber = yield getPrNumber({
                 boardid,
@@ -143,7 +146,9 @@ function run() {
                 apikey,
                 html_url,
             });
+            console.log(prNumber);
             if (!prNumber) {
+                console.log("Couldn't get PR number");
                 continue;
             }
             const editCustomFieldURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/edit_custom_fields/`;
@@ -155,6 +160,7 @@ function run() {
                 apikey,
             });
             if (!editResponse) {
+                console.log("Couldn't edit custom field");
                 continue;
             }
             console.log(`Added PR to card ${taskid}`);

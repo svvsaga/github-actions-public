@@ -75,7 +75,6 @@ async function getPrNumber({
     return undefined
   }
   const json = await response.json()
-
   return findNextPr(json, html_url)
 }
 
@@ -133,6 +132,7 @@ export default async function run(): Promise<void> {
 
   const ids = getPrefixAndCardId(body, cardIdRegex)
   if (!ids) {
+    console.log("Couldn't get prefixes and card ids")
     return
   }
 
@@ -140,9 +140,11 @@ export default async function run(): Promise<void> {
     const { prefix, taskid } = id
     const boardid = boardIdByPrefix.get(prefix)
     if (!boardid) {
+      console.log("Couldn't get board id")
       continue
     }
 
+    console.log(prefix, taskid)
     const getCardDetailsURL = `https://${subdomain}.kanbanize.com/index.php/api/kanbanize/get_task_details/`
     const prNumber = await getPrNumber({
       boardid,
@@ -151,7 +153,9 @@ export default async function run(): Promise<void> {
       apikey,
       html_url,
     })
+    console.log(prNumber)
     if (!prNumber) {
+      console.log("Couldn't get PR number")
       continue
     }
 
@@ -164,6 +168,7 @@ export default async function run(): Promise<void> {
       apikey,
     })
     if (!editResponse) {
+      console.log("Couldn't edit custom field")
       continue
     }
 
