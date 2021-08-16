@@ -106,9 +106,9 @@ export async function findTerraformChanges(): Promise<void> {
 
   const affectedFiles =
     github.context.eventName === 'pull_request'
-      ? await listFilesInPullRequest()
+      ? await listFilesInPullRequest(true)
       : github.context.eventName === 'push'
-      ? await listFilesInPush()
+      ? await listFilesInPush(true)
       : null
   if (affectedFiles === null)
     throw new Error(`Unsupported webhook event: ${github.context.eventName}`)

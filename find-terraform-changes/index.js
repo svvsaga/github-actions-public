@@ -110,9 +110,9 @@ function findTerraformChanges() {
             core.warning('Could not find any modules for the given marker; have you remembered to checkout the code?');
         }
         const affectedFiles = github.context.eventName === 'pull_request'
-            ? yield utils_1.listFilesInPullRequest()
+            ? yield utils_1.listFilesInPullRequest(true)
             : github.context.eventName === 'push'
-                ? yield utils_1.listFilesInPush()
+                ? yield utils_1.listFilesInPush(true)
                 : null;
         if (affectedFiles === null)
             throw new Error(`Unsupported webhook event: ${github.context.eventName}`);
