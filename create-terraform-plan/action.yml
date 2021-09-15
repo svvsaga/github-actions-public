@@ -29,6 +29,7 @@ inputs:
   tf_backend_config:
     description: Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration.
     required: false
+    default: ""
 
 runs:
   using: composite
@@ -64,16 +65,9 @@ runs:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
-      if: ${{ !inputs.tf_backend_config }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
-      run: terragrunt init
-
-    - name: Terragrunt init with config
-      if: ${{ inputs.tf_backend_config }}
-      working-directory: ${{ inputs.terraform_dir }}
-      shell: bash
-      run: terragrunt init -backend-config="${{ inputs.tf_backend_config }}"
+      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init || terragrunt init -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Create Terraform plan
       working-directory: ${{ inputs.terraform_dir }}

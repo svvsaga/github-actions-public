@@ -58,16 +58,9 @@ runs:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
-      if: ${{ !inputs.tf_backend_config }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
-      run: terragrunt init
-
-    - name: Terragrunt init with config
-      if: ${{ inputs.tf_backend_config }}
-      working-directory: ${{ inputs.terraform_dir }}
-      shell: bash
-      run: terragrunt init -backend-config="${{ inputs.tf_backend_config }}"
+      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init || terragrunt init -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Download plan
       uses: actions/download-artifact@v2
