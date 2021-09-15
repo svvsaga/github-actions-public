@@ -20,6 +20,9 @@ inputs:
     description: Name of the plan file to download from GitHub artifacts. Defaults to "terraform.plan".
     required: false
     default: terraform.plan
+  tf_backend_config:
+    description: Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration.
+    required: false
 
 runs:
   using: composite
@@ -55,9 +58,16 @@ runs:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
+      if: ${{ !inputs.tf_backend_config }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       run: terragrunt init
+
+    - name: Terragrunt init with config
+      if: ${{ inputs.tf_backend_config }}
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
+      run: terragrunt init -backend-config="${{ inputs.tf_backend_config }}"
 
     - name: Download plan
       uses: actions/download-artifact@v2
