@@ -29,10 +29,6 @@ inputs:
 
 runs:
   using: composite
-  defaults:
-    run:
-      working-directory: ${{ inputs.terraform_dir }}
-      shell: bash
   steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -41,6 +37,7 @@ runs:
   
     - name: Read TF and TG versions
       working-directory: .
+      shell: bash
       run: |
         echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
@@ -64,6 +61,8 @@ runs:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
       run: terragrunt init
 
     - name: Create Terraform plan
@@ -80,6 +79,8 @@ runs:
         if-no-files-found: error
 
     - name: Set plan description filename env variable
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
       run: echo "PLAN_TXT_FILENAME=$(date -u +'%Y-%m-%dT%H%M%SZ')_${{ github.sha }}.plan.txt" >> $GITHUB_ENV
 
     - name: Render plan description
