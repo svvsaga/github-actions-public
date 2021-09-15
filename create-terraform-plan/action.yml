@@ -29,6 +29,10 @@ inputs:
 
 runs:
   using: composite
+  defaults:
+    run:
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
   steps:
     - name: Checkout code
       uses: actions/checkout@v2
