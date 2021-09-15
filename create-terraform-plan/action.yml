@@ -66,6 +66,8 @@ runs:
       run: terragrunt init
 
     - name: Create Terraform plan
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: terragrunt plan -no-color -input=false -out="${{ inputs.plan_artifact_name }}"
@@ -96,6 +98,8 @@ runs:
 
     - name: Set whether plan has changes
       id: set-has-changes
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
       run: grep -q "No changes. Your infrastructure matches the configuration." "${{ env.PLAN_TXT_FILENAME }}" && echo "::set-output name=has_changes::0" && echo "No changes found." || echo "::set-output name=has_changes::1" && echo "Changes found."
 
 outputs:
