@@ -97,3 +97,6 @@ outputs:
   has_changes:
     description: Whether the plan has changes.
     value: ${{ toJSON(steps.set-has-changes.outputs.has_changes == 1) }}
+  plan_description_url:
+    description: Full URL of the plan description.
+    value: ${{ steps.publish-plan-description.outputs.uploaded }}
