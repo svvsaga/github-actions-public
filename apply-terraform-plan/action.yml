@@ -60,7 +60,7 @@ runs:
     - name: Terragrunt init
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
-      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init || terragrunt init -backend-config=${{ inputs.tf_backend_config }}
+      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Download plan
       uses: actions/download-artifact@v2
