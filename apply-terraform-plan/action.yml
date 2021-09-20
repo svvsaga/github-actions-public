@@ -71,5 +71,5 @@ runs:
     - name: Terragrunt apply
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
-      run: terragrunt apply -input=false -no-color -auto-approve sandbox.plan
+      run: terragrunt apply -input=false -no-color -auto-approve ${{ inputs.plan_artifact_name }}
       
