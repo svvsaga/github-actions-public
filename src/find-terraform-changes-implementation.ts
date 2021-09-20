@@ -113,6 +113,11 @@ export async function findTerraformChanges(): Promise<void> {
   if (affectedFiles === null)
     throw new Error(`Unsupported webhook event: ${github.context.eventName}`)
 
+  core.debug(`Found ${affectedFiles.length} files affected by the pr/push:`)
+  for (const file of affectedFiles) {
+    core.debug(file)
+  }
+
   const affectedModules = findAffectedModules({ affectedFiles, moduleDirs })
 
   core.debug(`Found ${affectedModules.length} affected Terraform modules:`)
