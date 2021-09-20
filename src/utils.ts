@@ -50,7 +50,7 @@ export async function listFilesInPullRequest(
     : response.data.filter((file) => file.status !== 'removed')
 
   if (core.isDebug()) {
-    core.debug(`${filteredFiles.length} files:`)
+    core.debug(`${filteredFiles.length} files in PR:`)
     for (const file of filteredFiles) {
       core.debug(file.filename)
     }
@@ -93,7 +93,7 @@ export async function listFilesInPush(
       : response.data.files?.filter((file) => file.status !== 'removed')) ?? []
 
   if (core.isDebug()) {
-    core.debug(`${filteredFiles.length} files:`)
+    core.debug(`${filteredFiles.length} files in push:`)
     for (const file of filteredFiles) {
       core.debug(file.filename)
     }

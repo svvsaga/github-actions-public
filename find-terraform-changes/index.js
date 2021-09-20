@@ -116,11 +116,11 @@ function findTerraformChanges() {
                 : null;
         if (affectedFiles === null)
             throw new Error(`Unsupported webhook event: ${github.context.eventName}`);
-        core.debug(`Found ${affectedFiles.length} files affected by the pr/push:`);
-        for (const file of affectedFiles) {
-            core.debug(file);
-        }
-        const affectedModules = findAffectedModules({ affectedFiles, moduleDirs });
+        const affectedModules = findAffectedModules({
+            affectedFiles,
+            moduleDirs,
+            cwd,
+        });
         core.debug(`Found ${affectedModules.length} affected Terraform modules:`);
         for (const module of affectedModules) {
             core.debug(module);
@@ -264,7 +264,7 @@ function listFilesInPullRequest(includeRemoved = false) {
             ? response.data
             : response.data.filter((file) => file.status !== 'removed');
         if (core.isDebug()) {
-            core.debug(`${filteredFiles.length} files:`);
+            core.debug(`${filteredFiles.length} files in PR:`);
             for (const file of filteredFiles) {
                 core.debug(file.filename);
             }
@@ -298,7 +298,7 @@ function listFilesInPush(includeRemoved = false) {
             ? response.data.files
             : (_a = response.data.files) === null || _a === void 0 ? void 0 : _a.filter((file) => file.status !== 'removed'))) !== null && _b !== void 0 ? _b : [];
         if (core.isDebug()) {
-            core.debug(`${filteredFiles.length} files:`);
+            core.debug(`${filteredFiles.length} files in push:`);
             for (const file of filteredFiles) {
                 core.debug(file.filename);
             }

@@ -48,6 +48,18 @@ describe('find-terraform-changes', () => {
         })
       ).toEqual(['./system/alpha'])
     })
+    it('finds files in cwd', () => {
+      const moduleDirs = ['./alpha']
+
+      expect(
+        findAffectedModules({
+          moduleDirs,
+          affectedFiles: ['projects/alpha/main.tf'],
+          cwd: 'projects',
+        })
+      ).toEqual(['./alpha'])
+    })
+
     it('finds only files in cwd', () => {
       const moduleDirs = ['.', './alpha', './beta']
 
