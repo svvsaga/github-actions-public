@@ -31,6 +31,7 @@ runs:
       uses: actions/checkout@v2
       with:
         ref: ${{ inputs.ref }}
+        token: ${{ inputs.github_token }}
   
     - name: Read TF and TG versions
       working-directory: .
@@ -71,5 +72,7 @@ runs:
     - name: Terragrunt apply
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: terragrunt apply -input=false -no-color -auto-approve ${{ inputs.plan_artifact_name }}
       
