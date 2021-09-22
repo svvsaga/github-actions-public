@@ -1,0 +1,103 @@
+name: Show Terraform plan on PR
+
+inputs:
+  terraform_dir:
+    description: The working directory, e.g. where the Terraform files are located.
+    required: true
+  service_account_key:
+    description: Terraform Service Account private key to use with `gcloud`.
+    required: true
+  tf_backend_config:
+    description: Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration.
+    required: false
+    default: ""
+  github_token:
+    description: Token used when authenticating with GitHub. Defaults to `github.token`.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        token: ${{ inputs.github_token }}
+  
+    - name: Read TF and TG versions
+      working-directory: .
+      shell: bash
+      run: |
+        echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
+        echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
+
+    - name: Setup Google Cloud SDK with Terraform service account
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        version: latest
+        service_account_key: ${{ inputs.service_account_key }}
+        export_default_credentials: true
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        terraform_wrapper: false
+
+    - name: Setup Terragrunt
+      uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
+      with:
+        terragrunt_version: ${{ env.TG_VERSION }}
+
+    - name: Terragrunt init
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
+      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
+
+    - name: Terraform format
+      id: fmt
+      shell: bash
+      run: terragrunt fmt -check -diff -recursive
+
+    - name: Terraform init
+      id: init
+      shell: bash
+      run: terragrunt init
+
+    - name: Terraform plan
+      id: plan
+      shell: bash
+      run: |
+        terragrunt plan -no-color -out="tf.plan"
+        echo 'PLAN<<EOF' >> $GITHUB_ENV
+        terragrunt show -no-color tf.plan >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+
+    - name: Show Terraform status
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const plan = process.env.PLAN
+          const output = `
+          <h1>${{ inputs.terraform_dir == '.' && 'root' || inputs.terraform_dir }}</h1>
+
+          #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome == 'success' && '✅' || steps.fmt.outcome == 'failure' && '❌' || steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome == 'success' && '✅' || steps.init.outcome == 'failure' && '❌' || steps.init.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome == 'success' && '✅' || steps.plan.outcome == 'failure' && '❌' || steps.plan.outcome }}\`
+
+
+          <details><summary>Show Plan</summary>
+
+          \`\`\`terraform\n${plan}\n\`\`\`
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
