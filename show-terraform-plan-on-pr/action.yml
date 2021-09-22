@@ -49,29 +49,27 @@ runs:
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
-    - name: Terragrunt init
-      working-directory: ${{ inputs.terraform_dir }}
-      shell: bash
-      run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
-
     - name: Terraform format
+      working-directory: ${{ inputs.terraform_dir }}
       id: fmt
       shell: bash
-      run: terragrunt fmt -check -diff -recursive
+      run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform init
+      working-directory: ${{ inputs.terraform_dir }}
       id: init
       shell: bash
-      run: terragrunt init
+      run: terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform plan
+      working-directory: ${{ inputs.terraform_dir }}
       id: plan
       shell: bash
       run: |
         terragrunt plan -no-color -out="tf.plan"
         echo 'PLAN<<EOF' >> $GITHUB_ENV
         terragrunt show -no-color tf.plan >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Show Terraform status
       uses: actions/github-script@v3
@@ -82,9 +80,9 @@ runs:
           const output = `
           <h1>${{ inputs.terraform_dir == '.' && 'root' || inputs.terraform_dir }}</h1>
 
-          #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome == 'success' && '✅' || steps.fmt.outcome == 'failure' && '❌' || steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome == 'success' && '✅' || steps.init.outcome == 'failure' && '❌' || steps.init.outcome }}\`
-          #### Terraform Plan 📖\`${{ steps.plan.outcome == 'success' && '✅' || steps.plan.outcome == 'failure' && '❌' || steps.plan.outcome }}\`
+          #### Terraform Format and Style 🖌\`${{ env.FMT_OUTCOME == 'success' && '✅' || env.FMT_OUTCOME == 'failure' && '❌' }}\`
+          #### Terraform Initialization ⚙️\`${{ env.INIT_OUTCOME == 'success' && '✅' || env.INIT_OUTCOME == 'failure' && '❌' }}\`
+          #### Terraform Plan 📖\`${{ env.PLAN_OUTCOME == 'success' && '✅' || env.PLAN_OUTCOME == 'failure' && '❌' }}\`
 
 
           <details><summary>Show Plan</summary>
