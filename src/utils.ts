@@ -202,17 +202,14 @@ export async function createMatrixForAffectedModules(
     ignoreModulesRegex = '',
     cwd = '.',
     includeRemoved = false,
+    includeAll = false,
   }: {
-    ignoreModules: string[]
-    ignoreModulesRegex: string
-    cwd: string
-    includeRemoved: boolean
-  } = {
-    ignoreModules: [],
-    ignoreModulesRegex: '',
-    cwd: '.',
-    includeRemoved: false,
-  }
+    ignoreModules?: string[]
+    ignoreModulesRegex?: string
+    cwd?: string
+    includeRemoved?: boolean
+    includeAll?: boolean
+  } = {}
 ): Promise<{ matrix: PathMatrix; hasResults: boolean }> {
   const moduleDirs = await findModules(marker, {
     ignoreModules,
@@ -232,13 +229,19 @@ export async function createMatrixForAffectedModules(
     )
   }
 
-  const affectedFiles = await findAffectedFilesInPushOrPr(includeRemoved)
+  let affectedModules: string[]
 
-  const affectedModules = findAffectedModules({
-    affectedFiles,
-    moduleDirs,
-    cwd,
-  })
+  if (includeAll) {
+    affectedModules = moduleDirs
+  } else {
+    const affectedFiles = await findAffectedFilesInPushOrPr(includeRemoved)
+
+    affectedModules = findAffectedModules({
+      affectedFiles,
+      moduleDirs,
+      cwd,
+    })
+  }
 
   core.debug(`Found ${affectedModules.length} affected modules:`)
   for (const module of affectedModules) {

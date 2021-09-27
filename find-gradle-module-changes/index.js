@@ -40,7 +40,8 @@ const utils_1 = __nccwpck_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)('gradlew');
+            const includeAll = core.getBooleanInput('include_all');
+            const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)('gradlew', { includeAll });
             core.setOutput('matrix', JSON.stringify(matrix));
             core.setOutput('has_results', hasResults);
         }
@@ -224,12 +225,7 @@ function findClosest(path, prefixes) {
     return null;
 }
 exports.findClosest = findClosest;
-function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModulesRegex = '', cwd = '.', includeRemoved = false, } = {
-    ignoreModules: [],
-    ignoreModulesRegex: '',
-    cwd: '.',
-    includeRemoved: false,
-}) {
+function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModulesRegex = '', cwd = '.', includeRemoved = false, includeAll = false, } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const moduleDirs = yield findModules(marker, {
             ignoreModules,
@@ -245,12 +241,18 @@ function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModu
         if (moduleDirs.length === 0) {
             core.warning('Could not find any modules for the given marker; have you remembered to checkout the code?');
         }
-        const affectedFiles = yield findAffectedFilesInPushOrPr(includeRemoved);
-        const affectedModules = findAffectedModules({
-            affectedFiles,
-            moduleDirs,
-            cwd,
-        });
+        let affectedModules;
+        if (includeAll) {
+            affectedModules = moduleDirs;
+        }
+        else {
+            const affectedFiles = yield findAffectedFilesInPushOrPr(includeRemoved);
+            affectedModules = findAffectedModules({
+                affectedFiles,
+                moduleDirs,
+                cwd,
+            });
+        }
         core.debug(`Found ${affectedModules.length} affected modules:`);
         for (const module of affectedModules) {
             core.debug(module);
