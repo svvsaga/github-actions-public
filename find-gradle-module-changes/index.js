@@ -40,7 +40,7 @@ const utils_1 = __nccwpck_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const includeAll = core.getBooleanInput('include_all');
+            const includeAll = core.getInput('include_all').toLowerCase() === 'true';
             const ignoreModules = (0, utils_1.getIgnoreModules)();
             const ignoreModulesRegex = core.getInput('ignore_modules_regex');
             const cwd = core.getInput('cwd') || '.';

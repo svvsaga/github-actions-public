@@ -3,7 +3,7 @@ import { createMatrixForAffectedModules, getIgnoreModules } from './utils'
 
 async function run(): Promise<void> {
   try {
-    const includeAll = core.getBooleanInput('include_all')
+    const includeAll = core.getInput('include_all').toLowerCase() === 'true'
     const ignoreModules = getIgnoreModules()
     const ignoreModulesRegex = core.getInput('ignore_modules_regex')
     const cwd = core.getInput('cwd') || '.'
