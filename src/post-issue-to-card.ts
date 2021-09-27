@@ -4,7 +4,7 @@ import postIssueToCard from './post-issue-to-card-implementation'
 async function run(): Promise<void> {
   try {
     await postIssueToCard()
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error)
   }
 }

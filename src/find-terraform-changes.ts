@@ -4,7 +4,7 @@ import { findTerraformChanges } from './find-terraform-changes-implementation'
 async function run(): Promise<void> {
   try {
     await findTerraformChanges()
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error)
   }
 }

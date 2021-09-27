@@ -1,7 +1,7 @@
 import {
   findNextPr,
   getPrefixAndCardId,
-} from '~/post-issue-to-card-implementation'
+} from '../post-issue-to-card-implementation'
 
 describe('post-issue-to-card', () => {
   describe('findNextPr', () => {

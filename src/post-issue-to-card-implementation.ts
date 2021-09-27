@@ -75,7 +75,7 @@ async function getPrIndex({
     return undefined
   }
   const json = await response.json()
-  return findNextPr(json, html_url)
+  return findNextPr(json as Card, html_url)
 }
 
 async function editCustomField({
@@ -90,7 +90,7 @@ async function editCustomField({
   html_url: string
   url: string
   apikey: string
-}): Promise<void | undefined> {
+}): Promise<unknown> {
   const response = await fetch(url, {
     method: 'POST',
     headers: {

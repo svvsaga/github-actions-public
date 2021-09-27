@@ -13,6 +13,7 @@ module.exports = {
       files: ['**/*.test.ts'],
       rules: {
         'no-console': 0,
+        'filenames/match-regex': 'off',
       },
       parserOptions: {
         project: './tsconfig.test.json',
