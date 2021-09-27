@@ -41,7 +41,15 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const includeAll = core.getBooleanInput('include_all');
-            const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)('gradlew', { includeAll });
+            const ignoreModules = (0, utils_1.getIgnoreModules)();
+            const ignoreModulesRegex = core.getInput('ignore_modules_regex');
+            const cwd = core.getInput('cwd') || '.';
+            const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)('gradlew', {
+                ignoreModules,
+                ignoreModulesRegex,
+                cwd,
+                includeAll,
+            });
             core.setOutput('matrix', JSON.stringify(matrix));
             core.setOutput('has_results', hasResults);
         }
@@ -92,7 +100,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findAffectedFilesInPushOrPr = exports.createMatrixForAffectedModules = exports.findClosest = exports.relativizePath = exports.findAffectedModules = exports.findModules = exports.listFilesInPush = exports.listFilesInPullRequest = exports.createPathMatrix = void 0;
+exports.getIgnoreModules = exports.findAffectedFilesInPushOrPr = exports.createMatrixForAffectedModules = exports.findClosest = exports.relativizePath = exports.findAffectedModules = exports.findModules = exports.listFilesInPush = exports.listFilesInPullRequest = exports.createPathMatrix = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const glob = __importStar(__nccwpck_require__(8090));
@@ -276,6 +284,14 @@ function findAffectedFilesInPushOrPr(includeRemoved = false) {
     });
 }
 exports.findAffectedFilesInPushOrPr = findAffectedFilesInPushOrPr;
+function getIgnoreModules() {
+    return core
+        .getInput('ignore_modules')
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => !!s);
+}
+exports.getIgnoreModules = getIgnoreModules;
 
 
 /***/ }),

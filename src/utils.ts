@@ -266,3 +266,10 @@ export async function findAffectedFilesInPushOrPr(
     throw new Error(`Unsupported webhook event: ${github.context.eventName}`)
   return affectedFiles
 }
+export function getIgnoreModules(): string[] {
+  return core
+    .getInput('ignore_modules')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => !!s)
+}

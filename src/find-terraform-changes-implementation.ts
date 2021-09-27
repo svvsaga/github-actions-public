@@ -1,16 +1,12 @@
 import * as core from '@actions/core'
-import { createMatrixForAffectedModules } from './utils'
+import { createMatrixForAffectedModules, getIgnoreModules } from './utils'
 
 export async function findTerraformChanges(): Promise<void> {
   const marker = core.getInput('marker')
   if (!marker) {
     throw new Error('No module marker specified')
   }
-  const ignoreModules = core
-    .getInput('ignore_modules')
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => !!s)
+  const ignoreModules = getIgnoreModules()
   const ignoreModulesRegex = core.getInput('ignore_modules_regex')
   const cwd = core.getInput('cwd') || '.'
 
