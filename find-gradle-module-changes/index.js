@@ -154,9 +154,9 @@ function listFilesInPullRequest(includeRemoved = false) {
             ? response.data
             : response.data.filter((file) => file.status !== 'removed');
         if (core.isDebug()) {
-            core.debug(`${filteredFiles.length} files in PR:`);
-            for (const file of filteredFiles) {
-                core.debug(file.filename);
+            core.debug(`${response.data.length} files in PR:`);
+            for (const file of response.data) {
+                core.debug(`${file.status}: ${file.filename}`);
             }
         }
         return filteredFiles.map(({ filename }) => filename);
