@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
+import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types'
 import {
   PullRequestEvent,
   PushEvent,
@@ -59,26 +60,39 @@ export async function listFilesInPullRequest(
   const octokit = github.getOctokit(token)
   const { repo, owner } = github.context.repo
 
-  const response = await octokit.rest.pulls.listFiles({
-    owner,
-    repo,
-    pull_number,
-    per_page: 100,
-  })
+  let data: RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] =
+    []
 
-  if (response.status >= 300) {
-    throw new Error(
-      `Non-success status code when retrieving PR files: ${response.status}`
-    )
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const response = await octokit.rest.pulls.listFiles({
+      owner,
+      repo,
+      pull_number,
+      per_page: 100,
+      page: data.length / 100 + 1,
+    })
+
+    if (response.status >= 300) {
+      throw new Error(
+        `Non-success status code when retrieving PR files: ${response.status}`
+      )
+    }
+
+    data = data.concat(response.data)
+
+    if (response.data.length < 100) {
+      break
+    }
   }
 
   const filteredFiles = includeRemoved
-    ? response.data
-    : response.data.filter((file) => file.status !== 'removed')
+    ? data
+    : data.filter((file) => file.status !== 'removed')
 
   if (core.isDebug()) {
-    core.debug(`${response.data.length} files in PR:`)
-    for (const file of response.data) {
+    core.debug(`${data.length} files in PR:`)
+    for (const file of data) {
       core.debug(`${file.status}: ${file.filename}`)
     }
   }
