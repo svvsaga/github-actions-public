@@ -25,7 +25,7 @@ runs:
       with:
         token: ${{ inputs.github_token }}
 
-    - name: Read Terraform config:
+    - name: Read Terraform config
       id: read-terraform-config
       uses: ../read-terraform-config
       with:
