@@ -65,7 +65,6 @@ runs:
       with:
         script: |
           const path = require('path')
-          const exec = require('@actions/exec')
           const dependencies = process.env.DEPENDENCIES && JSON.parse(process.env.DEPENDENCIES);
           const environment = process.env.ENVIRONMENT;
           const cwd = process.env.CWD;
