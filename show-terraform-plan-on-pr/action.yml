@@ -27,7 +27,7 @@ runs:
 
     - name: Read Terraform config
       id: read-terraform-config
-      uses: ../read-terraform-config
+      uses: ./../read-terraform-config
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
