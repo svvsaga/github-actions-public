@@ -49,13 +49,7 @@ runs:
       uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
       with:
         terragrunt_version: ${{ steps.read-terraform-config.outputs.tg_version }}
-
-    - name: Terraform format
-      working-directory: ${{ inputs.terraform_dir }}
-      id: fmt
-      shell: bash
-      run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
-
+        
     - name: Terraform init dependencies
       uses: actions/github-script@v5
       env:
@@ -79,9 +73,12 @@ runs:
               args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
             }
             for (const dependency of dependencies) {
+              console.log("cwd", cwd, "dependency", dependency)
+              const resolved = path.resolve(cwd, dependency)
+              console.log("resolved", resolved)
               await exec.exec('terragrunt', args, {
                 env,
-                cwd: path.resolve(cwd, dependency),
+                cwd: resolved,
                 ignoreReturnCode: true
               });
             }
@@ -100,6 +97,12 @@ runs:
         else
           terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
         fi
+
+    - name: Terraform format
+      working-directory: ${{ inputs.terraform_dir }}
+      id: fmt
+      shell: bash
+      run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform plan
       working-directory: ${{ inputs.terraform_dir }}
