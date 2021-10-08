@@ -70,7 +70,6 @@ runs:
           const cwd = process.env.CWD;
           const env = process.env;
           env.TF_INPUT = 'false'
-          core.debug(`Dependencies: ${JSON.stringify(dependencies)}`)
           if (dependencies && dependencies.length > 0) {
             const args = [
               'init',
@@ -79,13 +78,13 @@ runs:
             if (environment) {
               args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
             }
-            dependencies.forEach((dependency) => {
+            for (const dependency of dependencies) {
               exec('terragrunt', args, {
                 env,
                 cwd: path.resolve(cwd, dependency),
                 ignoreReturnCode: true
               });
-            })
+            }
           }
 
     - name: Terraform init
