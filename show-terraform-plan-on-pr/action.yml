@@ -57,7 +57,7 @@ runs:
       run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform init dependencies
-      uses: action/github-script@v5
+      uses: actions/github-script@v5
       env:
         DEPENDENCIES: ${{ toJSON(steps.read-terraform-config.outputs.tg_dependencies) }}
         ENVIRONMENT: ${{ steps.read.terraform-config.outputs.environment }}
