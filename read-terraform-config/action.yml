@@ -1,0 +1,27 @@
+name: Read Terraform config
+description: Finds Terraform settings, including .terraform-version and .terragrunt-version, as well as environment and tf_vars.
+runs:
+  using: 'node12'
+  main: './index.js'
+inputs:
+  cwd:
+    description: Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root.
+    required: true
+    default: .
+  secrets_json:
+    description: JSON string containing secrets to use for Terraform.
+    required: false
+    default: "{}"
+outputs:
+  tf_version:
+    description: Terraform version
+  tg_version:
+    description: Terragrunt version
+  tg_dependencies:
+    description: Terragrunt dependencies (as a list of strings)
+  tf_vars:
+    description: Terraform variables (as stringified JSON)
+  sa_secret:
+    description: Name of service account secret
+  environment:
+    description: Environment name

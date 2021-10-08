@@ -7,6 +7,7 @@ import {
   PushEvent,
   WebhookEvent,
 } from '@octokit/webhooks-definitions/schema'
+import findUp from 'find-up'
 import { readFileSync } from 'fs'
 import difference from 'lodash-es/difference'
 import last from 'lodash-es/last'
@@ -286,4 +287,13 @@ export function getIgnoreModules(): string[] {
     .split(',')
     .map((s) => s.trim())
     .filter((s) => !!s)
+}
+
+export async function readFileUp(
+  cwd: string,
+  fileName: string
+): Promise<string> {
+  const path = await findUp(fileName, { cwd })
+  if (!path) throw new Error(`Could not find ${fileName} in folder or parents`)
+  return readFileSync(path, 'utf-8').trim()
 }

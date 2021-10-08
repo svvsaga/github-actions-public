@@ -32,6 +32,7 @@ module.exports = {
     'i18n-text/no-en': 'off',
     'eslint-comments/no-use': 'off',
     'import/no-namespace': 'off',
+    'import/default': 'off',
     'no-unused-vars': 'off',
     'no-console': 'off',
     '@typescript-eslint/no-unused-vars': 'error',

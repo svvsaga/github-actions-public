@@ -15,6 +15,10 @@ inputs:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
     required: false
     default: ${{ github.token }}
+  secrets_json:
+    description: JSON string containing secrets to pass to Terraform.
+    required: false
+    default: "{}"
 
 runs:
   using: composite
@@ -23,14 +27,14 @@ runs:
       uses: actions/checkout@v2
       with:
         token: ${{ inputs.github_token }}
-  
-    - name: Read TF and TG versions
-      working-directory: .
-      shell: bash
-      run: |
-        echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
-        echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
 
+    - name: Read Terraform config:
+      id: read-terraform-config
+      uses: ../read-terraform-config
+      with:
+        cwd: ${{ inputs.terraform_dir }}
+        secrets_json: ${{ inputs.secrets_json }}
+  
     - name: Setup Google Cloud SDK with Terraform service account
       uses: google-github-actions/setup-gcloud@master
       with:
@@ -41,13 +45,13 @@ runs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: ${{ env.TF_VERSION }}
+        terraform_version: ${{ steps.read-terraform-config.outputs.tf_version }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
       uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
       with:
-        terragrunt_version: ${{ env.TG_VERSION }}
+        terragrunt_version: ${{ steps.read-terraform-config.outputs.tg_version }}
 
     - name: Terraform format
       working-directory: ${{ inputs.terraform_dir }}
@@ -55,18 +59,68 @@ runs:
       shell: bash
       run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
+    - name: Terraform init dependencies
+      uses: action/github-script@v5
+      env:
+        DEPENDENCIES: ${{ toJSON(steps.read-terraform-config.outputs.tg_dependencies) }}
+        ENVIRONMENT: ${{ steps.read.terraform-config.outputs.environment }}
+        CWD: ${{ inputs.terraform_dir }}
+      with:
+        script: |
+          const path = require('path')
+          const dependencies = process.env.DEPENDENCIES && JSON.parse(process.env.DEPENDENCIES);
+          const environment = process.env.ENVIRONMENT;
+          const cwd = process.env.CWD;
+          const env = process.env;
+          env.TF_INPUT = 'false'
+          if (dependencies && dependencies.length > 0) {
+            const args = [
+              'init',
+              '-reconfigure'
+            ]
+            if (environment) {
+              args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
+            }
+            dependencies.forEach((dependency) => {
+              exec('terragrunt', args, {
+                env,
+                cwd: path.resolve(cwd, dependency),
+                ignoreReturnCode: true
+              });
+            })
+          }
+
     - name: Terraform init
       working-directory: ${{ inputs.terraform_dir }}
       id: init
       shell: bash
-      run: terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
+      env:
+        ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_INPUT: 'false'
+      run: |
+        if [ -n "$ENVIRONMENT" ]; then
+          terragrunt init -backend-config="environments/${ENVIRONMENT}-backend-config.hcl" && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
+        else
+          terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
+        fi
 
     - name: Terraform plan
       working-directory: ${{ inputs.terraform_dir }}
       id: plan
       shell: bash
+      env:
+        ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_VARS: ${{ steps.read-terraform-config.outputs.tf_vars }}
+        TF_INPUT: 'false'
       run: |
-        terragrunt plan -no-color -out="tf.plan"
+        if [ -n "$TF_VARS" ]; then
+          echo "$TF_VARS" > extra.auto.tfvars.json
+        fi
+        if [ -n "$ENVIRONMENT" ]; then
+          terragrunt plan -no-color -var-file="environments/$ENVIRONMENT.tfvars" -out="tf.plan"
+        else
+          terragrunt plan -no-color -out="tf.plan"
+        fi
         echo 'PLAN<<EOF' >> $GITHUB_ENV
         terragrunt show -no-color tf.plan >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
