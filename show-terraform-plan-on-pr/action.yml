@@ -59,7 +59,7 @@ runs:
     - name: Terraform init dependencies
       uses: actions/github-script@v5
       env:
-        DEPENDENCIES: ${{ toJSON(steps.read-terraform-config.outputs.tg_dependencies) }}
+        DEPENDENCIES: ${{ steps.read-terraform-config.outputs.tg_dependencies }}
         ENVIRONMENT: ${{ steps.read.terraform-config.outputs.environment }}
         CWD: ${{ inputs.terraform_dir }}
       with:
