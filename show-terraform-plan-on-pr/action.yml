@@ -70,6 +70,7 @@ runs:
           const cwd = process.env.CWD;
           const env = process.env;
           env.TF_INPUT = 'false'
+          core.debug(`Dependencies: ${JSON.stringify(dependencies)}`)
           if (dependencies && dependencies.length > 0) {
             const args = [
               'init',
