@@ -65,6 +65,7 @@ runs:
       with:
         script: |
           const path = require('path')
+          const exec = require('@actions/exec')
           const dependencies = process.env.DEPENDENCIES && JSON.parse(process.env.DEPENDENCIES);
           const environment = process.env.ENVIRONMENT;
           const cwd = process.env.CWD;
@@ -79,7 +80,7 @@ runs:
               args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
             }
             for (const dependency of dependencies) {
-              exec('terragrunt', args, {
+              await exec('terragrunt', args, {
                 env,
                 cwd: path.resolve(cwd, dependency),
                 ignoreReturnCode: true
