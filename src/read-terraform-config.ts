@@ -9,6 +9,14 @@ type ActionConfig = {
   tfVarToSecretMap?: Record<string, string>
 }
 
+export function readTerragruntDependencies(terragruntConfig: string): string[] {
+  return terragruntConfig
+    .split('\n')
+    .map((line) => line.match(/^\s*config_path\s+?=\s+?"(.+?)"/))
+    .filter((x): x is RegExpMatchArray => Boolean(x))
+    .map(([, path]) => path)
+}
+
 async function run(): Promise<void> {
   try {
     const terraformRoot = core.getInput('cwd')
@@ -29,11 +37,7 @@ async function run(): Promise<void> {
         `${terraformRoot}/terragrunt.hcl`,
         'utf8'
       )
-      const dependencies = terragruntConfig
-        .split('\n')
-        .map((line) => line.match(/^\s*config_path\s+?=\s+?"(.+?)"/g))
-        .filter((x): x is RegExpMatchArray => Boolean(x))
-        .map(([, path]) => path)
+      const dependencies = readTerragruntDependencies(terragruntConfig)
       core.setOutput('tg_dependencies', dependencies)
     } else {
       core.setOutput('tg_dependencies', [])

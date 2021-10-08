@@ -38,10 +38,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.readTerragruntDependencies = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(5747));
 const mapValues_1 = __importDefault(__nccwpck_require__(668));
 const utils_1 = __nccwpck_require__(918);
+function readTerragruntDependencies(terragruntConfig) {
+    return terragruntConfig
+        .split('\n')
+        .map((line) => line.match(/^\s*config_path\s+?=\s+?"(.+?)"/))
+        .filter((x) => Boolean(x))
+        .map(([, path]) => path);
+}
+exports.readTerragruntDependencies = readTerragruntDependencies;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -53,11 +62,7 @@ function run() {
             const secrets = JSON.parse(core.getInput('secrets_json') || '{}');
             if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
                 const terragruntConfig = fs.readFileSync(`${terraformRoot}/terragrunt.hcl`, 'utf8');
-                const dependencies = terragruntConfig
-                    .split('\n')
-                    .map((line) => line.match(/^\s*config_path\s+?=\s+?"(.+?)"/g))
-                    .filter((x) => Boolean(x))
-                    .map(([, path]) => path);
+                const dependencies = readTerragruntDependencies(terragruntConfig);
                 core.setOutput('tg_dependencies', dependencies);
             }
             else {

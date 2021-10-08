@@ -27,7 +27,7 @@ runs:
 
     - name: Read Terraform config
       id: read-terraform-config
-      uses: svvsaga/github-actions-public/read-terraform-config@v3.5.10
+      uses: svvsaga/github-actions-public/read-terraform-config@v3.5.11
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
