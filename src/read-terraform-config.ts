@@ -19,6 +19,11 @@ async function run(): Promise<void> {
     const tgVersion = await readFileUp(terraformRoot, '.terragrunt-version')
     core.setOutput('tg_version', tgVersion)
 
+    const secrets = JSON.parse(core.getInput('secrets') || '{}') as Record<
+      string,
+      string
+    >
+
     if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
       const terragruntConfig = fs.readFileSync(
         `${terraformRoot}/terragrunt.hcl`,
@@ -38,16 +43,13 @@ async function run(): Promise<void> {
       const file = fs.readFileSync(configPath, 'utf-8')
       const config = JSON.parse(file) as ActionConfig
       core.setOutput('sa_secret', config.serviceAccountSecret)
+      core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret])
       core.info('sa_secret set')
       if (config.environment) {
         core.setOutput('environment', config.environment)
         core.info('environment set')
       }
       if (config.tfVarToSecretMap) {
-        const secrets = JSON.parse(core.getInput('secrets')) as Record<
-          string,
-          string
-        >
         const transformedMap = mapValues(
           config.tfVarToSecretMap,
           (secret) => secrets[secret]

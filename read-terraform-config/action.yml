@@ -23,5 +23,7 @@ outputs:
     description: Terraform variables (as stringified JSON)
   sa_secret:
     description: Name of service account secret
+  sa_secret_key:
+    description: Service account secret key
   environment:
     description: Environment name

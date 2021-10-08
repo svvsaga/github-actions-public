@@ -5,10 +5,7 @@ inputs:
     description: The working directory, e.g. where the Terraform files are located.
     required: true
   service_account_key:
-    description: Terraform Service Account private key to use with `gcloud`.
-    required: true
-  tf_backend_config:
-    description: Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration.
+    description: Terraform Service Account private key to use with `gcloud`. If not specified, will be read from 'tf-pr-action-config.json'.
     required: false
     default: ""
   github_token:
@@ -39,7 +36,7 @@ runs:
       uses: google-github-actions/setup-gcloud@master
       with:
         version: latest
-        service_account_key: ${{ inputs.service_account_key }}
+        service_account_key: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
         export_default_credentials: true
 
     - name: Setup Terraform

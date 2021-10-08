@@ -50,6 +50,7 @@ function run() {
             core.setOutput('tf_version', tfVersion);
             const tgVersion = yield (0, utils_1.readFileUp)(terraformRoot, '.terragrunt-version');
             core.setOutput('tg_version', tgVersion);
+            const secrets = JSON.parse(core.getInput('secrets') || '{}');
             if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
                 const terragruntConfig = fs.readFileSync(`${terraformRoot}/terragrunt.hcl`, 'utf8');
                 const dependencies = terragruntConfig
@@ -67,13 +68,13 @@ function run() {
                 const file = fs.readFileSync(configPath, 'utf-8');
                 const config = JSON.parse(file);
                 core.setOutput('sa_secret', config.serviceAccountSecret);
+                core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret]);
                 core.info('sa_secret set');
                 if (config.environment) {
                     core.setOutput('environment', config.environment);
                     core.info('environment set');
                 }
                 if (config.tfVarToSecretMap) {
-                    const secrets = JSON.parse(core.getInput('secrets'));
                     const transformedMap = (0, mapValues_1.default)(config.tfVarToSecretMap, (secret) => secrets[secret]);
                     core.info(`transformed map: ${JSON.stringify(transformedMap)}`);
                     core.setOutput('tf_vars', JSON.stringify(transformedMap));
