@@ -79,7 +79,7 @@ runs:
               args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
             }
             for (const dependency of dependencies) {
-              await exec('terragrunt', args, {
+              await exec.exec('terragrunt', args, {
                 env,
                 cwd: path.resolve(cwd, dependency),
                 ignoreReturnCode: true
