@@ -19,7 +19,7 @@ async function run(): Promise<void> {
     const tgVersion = await readFileUp(terraformRoot, '.terragrunt-version')
     core.setOutput('tg_version', tgVersion)
 
-    const secrets = JSON.parse(core.getInput('secrets') || '{}') as Record<
+    const secrets = JSON.parse(core.getInput('secrets_json') || '{}') as Record<
       string,
       string
     >

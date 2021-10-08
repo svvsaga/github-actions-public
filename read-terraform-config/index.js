@@ -50,7 +50,7 @@ function run() {
             core.setOutput('tf_version', tfVersion);
             const tgVersion = yield (0, utils_1.readFileUp)(terraformRoot, '.terragrunt-version');
             core.setOutput('tg_version', tgVersion);
-            const secrets = JSON.parse(core.getInput('secrets') || '{}');
+            const secrets = JSON.parse(core.getInput('secrets_json') || '{}');
             if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
                 const terragruntConfig = fs.readFileSync(`${terraformRoot}/terragrunt.hcl`, 'utf8');
                 const dependencies = terragruntConfig
