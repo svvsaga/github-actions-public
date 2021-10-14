@@ -19,4 +19,7 @@ jobs:
         id: find-severity
       
       - name: Publish new version
-        run: npm run publish:${{ steps.find-severity.outputs.severity }} && git push origin main --follow-tags
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm run publish:${{ steps.find-severity.outputs.severity }} && git push origin main --follow-tags
