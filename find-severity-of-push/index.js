@@ -32,7 +32,6 @@ function findSeverityOfPush() {
     });
 }
 exports.findSeverityOfPush = findSeverityOfPush;
-// Test
 
 
 /***/ }),

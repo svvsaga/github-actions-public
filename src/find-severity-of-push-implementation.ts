@@ -12,5 +12,3 @@ export async function findSeverityOfPush(): Promise<Severity> {
   }
   return severity
 }
-
-// Test

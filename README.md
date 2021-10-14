@@ -2,6 +2,24 @@
 
 Useful GitHub Actions!
 
+## Publishing new versions
+
+We follow semantic versioning when publishing new versions.
+
+To publish, first make sure your changes are committed. Then:
+
+1. If there are breaking changes: `npm run publish:major`
+1. If there are new features but no breaking changes: `npm run publish:minor`
+1. If there are no new features, just bug fixes or other improvements: `npm run publish:patch`
+
+### Automatic publishing
+
+A new version will automatically be published when there are any changes to a `.ts`-file pushed to master.
+
+1. If any commit in the push has a commit message containing `#major`, a major version will be published.
+1. If any commit in the push has a commit message containing `#minor`, a minor version will be published.
+1. Otherwise, a patch version will be published.
+
 ## Add new actions
 
 - Make a file in `src`, e.g. `src/my-action.ts`
