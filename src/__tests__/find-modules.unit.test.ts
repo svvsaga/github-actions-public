@@ -5,18 +5,22 @@ describe('find-terraform-changes', () => {
     it('finds all modules in repo', async () => {
       const expectedModules = ['.', './.husky', './.husky/_']
 
-      expect(await findModules('.gitignore')).toEqual(expectedModules)
+      expect(
+        await findModules('.gitignore', { ignoreModules: ['./.idea'] })
+      ).toEqual(expectedModules)
     })
 
     it('ignores ignored modules', async () => {
       expect(
-        await findModules('.gitignore', { ignoreModules: ['.', './.husky/_'] })
+        await findModules('.gitignore', {
+          ignoreModules: ['.', './.husky/_', './.idea'],
+        })
       ).toEqual(['./.husky'])
     })
 
     it('ignores ignored modules by regex', async () => {
       expect(
-        await findModules('.gitignore', { ignoreModulesRegex: /husky/ })
+        await findModules('.gitignore', { ignoreModulesRegex: /(husky|idea)/ })
       ).toEqual(['.'])
     })
 
