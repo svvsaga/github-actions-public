@@ -32,7 +32,6 @@ function findSeverityOfPush() {
     });
 }
 exports.findSeverityOfPush = findSeverityOfPush;
-// Test to trigger new version
 
 
 /***/ }),
