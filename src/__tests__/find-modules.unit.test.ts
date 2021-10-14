@@ -2,33 +2,41 @@ import { findAffectedModules, findModules } from '../utils'
 
 describe('find-terraform-changes', () => {
   describe('findModules', () => {
+    const findModuleTestDir = 'src/__tests__/find-modules'
     it('finds all modules in repo', async () => {
-      const expectedModules = ['.', './.husky', './.husky/_']
+      const expectedModules = ['.', './module', './module/submodule']
 
       expect(
-        await findModules('.gitignore', { ignoreModules: ['./.idea'] })
+        await findModules('marker.txt', {
+          cwd: findModuleTestDir,
+        })
       ).toEqual(expectedModules)
     })
 
     it('ignores ignored modules', async () => {
       expect(
-        await findModules('.gitignore', {
-          ignoreModules: ['.', './.husky/_', './.idea'],
+        await findModules('marker.txt', {
+          ignoreModules: ['.', './module/submodule'],
+          cwd: findModuleTestDir,
         })
-      ).toEqual(['./.husky'])
+      ).toEqual(['./module'])
     })
 
     it('ignores ignored modules by regex', async () => {
       expect(
-        await findModules('.gitignore', { ignoreModulesRegex: /(husky|idea)/ })
+        await findModules('marker.txt', {
+          ignoreModulesRegex: /\/module/,
+          cwd: findModuleTestDir,
+        })
       ).toEqual(['.'])
     })
 
     it('includes only subfolders of cwd', async () => {
-      expect(await findModules('.gitignore', { cwd: '.husky' })).toEqual([
-        '.',
-        './_',
-      ])
+      expect(
+        await findModules('marker.txt', {
+          cwd: 'src/__tests__/find-modules/module',
+        })
+      ).toEqual(['.', './submodule'])
     })
   })
 

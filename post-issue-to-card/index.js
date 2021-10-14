@@ -56,7 +56,10 @@ function getPrefixAndCardId(body, cardIdRegex) {
     return undefined;
 }
 exports.getPrefixAndCardId = getPrefixAndCardId;
-const boardIdByPrefix = new Map([['KB', '9'], ['KBi', '20']]);
+const boardIdByPrefix = new Map([
+    ['KB', '9'],
+    ['KBi', '20'],
+]);
 function findNextPr(card, html_url) {
     const filtered = card.customfields.filter((field) => field.name.startsWith('Relatert PR'));
     // Don't do anything if PR allready on card
