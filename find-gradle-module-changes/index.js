@@ -100,7 +100,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.readFileUp = exports.getIgnoreModules = exports.findAffectedFilesInPushOrPr = exports.createMatrixForAffectedModules = exports.findClosest = exports.relativizePath = exports.findAffectedModules = exports.findModules = exports.listFilesInPush = exports.listFilesInPullRequest = exports.createPathMatrix = void 0;
+exports.readFileUp = exports.getIgnoreModules = exports.findAffectedFilesInPushOrPr = exports.createMatrixForAffectedModules = exports.findClosest = exports.relativizePath = exports.findAffectedModules = exports.findModules = exports.listCommitMessagesInPush = exports.listFilesInPush = exports.listFilesInPullRequest = exports.createPathMatrix = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const glob = __importStar(__nccwpck_require__(8090));
@@ -176,6 +176,36 @@ exports.listFilesInPullRequest = listFilesInPullRequest;
 function listFilesInPush(includeRemoved = false) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
+        const data = yield fetchPushData();
+        const filteredFiles = (_b = (includeRemoved
+            ? data.files
+            : (_a = data.files) === null || _a === void 0 ? void 0 : _a.filter((file) => file.status !== 'removed'))) !== null && _b !== void 0 ? _b : [];
+        if (core.isDebug()) {
+            core.debug(`${filteredFiles.length} files in push:`);
+            for (const file of filteredFiles) {
+                core.debug(file.filename);
+            }
+        }
+        return filteredFiles.map(({ filename }) => filename);
+    });
+}
+exports.listFilesInPush = listFilesInPush;
+function listCommitMessagesInPush() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const data = yield fetchPushData();
+        const commitMessages = data.commits.map(({ commit }) => commit.message);
+        if (core.isDebug()) {
+            core.debug(`${commitMessages.length} commit messages in push:`);
+            for (const commitMessage of commitMessages) {
+                core.debug(commitMessage);
+            }
+        }
+        return commitMessages;
+    });
+}
+exports.listCommitMessagesInPush = listCommitMessagesInPush;
+function fetchPushData() {
+    return __awaiter(this, void 0, void 0, function* () {
         const event = parseGithubEvent();
         const { before, after } = event;
         if (!before || !after) {
@@ -194,19 +224,9 @@ function listFilesInPush(includeRemoved = false) {
         if (response.status >= 300) {
             throw new Error(`Non-success status code when retrieving pushed files: ${response.status}`);
         }
-        const filteredFiles = (_b = (includeRemoved
-            ? response.data.files
-            : (_a = response.data.files) === null || _a === void 0 ? void 0 : _a.filter((file) => file.status !== 'removed'))) !== null && _b !== void 0 ? _b : [];
-        if (core.isDebug()) {
-            core.debug(`${filteredFiles.length} files in push:`);
-            for (const file of filteredFiles) {
-                core.debug(file.filename);
-            }
-        }
-        return filteredFiles.map(({ filename }) => filename);
+        return response.data;
     });
 }
-exports.listFilesInPush = listFilesInPush;
 function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, cwd = '.', } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Module marker: ${marker}`);
