@@ -20,7 +20,10 @@ export function getPrefixAndCardId(
   return undefined
 }
 
-const boardIdByPrefix = new Map([['KB', '9']])
+const boardIdByPrefix = new Map([
+  ['KB', '9'],
+  ['KBi', '20'],
+])
 
 interface Card {
   customfields: CustomField[]
