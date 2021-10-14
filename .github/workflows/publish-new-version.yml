@@ -2,7 +2,7 @@ name: Publish new version
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "**/*.ts"
 
@@ -19,4 +19,4 @@ jobs:
         id: find-severity
       
       - name: Publish new version
-        run: npm run publish:${{ steps.find-severity.output.severity }} && git push origin master --follow-tags
+        run: npm run publish:${{ steps.find-severity.output.severity }} && git push origin main --follow-tags
