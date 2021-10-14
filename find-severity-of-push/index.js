@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 2315:
+/***/ 2754:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -35,34 +35,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findTerraformChanges = void 0;
+exports.findSeverityOfPush = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(918);
-function findTerraformChanges() {
+function findSeverityOfPush() {
     return __awaiter(this, void 0, void 0, function* () {
-        const marker = core.getInput('marker');
-        if (!marker) {
-            throw new Error('No module marker specified');
+        const commitMsgs = yield (0, utils_1.listCommitMessagesInPush)();
+        let severity = 'patch';
+        if (commitMsgs.some((msg) => msg.includes('#major'))) {
+            severity = 'major';
         }
-        const ignoreModules = (0, utils_1.getIgnoreModules)();
-        const ignoreModulesRegex = core.getInput('ignore_modules_regex');
-        const cwd = core.getInput('cwd') || '.';
-        const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)(marker, {
-            ignoreModules,
-            ignoreModulesRegex,
-            cwd,
-            includeRemoved: true,
-        });
-        core.setOutput('matrix', matrix);
-        core.setOutput('has_results', hasResults);
+        else if (commitMsgs.some((msg) => msg.includes('#minor'))) {
+            severity = 'minor';
+        }
+        core.setOutput('severity', severity);
     });
 }
-exports.findTerraformChanges = findTerraformChanges;
+exports.findSeverityOfPush = findSeverityOfPush;
 
 
 /***/ }),
 
-/***/ 2205:
+/***/ 7937:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -97,11 +91,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const find_terraform_changes_implementation_1 = __nccwpck_require__(2315);
+const find_severity_of_push_implementation_1 = __nccwpck_require__(2754);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, find_terraform_changes_implementation_1.findTerraformChanges)();
+            yield (0, find_severity_of_push_implementation_1.findSeverityOfPush)();
         }
         catch (error) {
             core.setFailed(error);
@@ -16650,7 +16644,7 @@ module.exports = require("zlib");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(2205);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(7937);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

@@ -103,6 +103,39 @@ export async function listFilesInPullRequest(
 export async function listFilesInPush(
   includeRemoved = false
 ): Promise<string[]> {
+  const data = await fetchPushData()
+  const filteredFiles =
+    (includeRemoved
+      ? data.files
+      : data.files?.filter((file) => file.status !== 'removed')) ?? []
+
+  if (core.isDebug()) {
+    core.debug(`${filteredFiles.length} files in push:`)
+    for (const file of filteredFiles) {
+      core.debug(file.filename)
+    }
+  }
+
+  return filteredFiles.map(({ filename }) => filename)
+}
+
+export async function listCommitMessagesInPush(): Promise<string[]> {
+  const data = await fetchPushData()
+  const commitMessages = data.commits.map(({ commit }) => commit.message)
+
+  if (core.isDebug()) {
+    core.debug(`${commitMessages.length} commit messages in push:`)
+    for (const commitMessage of commitMessages) {
+      core.debug(commitMessage)
+    }
+  }
+
+  return commitMessages
+}
+
+async function fetchPushData(): Promise<
+  RestEndpointMethodTypes['repos']['compareCommits']['response']['data']
+> {
   const event = parseGithubEvent<PushEvent>()
 
   const { before, after } = event
@@ -129,19 +162,7 @@ export async function listFilesInPush(
     )
   }
 
-  const filteredFiles =
-    (includeRemoved
-      ? response.data.files
-      : response.data.files?.filter((file) => file.status !== 'removed')) ?? []
-
-  if (core.isDebug()) {
-    core.debug(`${filteredFiles.length} files in push:`)
-    for (const file of filteredFiles) {
-      core.debug(file.filename)
-    }
-  }
-
-  return filteredFiles.map(({ filename }) => filename)
+  return response.data
 }
 
 export async function findModules(

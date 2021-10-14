@@ -9,6 +9,7 @@
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
     "package:find-gradle-module-changes": "ncc build lib/find-gradle-module-changes.js -o find-gradle-module-changes",
+    "package:find-severity-of-push": "ncc build lib/find-severity-of-push.js -o find-severity-of-push",
     "package:find-terraform-changes": "ncc build lib/find-terraform-changes.js -o find-terraform-changes",
     "package:install-tfmask": "ncc build lib/install-tfmask.js -o install-tfmask",
     "package:post-issue-to-card": "ncc build lib/post-issue-to-card.js -o post-issue-to-card",
