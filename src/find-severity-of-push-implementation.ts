@@ -1,13 +1,14 @@
-import * as core from '@actions/core'
-import { listCommitMessagesInPush } from './utils'
+import { listCommitMessagesInPush } from './utils/github'
 
-export async function findSeverityOfPush(): Promise<void> {
+type Severity = 'major' | 'minor' | 'patch'
+
+export async function findSeverityOfPush(): Promise<Severity> {
   const commitMsgs = await listCommitMessagesInPush()
-  let severity = 'patch'
+  let severity: Severity = 'patch'
   if (commitMsgs.some((msg) => msg.includes('#major'))) {
     severity = 'major'
   } else if (commitMsgs.some((msg) => msg.includes('#minor'))) {
     severity = 'minor'
   }
-  core.setOutput('severity', severity)
+  return severity
 }

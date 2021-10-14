@@ -1,4 +1,4 @@
-import { findAffectedModules, findModules } from '../utils'
+import { findAffectedModules, findModules } from '../utils/modules'
 
 describe('find-terraform-changes', () => {
   describe('findModules', () => {

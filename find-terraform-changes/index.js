@@ -37,17 +37,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findTerraformChanges = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(918);
+const matrix_1 = __nccwpck_require__(6294);
+const modules_1 = __nccwpck_require__(312);
 function findTerraformChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         const marker = core.getInput('marker');
         if (!marker) {
             throw new Error('No module marker specified');
         }
-        const ignoreModules = (0, utils_1.getIgnoreModules)();
+        const ignoreModules = (0, modules_1.getIgnoreModules)();
         const ignoreModulesRegex = core.getInput('ignore_modules_regex');
         const cwd = core.getInput('cwd') || '.';
-        const { matrix, hasResults } = yield (0, utils_1.createMatrixForAffectedModules)(marker, {
+        const { matrix, hasResults } = yield (0, matrix_1.createMatrixForAffectedModules)(marker, {
             ignoreModules,
             ignoreModulesRegex,
             cwd,
@@ -113,7 +114,7 @@ void run();
 
 /***/ }),
 
-/***/ 918:
+/***/ 6863:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -146,42 +147,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.readFileUp = exports.getIgnoreModules = exports.findAffectedFilesInPushOrPr = exports.createMatrixForAffectedModules = exports.findClosest = exports.relativizePath = exports.findAffectedModules = exports.findModules = exports.listCommitMessagesInPush = exports.listFilesInPush = exports.listFilesInPullRequest = exports.createPathMatrix = void 0;
+exports.parseGithubEvent = exports.findAffectedFilesInPushOrPr = exports.listCommitMessagesInPush = exports.listFilesInPush = exports.listFilesInPullRequest = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const glob = __importStar(__nccwpck_require__(8090));
-const find_up_1 = __importDefault(__nccwpck_require__(9486));
 const fs_1 = __nccwpck_require__(5747);
-const difference_1 = __importDefault(__nccwpck_require__(6936));
-const last_1 = __importDefault(__nccwpck_require__(6110));
-const orderBy_1 = __importDefault(__nccwpck_require__(9104));
-const uniq_1 = __importDefault(__nccwpck_require__(6051));
-const path_1 = __nccwpck_require__(5622);
-function parseGithubEvent() {
-    const eventPath = process.env.GITHUB_EVENT_PATH;
-    if (!eventPath) {
-        throw new Error('GITHUB_EVENT_PATH not set');
-    }
-    const event = JSON.parse((0, fs_1.readFileSync)(eventPath, 'utf8'));
-    return event;
-}
-function createPathMatrix(paths) {
-    return {
-        include: paths.map((path) => {
-            const segments = path.split('/').filter((x) => !!x);
-            return {
-                path,
-                segments,
-                folder: (0, last_1.default)(segments) || '',
-            };
-        }),
-    };
-}
-exports.createPathMatrix = createPathMatrix;
 function listFilesInPullRequest(includeRemoved = false) {
     return __awaiter(this, void 0, void 0, function* () {
         const event = parseGithubEvent();
@@ -277,45 +247,90 @@ function fetchPushData() {
         return response.data;
     });
 }
-function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, cwd = '.', } = {}) {
+function findAffectedFilesInPushOrPr(includeRemoved = false) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug(`Module marker: ${marker}`);
-        core.debug(`cwd: ${cwd}`);
-        const globber = yield glob.create(`${cwd}/**/${marker}`);
-        const searchPath = globber.getSearchPaths()[0];
-        core.debug(`Search path: ${searchPath}`);
-        const moduleHits = yield globber.glob();
-        const moduleDirs = (0, uniq_1.default)(moduleHits
-            .map(path_1.dirname)
-            .filter((dir) => !ignoreModulesRegex || !ignoreModulesRegex.test(dir))
-            .map((dir) => dir.replace(searchPath, '.')));
-        return (0, difference_1.default)(moduleDirs, ignoreModules);
+        const affectedFiles = github.context.eventName === 'pull_request'
+            ? yield listFilesInPullRequest(includeRemoved)
+            : github.context.eventName === 'push'
+                ? yield listFilesInPush(includeRemoved)
+                : null;
+        if (affectedFiles === null)
+            throw new Error(`Unsupported webhook event: ${github.context.eventName}`);
+        return affectedFiles;
     });
 }
-exports.findModules = findModules;
-function findAffectedModules({ affectedFiles, moduleDirs, cwd = '.', }) {
-    const dirsInPr = (0, uniq_1.default)(affectedFiles.map(path_1.dirname)).map(path_1.normalize);
-    const affectedModules = (0, uniq_1.default)(dirsInPr.map((dir) => findClosest(dir, moduleDirs.map((moduleDir) => (0, path_1.join)(cwd, moduleDir))))).filter((path) => path != null);
-    return affectedModules.map((module) => module.replace(RegExp(`^${relativizePath(cwd)}`), '.'));
-}
-exports.findAffectedModules = findAffectedModules;
-function relativizePath(path, prefix = '.') {
-    return path.startsWith(prefix) ? path : `${prefix}/${path}`;
-}
-exports.relativizePath = relativizePath;
-function findClosest(path, prefixes) {
-    const orderedPrefixes = (0, orderBy_1.default)(prefixes, (p) => p.length, 'desc').map((dir) => relativizePath(dir));
-    const relativePath = relativizePath(path);
-    for (const prefix of orderedPrefixes) {
-        if (relativePath.startsWith(prefix))
-            return prefix;
+exports.findAffectedFilesInPushOrPr = findAffectedFilesInPushOrPr;
+function parseGithubEvent() {
+    const eventPath = process.env.GITHUB_EVENT_PATH;
+    if (!eventPath) {
+        throw new Error('GITHUB_EVENT_PATH not set');
     }
-    return null;
+    const event = JSON.parse((0, fs_1.readFileSync)(eventPath, 'utf8'));
+    return event;
 }
-exports.findClosest = findClosest;
+exports.parseGithubEvent = parseGithubEvent;
+
+
+/***/ }),
+
+/***/ 6294:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createMatrixForAffectedModules = exports.createPathMatrix = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const last_1 = __importDefault(__nccwpck_require__(6110));
+const github_1 = __nccwpck_require__(6863);
+const modules_1 = __nccwpck_require__(312);
+function createPathMatrix(paths) {
+    return {
+        include: paths.map((path) => {
+            const segments = path.split('/').filter((x) => !!x);
+            return {
+                path,
+                segments,
+                folder: (0, last_1.default)(segments) || '',
+            };
+        }),
+    };
+}
+exports.createPathMatrix = createPathMatrix;
 function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModulesRegex = '', cwd = '.', includeRemoved = false, includeAll = false, } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
-        const moduleDirs = yield findModules(marker, {
+        const moduleDirs = yield (0, modules_1.findModules)(marker, {
             ignoreModules,
             ignoreModulesRegex: ignoreModulesRegex
                 ? RegExp(ignoreModulesRegex)
@@ -334,8 +349,8 @@ function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModu
             affectedModules = moduleDirs;
         }
         else {
-            const affectedFiles = yield findAffectedFilesInPushOrPr(includeRemoved);
-            affectedModules = findAffectedModules({
+            const affectedFiles = yield (0, github_1.findAffectedFilesInPushOrPr)(includeRemoved);
+            affectedModules = (0, modules_1.findAffectedModules)({
                 affectedFiles,
                 moduleDirs,
                 cwd,
@@ -351,19 +366,54 @@ function createMatrixForAffectedModules(marker, { ignoreModules = [], ignoreModu
     });
 }
 exports.createMatrixForAffectedModules = createMatrixForAffectedModules;
-function findAffectedFilesInPushOrPr(includeRemoved = false) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const affectedFiles = github.context.eventName === 'pull_request'
-            ? yield listFilesInPullRequest(includeRemoved)
-            : github.context.eventName === 'push'
-                ? yield listFilesInPush(includeRemoved)
-                : null;
-        if (affectedFiles === null)
-            throw new Error(`Unsupported webhook event: ${github.context.eventName}`);
-        return affectedFiles;
+
+
+/***/ }),
+
+/***/ 312:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-}
-exports.findAffectedFilesInPushOrPr = findAffectedFilesInPushOrPr;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findAffectedModules = exports.findModules = exports.getIgnoreModules = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const glob = __importStar(__nccwpck_require__(8090));
+const difference_1 = __importDefault(__nccwpck_require__(6936));
+const uniq_1 = __importDefault(__nccwpck_require__(6051));
+const path_1 = __nccwpck_require__(5622);
+const path_2 = __nccwpck_require__(8040);
 function getIgnoreModules() {
     return core
         .getInput('ignore_modules')
@@ -372,6 +422,54 @@ function getIgnoreModules() {
         .filter((s) => !!s);
 }
 exports.getIgnoreModules = getIgnoreModules;
+function findModules(marker, { ignoreModules = [], ignoreModulesRegex = undefined, cwd = '.', } = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug(`Module marker: ${marker}`);
+        core.debug(`cwd: ${cwd}`);
+        const globber = yield glob.create(`${cwd}/**/${marker}`);
+        const searchPath = globber.getSearchPaths()[0];
+        core.debug(`Search path: ${searchPath}`);
+        const moduleHits = yield globber.glob();
+        const moduleDirs = (0, uniq_1.default)(moduleHits
+            .map(path_1.dirname)
+            .filter((dir) => !ignoreModulesRegex || !ignoreModulesRegex.test(dir))
+            .map((dir) => dir.replace(searchPath, '.')));
+        return (0, difference_1.default)(moduleDirs, ignoreModules);
+    });
+}
+exports.findModules = findModules;
+function findAffectedModules({ affectedFiles, moduleDirs, cwd = '.', }) {
+    const affectedDirs = (0, uniq_1.default)(affectedFiles.map(path_1.dirname)).map(path_1.normalize);
+    const affectedModules = (0, uniq_1.default)(affectedDirs.map((dir) => (0, path_2.findClosest)(dir, moduleDirs.map((moduleDir) => (0, path_1.join)(cwd, moduleDir))))).filter((path) => path != null);
+    return affectedModules.map((module) => module.replace(RegExp(`^${(0, path_2.relativizePath)(cwd)}`), '.'));
+}
+exports.findAffectedModules = findAffectedModules;
+
+
+/***/ }),
+
+/***/ 8040:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findClosest = exports.relativizePath = exports.readFileUp = void 0;
+const find_up_1 = __importDefault(__nccwpck_require__(9486));
+const fs_1 = __nccwpck_require__(5747);
+const orderBy_1 = __importDefault(__nccwpck_require__(9104));
 function readFileUp(cwd, fileName) {
     return __awaiter(this, void 0, void 0, function* () {
         const path = yield (0, find_up_1.default)(fileName, { cwd });
@@ -381,6 +479,20 @@ function readFileUp(cwd, fileName) {
     });
 }
 exports.readFileUp = readFileUp;
+function relativizePath(path, prefix = '.') {
+    return path.startsWith(prefix) ? path : `${prefix}/${path}`;
+}
+exports.relativizePath = relativizePath;
+function findClosest(path, prefixes) {
+    const orderedPrefixes = (0, orderBy_1.default)(prefixes, (p) => p.length, 'desc').map((dir) => relativizePath(dir));
+    const relativePath = relativizePath(path);
+    for (const prefix of orderedPrefixes) {
+        if (relativePath.startsWith(prefix))
+            return prefix;
+    }
+    return null;
+}
+exports.findClosest = findClosest;
 
 
 /***/ }),
