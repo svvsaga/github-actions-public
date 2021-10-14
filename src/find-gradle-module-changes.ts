@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import { createMatrixForAffectedModules, getIgnoreModules } from './utils'
+import { createMatrixForAffectedModules } from './utils/matrix'
+import { getIgnoreModules } from './utils/modules'
 
 async function run(): Promise<void> {
   try {

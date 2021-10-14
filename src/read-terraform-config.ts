@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import mapValues from 'lodash/mapValues'
-import { readFileUp } from './utils'
+import { readFileUp } from './utils/path'
 
 type ActionConfig = {
   serviceAccountSecret: string

@@ -3,7 +3,7 @@ import { findSeverityOfPush } from './find-severity-of-push-implementation'
 
 async function run(): Promise<void> {
   try {
-    await findSeverityOfPush()
+    core.setOutput('severity', await findSeverityOfPush())
   } catch (error: any) {
     core.setFailed(error)
   }
