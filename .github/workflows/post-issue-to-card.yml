@@ -1,0 +1,14 @@
+name: Post issue to card
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+
+jobs:
+  find-issue-number:
+    name: Post issue to card
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./post-issue-to-card
+        with:
+          apikey: ${{ secrets.KANBANIZE_API_KEY }}
