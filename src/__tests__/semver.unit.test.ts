@@ -32,11 +32,11 @@ describe('getNextVersionTag', () => {
 })
 
 describe('getLatestTag', () => {
-  it('finds truthy latest tag', async () => {
+  it('finds truthy semver latest tag', async () => {
     const latestTag = await getLatestTag()
 
     console.log('latest tag', latestTag)
 
-    expect(latestTag).toBeTruthy()
+    expect(latestTag).toMatch(/^v\d+\.\d+\.\d+$/)
   })
 })

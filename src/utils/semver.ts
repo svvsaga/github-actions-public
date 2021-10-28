@@ -19,28 +19,33 @@ export function getNextVersionTag(
   return `v${parsed}`
 }
 
-export async function getLatestTag(): Promise<string | null> {
+export async function getVersionTagsDescending(): Promise<string[]> {
   let stdout = ''
   let stderr = ''
-  const exitCode = await exec(
-    `/bin/bash -c "set -o pipefail && git tag -l --sort=-v:refname | head -n 1"`,
-    undefined,
-    {
-      listeners: {
-        stdout: (data: Buffer) => {
-          stdout += data.toString()
-        },
-        stderr: (data: Buffer) => {
-          stderr += data.toString()
-        },
+  const exitCode = await exec('git', ['tag', '-l', '--sort', '-v:refname'], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        stdout += data.toString()
       },
-    }
-  )
+      stderr: (data: Buffer) => {
+        stderr += data.toString()
+      },
+    },
+  })
   if (stderr) {
     console.error(stderr.trim())
   }
   if (exitCode !== 0) {
-    throw new Error(`Failed to get latest tag: ${exitCode}`)
+    throw new Error(`Failed to get tags: ${exitCode}`)
   }
-  return stdout.trim() || null
+  return stdout
+    .trim()
+    .split('\n')
+    .map((tag) => tag.trim())
+    .filter((tag) => /^v\d+\.\d+\.\d+$/.test(tag))
+}
+
+export async function getLatestTag(): Promise<string | null> {
+  const tags = await getVersionTagsDescending()
+  return tags[0] ?? null
 }

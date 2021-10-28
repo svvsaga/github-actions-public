@@ -13,4 +13,4 @@ inputs:
 
 outputs:
   tag:
-    description: The new tag, or null if no tag was created.
+    description: The new tag, or empty string if no tag was created.

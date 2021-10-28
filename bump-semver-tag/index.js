@@ -329,7 +329,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getLatestTag = exports.getNextVersionTag = void 0;
+exports.getLatestTag = exports.getVersionTagsDescending = exports.getNextVersionTag = void 0;
 const exec_1 = __nccwpck_require__(1514);
 const semver_1 = __importDefault(__nccwpck_require__(5911));
 function getNextVersionTag(severity, version) {
@@ -346,11 +346,11 @@ function getNextVersionTag(severity, version) {
     return `v${parsed}`;
 }
 exports.getNextVersionTag = getNextVersionTag;
-function getLatestTag() {
+function getVersionTagsDescending() {
     return __awaiter(this, void 0, void 0, function* () {
         let stdout = '';
         let stderr = '';
-        const exitCode = yield (0, exec_1.exec)(`/bin/bash -c "set -o pipefail && git tag -l --sort=-v:refname | head -n 1"`, undefined, {
+        const exitCode = yield (0, exec_1.exec)('git', ['tag', '-l', '--sort', '-v:refname'], {
             listeners: {
                 stdout: (data) => {
                     stdout += data.toString();
@@ -364,9 +364,21 @@ function getLatestTag() {
             console.error(stderr.trim());
         }
         if (exitCode !== 0) {
-            throw new Error(`Failed to get latest tag: ${exitCode}`);
+            throw new Error(`Failed to get tags: ${exitCode}`);
         }
-        return stdout.trim() || null;
+        return stdout
+            .trim()
+            .split('\n')
+            .map((tag) => tag.trim())
+            .filter((tag) => /^v\d+\.\d+\.\d+$/.test(tag));
+    });
+}
+exports.getVersionTagsDescending = getVersionTagsDescending;
+function getLatestTag() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const tags = yield getVersionTagsDescending();
+        return (_a = tags[0]) !== null && _a !== void 0 ? _a : null;
     });
 }
 exports.getLatestTag = getLatestTag;
