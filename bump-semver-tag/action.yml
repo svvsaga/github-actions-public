@@ -4,6 +4,12 @@ description: Reads the latest tag, increments the version if a \#major, \#minor 
 runs:
   using: node12
   main: ./index.js
+  
+inputs:
+  token:
+    description: GitHub token. Defaults to `github.token`.
+    required: true
+    default: ${{ github.token }}
 
 outputs:
   tag:
