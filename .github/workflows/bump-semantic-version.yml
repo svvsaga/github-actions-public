@@ -17,7 +17,7 @@ jobs:
         id: bump-semver-tag
 
       - name: Push tag
-        if: ${{ steps.bump-semver-tag.outputs.tag != "" }}
+        if: ${{ steps.bump-semver-tag.outputs.tag != '' }}
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
