@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "**/*.ts"
 
 jobs:
   publish-new-version:
     name: Publish new version
-    uses: svvsaga/github-actions-public/.github/workflows/bump-semantic-version.yml
+    uses: svvsaga/github-actions-public/.github/workflows/bump-semantic-version.yml@main
