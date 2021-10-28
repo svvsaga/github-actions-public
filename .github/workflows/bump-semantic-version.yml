@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
           
       - name: Bump semantic version
-        uses: ./bump-semver-tag
+        uses: svvsaga/github-actions-public/bump-semver-tag@v3.8.0
         id: bump-semver-tag
 
       - name: Push tag
