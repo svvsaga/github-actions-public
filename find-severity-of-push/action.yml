@@ -1,5 +1,5 @@
 name: Find severity of push
-description: Find if any commits in a push are tagged as major or minor versions. Requires checking out the code beforehand.
+description: Find if any commits in a push are tagged as major, minor or patch versions. Requires checking out the code beforehand.
 runs:
   using: 'node12'
   main: './index.js'
@@ -10,5 +10,5 @@ inputs:
     default: ${{ github.token }}
 outputs:
   severity:
-    description: Severity of the push; major, minor or patch.
+    description: Severity of the push; major, minor, patch or null.
   

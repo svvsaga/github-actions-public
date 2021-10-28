@@ -1,14 +1,15 @@
 import { listCommitMessagesInPush } from './utils/github'
-
-type Severity = 'major' | 'minor' | 'patch'
+import { Severity } from './utils/semver'
 
 export async function findSeverityOfPush(): Promise<Severity> {
   const commitMsgs = await listCommitMessagesInPush()
-  let severity: Severity = 'patch'
+  let severity: Severity = null
   if (commitMsgs.some((msg) => msg.includes('#major'))) {
     severity = 'major'
   } else if (commitMsgs.some((msg) => msg.includes('#minor'))) {
     severity = 'minor'
+  } else if (commitMsgs.some((msg) => msg.includes('#patch'))) {
+    severity = 'patch'
   }
   return severity
 }

@@ -8,6 +8,7 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
+    "package:bump-semver-tag": "ncc build lib/bump-semver-tag.js -o bump-semver-tag",
     "package:find-gradle-module-changes": "ncc build lib/find-gradle-module-changes.js -o find-gradle-module-changes",
     "package:find-severity-of-push": "ncc build lib/find-severity-of-push.js -o find-severity-of-push",
     "package:find-terraform-changes": "ncc build lib/find-terraform-changes.js -o find-terraform-changes",
@@ -36,6 +37,7 @@
     "find-up": "^5.0.0",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.5",
+    "semver": "^6.3.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -9,17 +9,4 @@ on:
 jobs:
   publish-new-version:
     name: Publish new version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Find severity of push
-        uses: ./find-severity-of-push
-        id: find-severity
-      
-      - name: Publish new version
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          npm run publish:${{ steps.find-severity.outputs.severity }} && git push origin main --follow-tags
+    uses: svvsaga/github-actions-public/.github/workflows/bump-semantic-version.yml

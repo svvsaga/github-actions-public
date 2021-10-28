@@ -1,0 +1,19 @@
+name: Tag semantic version
+
+inputs:
+  github_token:
+    description: Token used when authenticating with GitHub. Defaults to `github.token`.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        token: ${{ inputs.github_token }}
+
+    - name: 
+

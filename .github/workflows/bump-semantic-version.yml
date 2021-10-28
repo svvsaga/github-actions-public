@@ -1,0 +1,24 @@
+name: Bump semantic version
+
+on:
+  workflow_call:
+    
+jobs:
+  bump-semantic-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout all tags
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
+      - name: Bump semantic version
+        uses: ./bump-semver-tag
+        id: bump-semver-tag
+
+      - name: Push tag
+        if: ${{ steps.bump-semver-tag.outputs.tag != "" }}
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git push origin ${{ steps.bump-semver-tag.outputs.tag }}

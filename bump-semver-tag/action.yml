@@ -1,0 +1,10 @@
+name: Bump semver tag
+description: Reads the latest tag, increments the version if a \#major, \#minor or \#patch tag is found in any commit msg in push, and creates a new tag.
+
+runs:
+  using: node12
+  main: ./index.js
+
+outputs:
+  tag:
+    description: The new tag, or null if no tag was created.
