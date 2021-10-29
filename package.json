@@ -19,10 +19,7 @@
     "test:unit": "jest unit --passWithNoTests",
     "test:int": "jest integration --passWithNoTests",
     "all": "run-s build format lint package test:unit",
-    "prepare": "husky install",
-    "publish:major": "npm version major && git push --follow-tags",
-    "publish:minor": "npm version minor && git push --follow-tags",
-    "publish:patch": "npm version patch && git push --follow-tags"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@actions/core": "^1.6.0",
