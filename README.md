@@ -6,7 +6,7 @@ Useful GitHub Actions!
 
 We follow semantic versioning when publishing new versions.
 
-A new version will automatically be published when there are any changes to a `.ts`-file pushed to master, with a commit msg tag.
+A new version will automatically be published when a push or PR merge is done with a commit msg tag.
 
 1. If any commit in the push has a commit message containing `#major`, a major version will be published.
 1. If any commit in the push has a commit message containing `#minor`, a minor version will be published.
