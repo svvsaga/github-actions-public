@@ -16,6 +16,7 @@ export async function bumpSemverTag(): Promise<void> {
       throw new Error(`Failed to tag ${nextTag}`)
     }
     core.setOutput('tag', nextTag)
+    core.setOutput('version', nextTag.substring(1))
   } else {
     core.info(`No tags found, or no #patch, #minor or #major commit msgs`)
   }
