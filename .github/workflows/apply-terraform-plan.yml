@@ -1,0 +1,82 @@
+name: Apply Terraform plan
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Which release to deploy, e.g. "datacatalog-web-v13"
+        required: true
+        type: string
+      environment:
+        description: Which environment to deploy to (e.g. STM, ATM or PROD).
+        type: string
+        required: true
+      skip_diff:
+        required: false
+        type: string
+        description: Set to 'true' to apply Terraform plan without checking if state has changed since plan was created.
+      saga_app_root:
+        description: Path to source code project from root of Git repo
+        type: string
+        required: true
+      storage_bucket:
+        description: GCP Storage bucket where Terraform plans are stored
+        type: string
+        required: true
+      application_name:
+        description: Name of application, e.g. Reisetid - Ingest
+        type: string
+        required: true
+      application_id:
+        description: Application ID, e.g. reisetid-ingest
+        type: string
+        required: true
+    secrets:
+      service_account_key:
+        description: SA key for service account used to deploy plan
+        required: true
+      github_app_private_key:
+        description: Private key for GitHub application to get app token
+        required: true
+      github_app_id:
+        description: GitHub application ID to get app token
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Google Cloud SDK with Terraform service account
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: latest
+          service_account_key: ${{ inputs.service_account_key }}
+          export_default_credentials: true
+
+      - name: Get app token
+        id: get_token
+        uses: tibdex/github-app-token@36464acb844fc53b9b8b2401da68844f6b05ebb0
+        with:
+          private_key: ${{ secrets.github_app_private_key }}
+          app_id: ${{ secrets.github_app_id }}
+
+      - name: Set GitHub token
+        run: |
+          git config --global url."https://x-access-token:${{ steps.get_token.outputs.token }}@github.com".insteadOf https://github.com
+          echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
+
+      - name: Deploy plan for ${{ inputs.environment }}
+        uses: svvsaga/github-actions-public/apply-terraform-plan@v3.8.0
+        with:
+          environment: ${{ inputs.environment }}
+          project_root: ${{ inputs.saga_app_root }}
+          storage_bucket: ${{ inputs.storage_bucket }}
+          storage_prefix: ${{ inputs.application_id }}
+          application: ${{ inputs.application_name }}
+          github_token: ${{ github.token }}
+          skip_diff: ${{ inputs.skip_diff }}

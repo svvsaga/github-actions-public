@@ -1,0 +1,76 @@
+name: Build and upload Gradle module
+
+on:
+  workflow_call:
+    inputs:
+      storage_bucket:
+        description: The GCP storage bucket into which to upload artifact
+        type: string
+        required: true
+      saga_app_root:
+        description: Path to source code project from root of Git repo
+        type: string
+        required: true
+      version_property:
+        description: Project property used to set app version
+        required: false
+        type: string
+        default: appVersion
+      app_version:
+        description: Will set the app version of the JAR to be built and published
+        required: false
+        type: string
+        default: ${{ github.run_number }}
+      ref:
+        description: Which ref to create release for. Defaults to same as workflow is run from if empty.
+        required: false
+        type: string
+        default: ${{ github.sha }}
+
+    secrets:
+      storage_bucket_sa_publisher_key:
+        description: Key for service account that has permission to upload to the given GCP storage bucket
+        required: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REF: ${{ github.inputs.ref }}
+
+jobs:
+  build_module:
+    name: Build module and publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.saga_app_root }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.REF }}
+
+      - name: Cache Gradle
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build function
+        run: ../gradlew shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
+
+      - name: Zip jars
+        run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: latest
+          service_account_key: ${{ secrets.storage_bucket_sa_publisher_key }}
+          export_default_credentials: true
+
+      - name: Publish to GCS
+        run: gsutil cp *.zip gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}/
