@@ -416,10 +416,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findClosest = exports.relativizePath = exports.readFileUp = void 0;
+exports.getTerraformDir = exports.findClosest = exports.relativizePath = exports.readFileUp = void 0;
 const find_up_1 = __importDefault(__nccwpck_require__(9486));
 const fs_1 = __nccwpck_require__(5747);
 const orderBy_1 = __importDefault(__nccwpck_require__(9104));
+const path_1 = __nccwpck_require__(5622);
 function readFileUp(cwd, fileName) {
     return __awaiter(this, void 0, void 0, function* () {
         const path = yield (0, find_up_1.default)(fileName, { cwd });
@@ -443,6 +444,14 @@ function findClosest(path, prefixes) {
     return null;
 }
 exports.findClosest = findClosest;
+function getTerraformDir(projectRoot) {
+    const workspace = process.env.GITHUB_WORKSPACE;
+    if (!workspace) {
+        throw new Error('GITHUB_WORKSPACE not set!');
+    }
+    return (0, path_1.resolve)(workspace, projectRoot, 'terraform');
+}
+exports.getTerraformDir = getTerraformDir;
 
 
 /***/ }),

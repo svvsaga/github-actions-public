@@ -1,0 +1,28 @@
+name: Apply Terraform plan
+description: Apply Terraform plan from storage bucket. Requires that Google Cloud SDK has been setup.
+runs:
+  using: 'node12'
+  main: './index.js'
+inputs:
+  project_root:
+    description: Where to find the terraform directory.
+    required: true
+  environment:
+    description: Which environment to deploy plan for (STM, ATM, PROD).
+    required: true
+    default: STM
+  storage_bucket:
+    description: Where to read the Terraform plan.
+    required: true
+  application:
+    description: Name of the application that is being deployed, e.g. 'Oppetid'.
+    required: true
+  github_token:
+    description: Token used to create and update GitHub deployment.
+    required: true
+  skip_diff:
+    description: Set to 'true' to apply Terraform plan without checking if state has changed since plan was created.
+    required: false
+  storage_prefix:
+    description: Subfolder in storage bucket. If set, plans will be read from `<storage_prefix>/terraform-plans`.
+    required: false

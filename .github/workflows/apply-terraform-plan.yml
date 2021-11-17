@@ -55,7 +55,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@master
         with:
           version: latest
-          service_account_key: ${{ inputs.service_account_key }}
+          service_account_key: ${{ secrets.service_account_key }}
           export_default_credentials: true
 
       - name: Get app token
@@ -71,7 +71,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Deploy plan for ${{ inputs.environment }}
-        uses: svvsaga/github-actions-public/apply-terraform-plan@v3.8.0
+        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@add-workflows
         with:
           environment: ${{ inputs.environment }}
           project_root: ${{ inputs.saga_app_root }}
