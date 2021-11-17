@@ -1,0 +1,25 @@
+name: Publish Terraform plan to GCS
+description: Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has been setup.
+runs:
+  using: 'node12'
+  main: './index.js'
+inputs:
+  project_root:
+    description: Where to find the terraform directory.
+    required: true
+  environment:
+    description: Which environment to publish plan for (STM, ATM, PROD, SHARED).
+    required: true
+    default: STM
+  release_id:
+    description: If it should upload the plan text version to a release, add the release ID number.
+    required: false
+  terraform_vars:
+    description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'
+    required: false
+  storage_bucket:
+    description: Where to store the Terraform plan.
+    required: true
+  storage_prefix:
+    description: Subfolder in storage bucket. If set, plans will be stored in `<storage_prefix>/terraform-plans`.
+    required: false
