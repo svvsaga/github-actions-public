@@ -1,6 +1,5 @@
-# Deprecated - use apply-terraform-plan-from-artifact instead
-name: Apply Terraform plan
-description: Apply Terraform plan
+name: Apply Terraform plan from artifact
+description: Apply Terraform plan from artifact in previous job
 
 inputs:
   terraform_dir:
@@ -33,7 +32,7 @@ runs:
       with:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
-  
+
     - name: Read TF and TG versions
       working-directory: .
       shell: bash

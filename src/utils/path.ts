@@ -1,6 +1,7 @@
 import findUp from 'find-up'
 import { readFileSync } from 'fs'
 import orderBy from 'lodash-es/orderBy'
+import { resolve } from 'path'
 
 export async function readFileUp(
   cwd: string,
@@ -24,4 +25,14 @@ export function findClosest(path: string, prefixes: string[]): string | null {
     if (relativePath.startsWith(prefix)) return prefix
   }
   return null
+}
+
+export function getTerraformDir(projectRoot: string): string {
+  const workspace = process.env.GITHUB_WORKSPACE
+
+  if (!workspace) {
+    throw new Error('GITHUB_WORKSPACE not set!')
+  }
+
+  return resolve(workspace, projectRoot, 'terraform')
 }
