@@ -1,4 +1,5 @@
 name: Show Terraform plan on PR
+description: Show Terraform plan on PR
 
 inputs:
   terraform_dir:
@@ -31,7 +32,7 @@ runs:
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
-  
+
     - name: Setup Google Cloud SDK with Terraform service account
       uses: google-github-actions/setup-gcloud@master
       with:
@@ -49,11 +50,11 @@ runs:
       uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
       with:
         terragrunt_version: ${{ steps.read-terraform-config.outputs.tg_version }}
-        
+
     - name: Terraform init dependencies
       uses: actions/github-script@v5
       env:
-        DEPENDENCIES: ${{ steps.read-terraform-config.outputs.tg_dependencies }}
+        DEPENDENCIES: ${{ steps.read-terraform-config.outputs.tg_dependencies }}
         ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
         CWD: ${{ inputs.terraform_dir }}
       with:

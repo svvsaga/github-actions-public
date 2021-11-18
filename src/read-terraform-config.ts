@@ -63,7 +63,9 @@ async function run(): Promise<void> {
         core.setOutput('tf_vars', JSON.stringify(transformedMap))
       }
     } else {
-      core.warning('no ts-pr-action.config.json found, aborting...')
+      core.info(
+        'No ts-pr-action.config.json found. If this module needs to run as a specific SA, add a ts-pr-action.config.json.'
+      )
     }
   } catch (error: any) {
     core.setFailed(error)
