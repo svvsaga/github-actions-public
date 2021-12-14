@@ -27,3 +27,5 @@ outputs:
     description: Service account secret key
   environment:
     description: Environment name
+  workload_identity_project_id:
+    description: Project ID for the workload identity federation authentication

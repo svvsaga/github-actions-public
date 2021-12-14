@@ -4,7 +4,8 @@ import mapValues from 'lodash/mapValues'
 import { readFileUp } from './utils/path'
 
 type ActionConfig = {
-  serviceAccountSecret: string
+  serviceAccountSecret?: string
+  workloadIdentityProjectId?: string
   environment?: string
   tfVarToSecretMap?: Record<string, string>
 }
@@ -46,9 +47,18 @@ async function run(): Promise<void> {
     if (fs.existsSync(configPath)) {
       const file = fs.readFileSync(configPath, 'utf-8')
       const config = JSON.parse(file) as ActionConfig
-      core.setOutput('sa_secret', config.serviceAccountSecret)
-      core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret])
-      core.info('sa_secret set')
+      if (config.workloadIdentityProjectId) {
+        core.setOutput(
+          'workload_identity_project_id',
+          config.workloadIdentityProjectId
+        )
+        core.info(`workload_identity_project_id set`)
+      }
+      if (config.serviceAccountSecret) {
+        core.setOutput('sa_secret', config.serviceAccountSecret)
+        core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret])
+        core.info('sa_secret set')
+      }
       if (config.environment) {
         core.setOutput('environment', config.environment)
         core.info('environment set')
