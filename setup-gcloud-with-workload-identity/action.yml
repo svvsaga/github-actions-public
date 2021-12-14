@@ -1,0 +1,50 @@
+name: Setup GCloud with workload identity
+description: Setup Workload Identity Federation and GCloud SDK. Code must be checked out first, to set Google application credentials.
+
+inputs:
+  project_id:
+    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `<project_id>@<project_id>.iam.gserviceaccount.com` service account.
+    required: true
+  service_account:
+    description: The service account to use with `gcloud`. Defaults to `terraform`.
+    required: false
+    default: terraform
+  pool_id:
+    description: The pool ID of the workload identity pool to use with `gcloud`. Defaults to `default`.
+    required: false
+    default: default
+  provider_id:
+    description: The provider ID of the workload identity provider to use with `gcloud`. Defaults to `github`.
+    required: false
+    default: github
+
+runs:
+  using: composite
+  steps:
+    - name: Verify that the code has been checked out
+      working-directory: .
+      shell: bash
+      run: |
+        if [ ! -d .git ]; then
+          echo "ERROR: Code must be checked out first"
+          exit 1
+        fi
+
+    - name: Authenticate to Google Cloud with Terraform service account
+      id: auth
+      uses: google-github-actions/auth@v0
+      with:
+        workload_identity_provider: projects/${{ inputs.project_id }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }} /providers/${{ inputs.provider_id }}
+        service_account: ${{ inputs.service_account }}@${{ inputs.project_id }}.iam.gserviceaccount.com
+        token_format: access_token
+
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+
+outputs:
+  credentials_file_path:
+    description: The path to the credentials file used by `gcloud` to authenticate with the Workload Identity provider.
+    value: ${{ steps.auth.outputs.credentials_file_path }}
+  access_token:
+    description: The access token to use with `gcloud`
+    value: ${{ steps.auth.outputs.access_token }}
