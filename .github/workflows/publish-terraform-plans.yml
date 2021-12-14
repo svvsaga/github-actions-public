@@ -34,6 +34,18 @@ on:
         description: Storage bucket for Terraform plan in PROD
         type: string
         required: true
+      workload_identity_project_id_stm:
+        description: The project ID of the workload identity project to use with `gcloud` for STM.
+        type: string
+        required: true
+      workload_identity_project_id_atm:
+        description: The project ID of the workload identity project to use with `gcloud` for ATM.
+        type: string
+        required: true
+      workload_identity_project_id_prod:
+        description: The project ID of the workload identity project to use with `gcloud` for PROD.
+        type: string
+        required: true
       
     secrets:
       github_app_private_key:
@@ -41,15 +53,6 @@ on:
         required: true
       github_app_id:
         description: GitHub application ID to get app token
-        required: true
-      service_account_key_stm:
-        description: Service account key to use with `gcloud` for STM
-        required: true
-      service_account_key_atm:
-        description: Service account key to use with `gcloud` for ATM
-        required: true
-      service_account_key_prod:
-        description: Service account key to use with `gcloud` for PROD
         required: true
     
 jobs:
@@ -62,13 +65,13 @@ jobs:
         environment: [ STM, ATM, PROD ]
         include:
           - environment: STM
-            sa_key_secret: service_account_key_stm
+            workload_identity_project_id: workload_identity_project_id_stm
             storage_bucket: ${{ inputs.storage_bucket_stm }}
           - environment: ATM
-            sa_key_secret: service_account_key_atm
+            workload_identity_project_id: workload_identity_project_id_atm
             storage_bucket: ${{ inputs.storage_bucket_atm }}
           - environment: PROD
-            sa_key_secret: service_account_key_prod
+            workload_identity_project_id: workload_identity_project_id_prod
             storage_bucket: ${{ inputs.storage_bucket_prod }}
 
     steps:
@@ -77,12 +80,10 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup Google Cloud SDK with Terraform service account
-        uses: google-github-actions/setup-gcloud@master
+      - name: Setup Google Cloud SDK with Workload Identity Federation
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
         with:
-          version: latest
-          service_account_key: ${{ secrets[matrix.sa_key_secret] }}
-          export_default_credentials: true
+          workload_identity_project_id: ${{ inputs[matrix.workload_identity_project_id] }}
 
       - name: Get app token
         id: get_token

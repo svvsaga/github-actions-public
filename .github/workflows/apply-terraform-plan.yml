@@ -30,10 +30,11 @@ on:
         description: Application ID, e.g. reisetid-ingest
         type: string
         required: true
-    secrets:
-      service_account_key:
-        description: SA key for service account used to deploy plan
+      workload_identity_project_id:
+        description: The project ID of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
+        type: string
         required: true
+    secrets:
       github_app_private_key:
         description: Private key for GitHub application to get app token
         required: true
@@ -51,12 +52,17 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup Google Cloud SDK with Terraform service account
-        uses: google-github-actions/setup-gcloud@master
+      - name: Authenticate to Google Cloud with Terraform service account
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          version: latest
-          service_account_key: ${{ secrets.service_account_key }}
-          export_default_credentials: true
+          workload_identity_provider: projects/${{ inputs.workload_identity_project_id }}/locations/global/workloadIdentityPools/default/providers/github
+          service_account: terraform@${{ inputs.workload_identity_project_id }}.iam.gserviceaccount.com
+
+      - name: Setup Google Cloud SDK with Workload Identity Federation
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+        with:
+          workload_identity_project_id: ${{ inputs.workload_identity_project_id }}
 
       - name: Get app token
         id: get_token
