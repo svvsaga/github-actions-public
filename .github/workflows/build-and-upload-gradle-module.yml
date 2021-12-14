@@ -26,11 +26,15 @@ on:
         required: false
         type: string
         default: ${{ github.sha }}
-
-    secrets:
-      storage_bucket_sa_publisher_key:
-        description: Key for service account that has permission to upload to the given GCP storage bucket
+      workload_identity_project_id:
+        description: The project ID of the workload identity project to use with `gcloud`.
+        type: string
         required: true
+      workload_identity_service_account:
+        description: The username of the service account to use with `gcloud` (before the @). Will be used with the workload_identity_project_id. Defaults to `publisher`.
+        type: string
+        required: false
+        default: publisher
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -65,12 +69,11 @@ jobs:
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
-        with:
-          version: latest
-          service_account_key: ${{ secrets.storage_bucket_sa_publisher_key }}
-          export_default_credentials: true
+    - name: Setup Google Cloud SDK with Workload Identity Federation
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+      with:
+        workload_identity_project_id: ${{ inputs.workload_identity_project_id }}
+        workload_identity_service_account: ${{ inputs.workload_identity_service_account }}
 
       - name: Publish to GCS
         run: gsutil cp *.zip gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}/

@@ -40,3 +40,7 @@ jobs:
 
 - Use dashes when-naming-your-action
 - Use underscores when_naming_your_inputs_and_outputs
+
+## GCP Authentication
+
+Many of our modules depend on Google Cloud Platform. We use [Workload Identity Federation](https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions) to authenticate with GCP, because this is more secure than long-lived JSON keys. Follow the link above to set this up for your project.

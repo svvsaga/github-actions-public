@@ -9,8 +9,8 @@ inputs:
     description: Which commit, tag or branch to plan terraform from. Defaults to same as workflow is run from if empty.
     required: false
     default: ${{ github.sha }}
-  service_account_key:
-    description: Terraform Service Account private key to use with `gcloud`.
+  workload_identity_project_id:
+    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
     required: true
   github_token:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
@@ -40,12 +40,10 @@ runs:
         echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
 
-    - name: Setup Google Cloud SDK with Terraform service account
-      uses: google-github-actions/setup-gcloud@master
+    - name: Setup Google Cloud SDK with Workload Identity Federation
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
       with:
-        version: latest
-        service_account_key: ${{ inputs.service_account_key }}
-        export_default_credentials: true
+        workload_identity_project_id: ${{ inputs.workload_identity_project_id }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
