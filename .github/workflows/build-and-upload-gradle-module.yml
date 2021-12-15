@@ -30,6 +30,10 @@ on:
         description: The project ID of the workload identity project to use with `gcloud`.
         type: string
         required: true
+      workload_identity_project_number:
+        description: The project number of the workload identity project to use with `gcloud`.
+        type: string
+        required: true
       workload_identity_service_account:
         description: The username of the service account to use with `gcloud` (before the @). Will be used with the workload_identity_project_id. Defaults to `publisher`.
         type: string
@@ -70,10 +74,11 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
       with:
-        workload_identity_project_id: ${{ inputs.workload_identity_project_id }}
-        workload_identity_service_account: ${{ inputs.workload_identity_service_account }}
+        project_id: ${{ inputs.workload_identity_project_id }}
+        project_number: ${{ inputs.workload_identity_project_number }}
+        service_account: ${{ inputs.workload_identity_service_account }}
 
       - name: Publish to GCS
         run: gsutil cp *.zip gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}/

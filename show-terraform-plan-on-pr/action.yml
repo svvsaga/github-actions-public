@@ -5,8 +5,12 @@ inputs:
   terraform_dir:
     description: The working directory, e.g. where the Terraform files are located.
     required: true
+  workload_identity_project_number:
+    description: The project number of the project where the workload identity provider exists. If not specified, it will be read from `tf-pr-action-config.json`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`.
+    required: false
+    default: ""
   workload_identity_project_id:
-    description: The project ID of the workload identity project to use with `gcloud`. If not specified will be read from `tf-pr-action-config.json`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
+    description: The project ID of the workload identity project to use with `gcloud`. If not specified will be read from `tf-pr-action-config.json`. Will be used to set the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
     required: false
     default: ""
   github_token:
@@ -34,9 +38,10 @@ runs:
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
       with:
-        workload_identity_project_id: ${{ inputs.project_id }}
+        project_id: ${{ inputs.project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}
+        project_number: ${{ inputs.project_number || steps.read-terraform-config.outputs.workload_identity_project_number }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
