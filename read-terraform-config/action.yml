@@ -29,3 +29,5 @@ outputs:
     description: Environment name
   workload_identity_project_id:
     description: Project ID for the workload identity federation authentication
+  workload_identity_project_number:
+    description: Project number for the workload identity federation authentication

@@ -3,7 +3,10 @@ description: Setup Workload Identity Federation and GCloud SDK. Code must be che
 
 inputs:
   project_id:
-    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `<project_id>@<project_id>.iam.gserviceaccount.com` service account.
+    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `<service_account>@<project_id>.iam.gserviceaccount.com` service account.
+    required: true
+  project_number:
+    description: The project number of the project where the workload identity provider exists. Will be used to set workload identity provider to `projects/<project_number>/locations/global/workloadIdentityPools/<pool_id>/providers/<provider_id>`.
     required: true
   service_account:
     description: The service account to use with `gcloud`. Defaults to `terraform`.
@@ -34,7 +37,7 @@ runs:
       id: auth
       uses: google-github-actions/auth@v0
       with:
-        workload_identity_provider: projects/${{ inputs.project_id }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }} /providers/${{ inputs.provider_id }}
+        workload_identity_provider: projects/${{ inputs.project_number }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }} /providers/${{ inputs.provider_id }}
         service_account: ${{ inputs.service_account }}@${{ inputs.project_id }}.iam.gserviceaccount.com
         token_format: access_token
 

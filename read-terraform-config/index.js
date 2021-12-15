@@ -76,6 +76,10 @@ function run() {
                     core.setOutput('workload_identity_project_id', config.workloadIdentityProjectId);
                     core.info(`workload_identity_project_id set`);
                 }
+                if (config.workloadIdentityProjectNumber) {
+                    core.setOutput('workload_identity_project_number', config.workloadIdentityProjectNumber);
+                    core.info(`workload_identity_project_number set`);
+                }
                 if (config.serviceAccountSecret) {
                     core.setOutput('sa_secret', config.serviceAccountSecret);
                     core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret]);

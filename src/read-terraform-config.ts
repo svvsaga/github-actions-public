@@ -6,6 +6,7 @@ import { readFileUp } from './utils/path'
 type ActionConfig = {
   serviceAccountSecret?: string
   workloadIdentityProjectId?: string
+  workloadIdentityProjectNumber?: string
   environment?: string
   tfVarToSecretMap?: Record<string, string>
 }
@@ -53,6 +54,13 @@ async function run(): Promise<void> {
           config.workloadIdentityProjectId
         )
         core.info(`workload_identity_project_id set`)
+      }
+      if (config.workloadIdentityProjectNumber) {
+        core.setOutput(
+          'workload_identity_project_number',
+          config.workloadIdentityProjectNumber
+        )
+        core.info(`workload_identity_project_number set`)
       }
       if (config.serviceAccountSecret) {
         core.setOutput('sa_secret', config.serviceAccountSecret)
