@@ -73,12 +73,16 @@ jobs:
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
-    - name: Setup Google Cloud SDK with Workload Identity Federation
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
-      with:
-        project_id: ${{ inputs.workload_identity_project_id }}
-        project_number: ${{ inputs.workload_identity_project_number }}
-        service_account: ${{ inputs.workload_identity_service_account }}
+      - name: Setup Google Cloud SDK with Workload Identity Federation
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
+        with:
+          project_id: ${{ inputs.workload_identity_project_id }}
+          project_number: ${{ inputs.workload_identity_project_number }}
+          service_account: ${{ inputs.workload_identity_service_account }}
 
       - name: Publish to GCS
-        run: gsutil cp *.zip gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}/
+        uses: google-github-actions/upload-cloud-storage@v0.5.0
+        with:
+          path: ${{ inputs.saga_app_root }}
+          destination: gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}
+          glob: "*.zip"
