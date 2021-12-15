@@ -37,7 +37,7 @@ runs:
       id: auth
       uses: google-github-actions/auth@v0
       with:
-        workload_identity_provider: projects/${{ inputs.project_number }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }} /providers/${{ inputs.provider_id }}
+        workload_identity_provider: projects/${{ inputs.project_number }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }}/providers/${{ inputs.provider_id }}
         service_account: ${{ inputs.service_account }}@${{ inputs.project_id }}.iam.gserviceaccount.com
         token_format: access_token
 
