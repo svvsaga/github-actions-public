@@ -1,0 +1,37 @@
+name: Setup GCloud with JSON secret
+description: Setup GCloud SDK with service account JSON secret key. Code must be checked out first, to set Google application credentials.
+
+secrets:
+  service_account_key:
+    description: The service account JSON secret key to use with `gcloud`.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify that the code has been checked out
+      working-directory: .
+      shell: bash
+      run: |
+        if [ ! -d .git ]; then
+          echo "ERROR: Code must be checked out first"
+          exit 1
+        fi
+
+    - name: Authenticate to Google Cloud with service account key
+      id: auth
+      uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.service_account_key }}
+        token_format: access_token
+
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+
+outputs:
+  credentials_file_path:
+    description: The path to the credentials file used by `gcloud` to authenticate with the Workload Identity provider.
+    value: ${{ steps.auth.outputs.credentials_file_path }}
+  access_token:
+    description: The access token to use with `gcloud`
+    value: ${{ steps.auth.outputs.access_token }}
