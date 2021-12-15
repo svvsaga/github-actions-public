@@ -11,6 +11,11 @@ on:
         description: Path to source code project from root of Git repo
         type: string
         required: true
+      destination_path:
+        description: Path within storage bucket where to upload artifact. Defaults to `saga_app_root`.
+        type: string
+        required: false
+        default: ""
       version_property:
         description: Project property used to set app version
         required: false
@@ -84,5 +89,6 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@v0.5.0
         with:
           path: ${{ inputs.saga_app_root }}
-          destination: gs://${{ inputs.storage_bucket }}/${{ inputs.saga_app_root }}
+          destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.saga_app_root }}
           glob: "*.zip"
+          parent: false
