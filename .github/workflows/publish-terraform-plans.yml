@@ -46,6 +46,18 @@ on:
         description: The project ID of the workload identity project to use with `gcloud` for PROD.
         type: string
         required: true
+      workload_identity_project_number_stm:
+        description: The project number of the workload identity project to use with `gcloud` for STM.
+        type: string
+        required: true
+      workload_identity_project_number_atm:
+        description: The project number of the workload identity project to use with `gcloud` for ATM.
+        type: string
+        required: true
+      workload_identity_project_number_prod:
+        description: The project number of the workload identity project to use with `gcloud` for PROD.
+        type: string
+        required: true
       
     secrets:
       github_app_private_key:
@@ -66,12 +78,15 @@ jobs:
         include:
           - environment: STM
             workload_identity_project_id: workload_identity_project_id_stm
+            workload_identity_project_number: workload_identity_project_number_stm
             storage_bucket: ${{ inputs.storage_bucket_stm }}
           - environment: ATM
             workload_identity_project_id: workload_identity_project_id_atm
+            workload_identity_project_number: workload_identity_project_number_atm
             storage_bucket: ${{ inputs.storage_bucket_atm }}
           - environment: PROD
             workload_identity_project_id: workload_identity_project_id_prod
+            workload_identity_project_number: workload_identity_project_number_prod
             storage_bucket: ${{ inputs.storage_bucket_prod }}
 
     steps:
@@ -81,9 +96,10 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK with Workload Identity Federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
         with:
-          workload_identity_project_id: ${{ inputs[matrix.workload_identity_project_id] }}
+          project_id: ${{ inputs[matrix.workload_identity_project_id] }}
+          project_number: ${{ inputs[matrix.workload_identity_project_number] }}
 
       - name: Get app token
         id: get_token
@@ -105,4 +121,4 @@ jobs:
           storage_bucket: ${{ matrix.storage_bucket }}
           storage_prefix: ${{ inputs.app_id }}
           release_id: ${{ inputs.release_id }}
-          terraform_vars: ${{ inputs.terraform_vars }}
+          terraform_vars: ${{ inputs.terraform_vars }}

@@ -16,7 +16,10 @@ inputs:
     required: false
     default: ${{ github.sha }}
   workload_identity_project_id:
-    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`, and use the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
+    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
+    required: true
+  workload_identity_project_number:
+    description: The project number of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_number>/locations/global/workloadIdentityPools/default/providers/github`.
     required: true
   github_token:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
@@ -48,9 +51,10 @@ runs:
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.0
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
       with:
-        workload_identity_project_id: ${{ inputs.workload_identity_project_id }}
+        project_id: ${{ inputs.workload_identity_project_id }}
+        project_number: ${{ inputs.workload_identity_project_number }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
