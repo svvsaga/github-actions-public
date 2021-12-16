@@ -51,8 +51,8 @@ runs:
       if: ${{ !(inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key) }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
       with:
-        project_id: ${{ inputs.project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}
-        project_number: ${{ inputs.project_number || steps.read-terraform-config.outputs.workload_identity_project_number }}
+        project_id: ${{ inputs.workload_identity_project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}
+        project_number: ${{ inputs.workload_identity_project_number || steps.read-terraform-config.outputs.workload_identity_project_number }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
