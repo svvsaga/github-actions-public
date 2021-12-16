@@ -23,7 +23,6 @@ runs:
       uses: google-github-actions/auth@v0
       with:
         credentials_json: ${{ inputs.service_account_key }}
-        token_format: access_token
 
     - name: Setup Google Cloud SDK
       uses: google-github-actions/setup-gcloud@master
@@ -32,6 +31,3 @@ outputs:
   credentials_file_path:
     description: The path to the credentials file used by `gcloud` to authenticate with the Workload Identity provider.
     value: ${{ steps.auth.outputs.credentials_file_path }}
-  access_token:
-    description: The access token to use with `gcloud`
-    value: ${{ steps.auth.outputs.access_token }}
