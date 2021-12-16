@@ -30,15 +30,10 @@ on:
         description: Application ID, e.g. reisetid-ingest
         type: string
         required: true
-      workload_identity_project_id:
-        description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
-        type: string
-        required: true
-      workload_identity_project_number:
-        description: The project number of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_number>/locations/global/workloadIdentityPools/default/providers/github`.
-        type: string
-        required: true
     secrets:
+      service_account_key:
+        description: SA key for service account used to deploy plan
+        required: true
       github_app_private_key:
         description: Private key for GitHub application to get app token
         required: true
@@ -56,18 +51,10 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Authenticate to Google Cloud with Terraform service account
-        id: auth
-        uses: google-github-actions/auth@v0
+      - name: Setup Google Cloud SDK with service account key
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v3.13.0
         with:
-          workload_identity_provider: projects/${{ inputs.workload_identity_project_id }}/locations/global/workloadIdentityPools/default/providers/github
-          service_account: terraform@${{ inputs.workload_identity_project_id }}.iam.gserviceaccount.com
-
-      - name: Setup Google Cloud SDK with Workload Identity Federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
-        with:
-          project_id: ${{ inputs.workload_identity_project_id }}
-          project_number: ${{ inputs.workload_identity_project_number }}
+          service_account_key: ${{ secrets.service_account_key }}
 
       - name: Get app token
         id: get_token

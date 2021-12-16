@@ -1,5 +1,7 @@
 name: Publish Terraform plan to GCS
-description: Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has been setup.
+description: |
+  Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has been setup.
+  **Uses `gsutil`, so requires authentication with service account key instead of WIF.**
 runs:
   using: 'node12'
   main: './index.js'

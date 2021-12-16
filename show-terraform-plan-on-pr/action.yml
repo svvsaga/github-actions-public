@@ -6,11 +6,15 @@ inputs:
     description: The working directory, e.g. where the Terraform files are located.
     required: true
   workload_identity_project_number:
-    description: The project number of the project where the workload identity provider exists. If not specified, it will be read from `tf-pr-action-config.json`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`.
+    description: The project number of the project where the workload identity provider exists. Either this or `service_account_key` must be set. If not specified, it will be read from `tf-pr-action-config.json`. Will be used to set workload identity provider to `projects/<workload_identity_project_id>/locations/global/workloadIdentityPools/default/providers/github`.
     required: false
     default: ""
   workload_identity_project_id:
     description: The project ID of the workload identity project to use with `gcloud`. If not specified will be read from `tf-pr-action-config.json`. Will be used to set the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
+    required: false
+    default: ""
+  service_account_key:
+    description: Terraform Service Account private key to use with `gcloud`. If not specified, will be read from 'tf-pr-action-config.json'. Either this or Workload Identity must be set.
     required: false
     default: ""
   github_token:
@@ -37,7 +41,14 @@ runs:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
+    - name: Setup Google Cloud SDK with service account key
+      if: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v3.13.0
+      with:
+        service_account_key: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
+
     - name: Setup Google Cloud SDK with Workload Identity Federation
+      if: ${{ !(inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key) }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
       with:
         project_id: ${{ inputs.project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}

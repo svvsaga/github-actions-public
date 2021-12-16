@@ -43,4 +43,8 @@ jobs:
 
 ## GCP Authentication
 
-Many of our modules depend on Google Cloud Platform. We use [Workload Identity Federation](https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions) to authenticate with GCP, because this is more secure than long-lived JSON keys. Follow the link above to set this up for your project.
+Many of our modules depend on Google Cloud Platform. We recommend using [Workload Identity Federation](https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions) to authenticate with GCP, because this is more secure than long-lived JSON keys. Follow the link above to set this up for your project.
+
+We also support using service account keys for backwards compatibility.
+
+**NOTE: `gsutil` does not yet support WIF, so for workflows that use `gsutil` directly or indirectly, authentication with service account key is necessary.**
