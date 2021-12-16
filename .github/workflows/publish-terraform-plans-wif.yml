@@ -1,0 +1,124 @@
+name: Publish Terraform plans with WIF
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Which commit, tag or branch to plan terraform from. Defaults to same as workflow is run from if empty.
+        required: false
+        type: string
+      app_root:
+        description: Path to source code project from root of Git repo
+        type: string
+        required: true
+      app_id:
+        description: Application ID, e.g. reisetid-ingest
+        type: string
+        required: true
+      terraform_vars:
+        description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'
+        type: string
+        required: false
+      release_id:
+        description: ID of GitHub release, typically output from actions/create-release
+        type: string
+        required: true
+      storage_bucket_stm:
+        description: Storage bucket for Terraform plan in STM
+        type: string
+        required: true
+      storage_bucket_atm:
+        description: Storage bucket for Terraform plan in ATM
+        type: string
+        required: true
+      storage_bucket_prod:
+        description: Storage bucket for Terraform plan in PROD
+        type: string
+        required: true
+      workload_identity_project_id_stm:
+        description: The project ID of the workload identity project to use with `gcloud` for STM.
+        type: string
+        required: true
+      workload_identity_project_id_atm:
+        description: The project ID of the workload identity project to use with `gcloud` for ATM.
+        type: string
+        required: true
+      workload_identity_project_id_prod:
+        description: The project ID of the workload identity project to use with `gcloud` for PROD.
+        type: string
+        required: true
+      workload_identity_project_number_stm:
+        description: The project number of the workload identity project to use with `gcloud` for STM.
+        type: string
+        required: true
+      workload_identity_project_number_atm:
+        description: The project number of the workload identity project to use with `gcloud` for ATM.
+        type: string
+        required: true
+      workload_identity_project_number_prod:
+        description: The project number of the workload identity project to use with `gcloud` for PROD.
+        type: string
+        required: true
+      
+    secrets:
+      github_app_private_key:
+        description: Private key for GitHub application to get app token
+        required: true
+      github_app_id:
+        description: GitHub application ID to get app token
+        required: true
+    
+jobs:
+  publish_plans:
+    name: Publish Terraform plans
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [ STM, ATM, PROD ]
+        include:
+          - environment: STM
+            workload_identity_project_id: workload_identity_project_id_stm
+            workload_identity_project_number: workload_identity_project_number_stm
+            storage_bucket: ${{ inputs.storage_bucket_stm }}
+          - environment: ATM
+            workload_identity_project_id: workload_identity_project_id_atm
+            workload_identity_project_number: workload_identity_project_number_atm
+            storage_bucket: ${{ inputs.storage_bucket_atm }}
+          - environment: PROD
+            workload_identity_project_id: workload_identity_project_id_prod
+            workload_identity_project_number: workload_identity_project_number_prod
+            storage_bucket: ${{ inputs.storage_bucket_prod }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Google Cloud SDK with Workload Identity Federation
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
+        with:
+          project_id: ${{ inputs[matrix.workload_identity_project_id] }}
+          project_number: ${{ inputs[matrix.workload_identity_project_number] }}
+
+      - name: Get app token
+        id: get_token
+        uses: tibdex/github-app-token@36464acb844fc53b9b8b2401da68844f6b05ebb0
+        with:
+          private_key: ${{ secrets.github_app_private_key }}
+          app_id: ${{ secrets.github_app_id }}
+
+      - name: Set GitHub token
+        run: |
+          git config --global url."https://x-access-token:${{ steps.get_token.outputs.token }}@github.com".insteadOf https://github.com
+          echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
+
+      - name: Publish plan for ${{ matrix.environment }}
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v3.10.0
+        with:
+          environment: ${{ matrix.environment }}
+          project_root: ${{ inputs.app_root }}
+          storage_bucket: ${{ matrix.storage_bucket }}
+          storage_prefix: ${{ inputs.app_id }}
+          release_id: ${{ inputs.release_id }}
+          terraform_vars: ${{ inputs.terraform_vars }}
