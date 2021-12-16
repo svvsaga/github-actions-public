@@ -52,7 +52,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.4
         with:
           service_account_key: ${{ secrets.service_account_key }}
 
