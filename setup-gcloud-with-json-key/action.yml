@@ -1,7 +1,7 @@
 name: Setup GCloud with JSON secret
 description: Setup GCloud SDK with service account JSON secret key. Code must be checked out first, to set Google application credentials.
 
-secrets:
+inputs:
   service_account_key:
     description: The service account JSON secret key to use with `gcloud`.
     required: true
