@@ -1,3 +1,4 @@
+# Deprecated: Use `publish-terraform-plan-as-artifact` instead.
 name: Create Terraform plan
 description: Create Terraform plan
 
