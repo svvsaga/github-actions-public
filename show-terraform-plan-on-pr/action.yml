@@ -117,7 +117,7 @@ runs:
       working-directory: ${{ inputs.terraform_dir }}
       id: fmt
       shell: bash
-      run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
+      run: terraform fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform plan
       working-directory: ${{ inputs.terraform_dir }}
