@@ -42,7 +42,7 @@ runs:
         token_format: access_token
 
     - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
 
 outputs:
   credentials_file_path:
