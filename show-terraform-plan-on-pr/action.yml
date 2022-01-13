@@ -36,20 +36,20 @@ runs:
 
     - name: Read Terraform config
       id: read-terraform-config
-      uses: svvsaga/github-actions-public/read-terraform-config@v3.11.0
+      uses: svvsaga/github-actions-public/read-terraform-config@v4.0.6
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Setup Google Cloud SDK with service account key
       if: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.4
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.6
       with:
         service_account_key: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
       if: ${{ !(inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key) }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v4.0.6
       with:
         project_id: ${{ inputs.workload_identity_project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}
         project_number: ${{ inputs.workload_identity_project_number || steps.read-terraform-config.outputs.workload_identity_project_number }}

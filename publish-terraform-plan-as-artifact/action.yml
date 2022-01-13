@@ -55,13 +55,13 @@ runs:
 
     - name: Setup Google Cloud SDK with service account key
       if: ${{ inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.13.0
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v4.0.6
       with:
         service_account_key: ${{ inputs.service_account_key }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
       if: ${{ !inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v3.12.2
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v4.0.6
       with:
         project_id: ${{ inputs.workload_identity_project_id }}
         project_number: ${{ inputs.workload_identity_project_number }}
