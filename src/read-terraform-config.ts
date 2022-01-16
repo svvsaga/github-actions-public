@@ -19,70 +19,138 @@ export function readTerragruntDependencies(terragruntConfig: string): string[] {
     .map(([, path]) => path)
 }
 
+export type ReadTerraformConfigOptions = {
+  terraformRoot: string
+  secrets: Record<string, string>
+}
+
+export type TerraformConfig = {
+  tfVersion: string
+  tgVersion: string
+  tgDependencies: string[]
+  saSecret?: string
+  saSecretKey?: string
+  environment: string
+  tfVars: Record<string, string>
+  workloadIdentityProjectId?: string
+  workloadIdentityProjectNumber?: string
+  isTerragruntModule: boolean
+}
+
+export async function readTerraformConfig({
+  terraformRoot,
+  secrets,
+}: ReadTerraformConfigOptions): Promise<TerraformConfig> {
+  const tfVersion = await readFileUp(terraformRoot, '.terraform-version')
+  const tgVersion = await readFileUp(terraformRoot, '.terragrunt-version')
+
+  let tgDependencies: string[] = []
+  let workloadIdentityProjectId: string | undefined = undefined
+  let workloadIdentityProjectNumber: string | undefined = undefined
+  let saSecret: string | undefined = undefined
+  let saSecretKey: string | undefined = undefined
+  let environment = 'SHARED'
+  let tfVars: Record<string, string> = {}
+  let isTerragruntModule = false
+
+  if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
+    isTerragruntModule = true
+    const terragruntConfig = fs.readFileSync(
+      `${terraformRoot}/terragrunt.hcl`,
+      'utf8'
+    )
+    tgDependencies = readTerragruntDependencies(terragruntConfig)
+  }
+  const configPath = `${terraformRoot}/tf-pr-action.config.json`
+  if (fs.existsSync(configPath)) {
+    const file = fs.readFileSync(configPath, 'utf-8')
+    const config = JSON.parse(file) as ActionConfig
+    if (config.workloadIdentityProjectId) {
+      workloadIdentityProjectId = config.workloadIdentityProjectId
+    }
+    if (config.workloadIdentityProjectNumber) {
+      workloadIdentityProjectNumber = config.workloadIdentityProjectNumber
+    }
+    if (config.serviceAccountSecret) {
+      saSecret = config.serviceAccountSecret
+      saSecretKey = secrets[config.serviceAccountSecret]
+    }
+    if (config.environment) {
+      environment = config.environment
+    }
+    if (config.tfVarToSecretMap) {
+      const transformedMap = mapValues(
+        config.tfVarToSecretMap,
+        (secret) => secrets[secret]
+      )
+      tfVars = transformedMap
+    }
+  } else {
+    core.info(
+      'No ts-pr-action.config.json found. If this module needs to run as a specific SA, add a ts-pr-action.config.json.'
+    )
+  }
+
+  return {
+    tfVersion,
+    tgVersion,
+    tgDependencies,
+    saSecret,
+    saSecretKey,
+    environment,
+    tfVars,
+    workloadIdentityProjectId,
+    workloadIdentityProjectNumber,
+    isTerragruntModule,
+  }
+}
+
 async function run(): Promise<void> {
   try {
     const terraformRoot = core.getInput('cwd')
-
-    const tfVersion = await readFileUp(terraformRoot, '.terraform-version')
-    core.setOutput('tf_version', tfVersion)
-
-    const tgVersion = await readFileUp(terraformRoot, '.terragrunt-version')
-    core.setOutput('tg_version', tgVersion)
 
     const secrets = JSON.parse(core.getInput('secrets_json') || '{}') as Record<
       string,
       string
     >
 
-    if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
-      const terragruntConfig = fs.readFileSync(
-        `${terraformRoot}/terragrunt.hcl`,
-        'utf8'
-      )
-      const dependencies = readTerragruntDependencies(terragruntConfig)
-      core.setOutput('tg_dependencies', dependencies)
-    } else {
-      core.setOutput('tg_dependencies', [])
-    }
-    const configPath = `${terraformRoot}/tf-pr-action.config.json`
-    if (fs.existsSync(configPath)) {
-      const file = fs.readFileSync(configPath, 'utf-8')
-      const config = JSON.parse(file) as ActionConfig
-      if (config.workloadIdentityProjectId) {
-        core.setOutput(
-          'workload_identity_project_id',
-          config.workloadIdentityProjectId
-        )
-        core.info(`workload_identity_project_id set`)
-      }
-      if (config.workloadIdentityProjectNumber) {
-        core.setOutput(
-          'workload_identity_project_number',
-          config.workloadIdentityProjectNumber
-        )
-        core.info(`workload_identity_project_number set`)
-      }
-      if (config.serviceAccountSecret) {
-        core.setOutput('sa_secret', config.serviceAccountSecret)
-        core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret])
-        core.info('sa_secret set')
-      }
-      if (config.environment) {
-        core.setOutput('environment', config.environment)
-        core.info('environment set')
-      }
-      if (config.tfVarToSecretMap) {
-        const transformedMap = mapValues(
-          config.tfVarToSecretMap,
-          (secret) => secrets[secret]
-        )
-        core.info(`transformed map: ${JSON.stringify(transformedMap)}`)
+    const {
+      tfVars,
+      tfVersion,
+      tgDependencies,
+      tgVersion,
+      environment,
+      saSecret,
+      saSecretKey,
+      workloadIdentityProjectId,
+      workloadIdentityProjectNumber,
+    } = await readTerraformConfig({
+      terraformRoot,
+      secrets,
+    })
 
-        core.setOutput('tf_vars', JSON.stringify(transformedMap))
-      }
-    } else {
-      core.info(
-        'No ts-pr-action.config.json found. If this module needs to run as a specific SA, add a ts-pr-action.config.json.'
+    core.setOutput('tf_version', tfVersion)
+    core.setOutput('tg_version', tgVersion)
+    if (Object.keys(tfVars).length > 0) {
+      core.setOutput('tf_vars', JSON.stringify(tfVars))
+    }
+    core.setOutput('tg_dependencies', tgDependencies)
+    if (environment) {
+      core.setOutput('environment', environment)
+    }
+    if (saSecret) {
+      core.setOutput('sa_secret', saSecret)
+    }
+    if (saSecretKey) {
+      core.setOutput('sa_secret_key', saSecretKey)
+    }
+    if (workloadIdentityProjectId) {
+      core.setOutput('workload_identity_project_id', workloadIdentityProjectId)
+    }
+    if (workloadIdentityProjectNumber) {
+      core.setOutput(
+        'workload_identity_project_number',
+        workloadIdentityProjectNumber
       )
     }
   } catch (error: any) {

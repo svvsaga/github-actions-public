@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.readTerragruntDependencies = void 0;
+exports.readTerraformConfig = exports.readTerragruntDependencies = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const mapValues_1 = __importDefault(__nccwpck_require__(668));
@@ -51,52 +51,92 @@ function readTerragruntDependencies(terragruntConfig) {
         .map(([, path]) => path);
 }
 exports.readTerragruntDependencies = readTerragruntDependencies;
+function readTerraformConfig({ terraformRoot, secrets, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tfVersion = yield (0, path_1.readFileUp)(terraformRoot, '.terraform-version');
+        const tgVersion = yield (0, path_1.readFileUp)(terraformRoot, '.terragrunt-version');
+        let tgDependencies = [];
+        let workloadIdentityProjectId = undefined;
+        let workloadIdentityProjectNumber = undefined;
+        let saSecret = undefined;
+        let saSecretKey = undefined;
+        let environment = 'SHARED';
+        let tfVars = {};
+        let isTerragruntModule = false;
+        if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
+            isTerragruntModule = true;
+            const terragruntConfig = fs.readFileSync(`${terraformRoot}/terragrunt.hcl`, 'utf8');
+            tgDependencies = readTerragruntDependencies(terragruntConfig);
+        }
+        const configPath = `${terraformRoot}/tf-pr-action.config.json`;
+        if (fs.existsSync(configPath)) {
+            const file = fs.readFileSync(configPath, 'utf-8');
+            const config = JSON.parse(file);
+            if (config.workloadIdentityProjectId) {
+                workloadIdentityProjectId = config.workloadIdentityProjectId;
+            }
+            if (config.workloadIdentityProjectNumber) {
+                workloadIdentityProjectNumber = config.workloadIdentityProjectNumber;
+            }
+            if (config.serviceAccountSecret) {
+                saSecret = config.serviceAccountSecret;
+                saSecretKey = secrets[config.serviceAccountSecret];
+            }
+            if (config.environment) {
+                environment = config.environment;
+            }
+            if (config.tfVarToSecretMap) {
+                const transformedMap = (0, mapValues_1.default)(config.tfVarToSecretMap, (secret) => secrets[secret]);
+                tfVars = transformedMap;
+            }
+        }
+        else {
+            core.info('No ts-pr-action.config.json found. If this module needs to run as a specific SA, add a ts-pr-action.config.json.');
+        }
+        return {
+            tfVersion,
+            tgVersion,
+            tgDependencies,
+            saSecret,
+            saSecretKey,
+            environment,
+            tfVars,
+            workloadIdentityProjectId,
+            workloadIdentityProjectNumber,
+            isTerragruntModule,
+        };
+    });
+}
+exports.readTerraformConfig = readTerraformConfig;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const terraformRoot = core.getInput('cwd');
-            const tfVersion = yield (0, path_1.readFileUp)(terraformRoot, '.terraform-version');
-            core.setOutput('tf_version', tfVersion);
-            const tgVersion = yield (0, path_1.readFileUp)(terraformRoot, '.terragrunt-version');
-            core.setOutput('tg_version', tgVersion);
             const secrets = JSON.parse(core.getInput('secrets_json') || '{}');
-            if (fs.existsSync(`${terraformRoot}/terragrunt.hcl`)) {
-                const terragruntConfig = fs.readFileSync(`${terraformRoot}/terragrunt.hcl`, 'utf8');
-                const dependencies = readTerragruntDependencies(terragruntConfig);
-                core.setOutput('tg_dependencies', dependencies);
+            const { tfVars, tfVersion, tgDependencies, tgVersion, environment, saSecret, saSecretKey, workloadIdentityProjectId, workloadIdentityProjectNumber, } = yield readTerraformConfig({
+                terraformRoot,
+                secrets,
+            });
+            core.setOutput('tf_version', tfVersion);
+            core.setOutput('tg_version', tgVersion);
+            if (Object.keys(tfVars).length > 0) {
+                core.setOutput('tf_vars', JSON.stringify(tfVars));
             }
-            else {
-                core.setOutput('tg_dependencies', []);
+            core.setOutput('tg_dependencies', tgDependencies);
+            if (environment) {
+                core.setOutput('environment', environment);
             }
-            const configPath = `${terraformRoot}/tf-pr-action.config.json`;
-            if (fs.existsSync(configPath)) {
-                const file = fs.readFileSync(configPath, 'utf-8');
-                const config = JSON.parse(file);
-                if (config.workloadIdentityProjectId) {
-                    core.setOutput('workload_identity_project_id', config.workloadIdentityProjectId);
-                    core.info(`workload_identity_project_id set`);
-                }
-                if (config.workloadIdentityProjectNumber) {
-                    core.setOutput('workload_identity_project_number', config.workloadIdentityProjectNumber);
-                    core.info(`workload_identity_project_number set`);
-                }
-                if (config.serviceAccountSecret) {
-                    core.setOutput('sa_secret', config.serviceAccountSecret);
-                    core.setOutput('sa_secret_key', secrets[config.serviceAccountSecret]);
-                    core.info('sa_secret set');
-                }
-                if (config.environment) {
-                    core.setOutput('environment', config.environment);
-                    core.info('environment set');
-                }
-                if (config.tfVarToSecretMap) {
-                    const transformedMap = (0, mapValues_1.default)(config.tfVarToSecretMap, (secret) => secrets[secret]);
-                    core.info(`transformed map: ${JSON.stringify(transformedMap)}`);
-                    core.setOutput('tf_vars', JSON.stringify(transformedMap));
-                }
+            if (saSecret) {
+                core.setOutput('sa_secret', saSecret);
             }
-            else {
-                core.info('No ts-pr-action.config.json found. If this module needs to run as a specific SA, add a ts-pr-action.config.json.');
+            if (saSecretKey) {
+                core.setOutput('sa_secret_key', saSecretKey);
+            }
+            if (workloadIdentityProjectId) {
+                core.setOutput('workload_identity_project_id', workloadIdentityProjectId);
+            }
+            if (workloadIdentityProjectNumber) {
+                core.setOutput('workload_identity_project_number', workloadIdentityProjectNumber);
             }
         }
         catch (error) {

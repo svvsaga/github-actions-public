@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import { chmodSync } from 'fs'
-import { readFileUp } from '../utils/path'
 import { getPlatformAndArch } from '../utils/platform'
 
 async function fetchCachedTerragrunt(version: string): Promise<string> {
@@ -27,14 +26,7 @@ async function fetchCachedTerragrunt(version: string): Promise<string> {
   return toolPath
 }
 
-interface SetupTerragruntOptions {
-  terraformDir: string
-}
-
-async function setupTerragrunt({
-  terraformDir,
-}: SetupTerragruntOptions): Promise<void> {
-  const version = await readFileUp(terraformDir, '.terragrunt-version')
+async function setupTerragrunt(version: string): Promise<void> {
   const toolPath = await fetchCachedTerragrunt(version)
   core.addPath(toolPath)
   core.info(`${toolPath} added to path`)
