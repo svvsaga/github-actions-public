@@ -46,6 +46,11 @@ on:
         type: string
         required: false
         default: publisher
+      gradlew_path:
+        description: Relative path to the gradle wrapper. Defaults to `../gradlew`.
+        type: string
+        required: false
+        default: ../gradlew
     secrets:
       storage_bucket_sa_publisher_key:
         description: Key for service account that has permission to upload to the given GCP storage bucket

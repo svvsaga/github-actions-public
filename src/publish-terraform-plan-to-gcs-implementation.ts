@@ -2,9 +2,14 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { getTerraformDir, readFileUp } from './utils/path'
-import setupTerraform from './vendor/setup-terraform'
-import setupTerragrunt from './vendor/setup-terragrunt'
+import { readTerraformConfig } from './read-terraform-config'
+import { getTerraformDir } from './utils/path'
+import {
+  getGitSha,
+  getInitArgs,
+  getVarFileArg,
+  initTerragruntDependencies,
+} from './utils/terragrunt'
 import uploadReleaseAsset from './vendor/upload-release-asset'
 
 interface PublishTerraformPlanOptions {
@@ -53,57 +58,26 @@ export async function publishTerraformPlan({
 
   execOptions.env.TF_INPUT = 'false'
 
-  let gitSha: string | null = null
-  await exec('git', ['log', '--format=%h', '-1', terraformDir], {
-    ...execOptions,
-    listeners: {
-      stdout: (buffer) => (gitSha = buffer.toString().trim()),
-    },
-  })
-  if (!gitSha)
-    throw new Error(`failed to get git SHA of folder ${terraformDir}`)
+  const gitSha = await getGitSha(execOptions, terraformDir)
   const planFilename = `plan_${environment}_${gitSha}.plan`
   const planFilepath = resolve(process.env.GITHUB_WORKSPACE || '', planFilename)
   const storagePath = storagePrefix
     ? `${storageBucket}/${storagePrefix}`
     : storageBucket
 
-  core.info('Setup Terraform')
-  await setupTerraform(await readFileUp(terraformDir, '.terraform-version'))
+  const config = await readTerraformConfig({
+    terraformRoot: terraformDir,
+    secrets: {},
+  })
 
-  let command = 'terraform'
+  await initTerragruntDependencies(terraformDir, config)
 
-  if (existsSync(resolve(terraformDir, 'terragrunt.hcl'))) {
-    core.info('Setup Terragrunt and alias terraform')
-    await setupTerragrunt({ terraformDir })
-    command = 'terragrunt'
-    // Must init all modules in case of dependencies
-    await exec(
-      command,
-      [
-        'run-all',
-        'init',
-        `-backend-config=environments/${environment}-backend-config.hcl`,
-        `-reconfigure`,
-      ],
-      {
-        ...execOptions,
-        cwd: process.env.GITHUB_WORKSPACE,
-        ignoreReturnCode: true,
-      }
-    )
-  } else {
-    core.info('Terraform init')
-    await exec(
-      command,
-      [
-        'init',
-        `-backend-config=environments/${environment}-backend-config.hcl`,
-        `-reconfigure`,
-      ],
-      execOptions
-    )
-  }
+  const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
+
+  const args = getInitArgs({ environment, terraformDir })
+
+  core.info('Terraform init')
+  await exec(command, args, execOptions)
 
   core.info('Terraform validate')
   await exec(command, ['validate', '-no-color'], execOptions)
@@ -114,8 +88,9 @@ export async function publishTerraformPlan({
   }
 
   core.info('Terraform plan')
+  const varFileArg = getVarFileArg({ environment, terraformDir })
   await exec(
-    `/bin/bash -c "${command} plan -no-color -input=false -out=${planFilepath} -var-file=environments/${environment}.tfvars`,
+    `/bin/bash -c "${command} plan -no-color -input=false -out=${planFilepath} ${varFileArg}"`,
     undefined,
     execOptions
   )
@@ -130,13 +105,19 @@ export async function publishTerraformPlan({
   const projectFolder = `gs://${storagePath}/terraform-plans/${projectRoot}`
 
   core.info('Publish plan data to Google Storage')
-  await exec('gsutil', ['cp', `${planFilepath}*`, projectFolder], execOptions)
+  await exec(
+    'gcloud',
+    ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder],
+    execOptions
+  )
 
   if (terraformVars) {
     core.info('Upload Terraform variables')
     await exec(
-      'gsutil',
+      'gcloud',
       [
+        'alpha',
+        'storage',
         'cp',
         'extra.auto.tfvars',
         `${projectFolder}/${planFilename}.auto.tfvars`,
@@ -148,8 +129,10 @@ export async function publishTerraformPlan({
   if (existsSync(resolve(terraformDir, 'extra.auto.tfvars.json'))) {
     core.info('Upload Terraform JSON variables')
     await exec(
-      'gsutil',
+      'gcloud',
       [
+        'alpha',
+        'storage',
         'cp',
         'extra.auto.tfvars.json',
         `${projectFolder}/${planFilename}.auto.tfvars.json`,

@@ -1,12 +1,17 @@
 import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import * as github from '@actions/github'
-import { existsSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import last from 'lodash/last'
 import { resolve } from 'path'
-import { getTerraformDir, readFileUp } from './utils/path'
-import setupTerraform from './vendor/setup-terraform'
-import setupTerragrunt from './vendor/setup-terragrunt'
+import { readTerraformConfig } from './read-terraform-config'
+import { getTerraformDir } from './utils/path'
+import {
+  getGitSha,
+  getInitArgs,
+  getVarFileArg,
+  initTerragruntDependencies,
+} from './utils/terragrunt'
 
 interface DeployTerraformPlanOptions {
   projectRoot: string
@@ -78,24 +83,9 @@ export async function deployTerraformPlan({
 
   execOptions.env.TF_INPUT = 'false'
 
-  let gitSha: string | null = null
-  await exec('git', ['log', '--format=%h', '-1', terraformDir], {
-    ...execOptions,
-    listeners: {
-      stdout: (buffer) => (gitSha = buffer.toString().trim()),
-    },
-  })
-  if (!gitSha)
-    throw new Error(`failed to get git SHA of folder ${terraformDir}`)
+  const gitSha = await getGitSha(execOptions, terraformDir)
 
-  let rootSha: string | null = null
-  await exec('git', ['log', '--format=%h', '-1'], {
-    ...execOptions,
-    listeners: {
-      stdout: (buffer) => (rootSha = buffer.toString().trim()),
-    },
-  })
-  if (!rootSha) throw new Error(`failed to get git SHA of root`)
+  const rootSha = await getGitSha(execOptions)
 
   core.info(`Create deployment for ref ${rootSha}`)
   const octokit = github.getOctokit(githubToken, {
@@ -143,42 +133,18 @@ export async function deployTerraformPlan({
   let success = false
 
   try {
-    core.info('Setup Terraform')
-    await setupTerraform(await readFileUp(terraformDir, '.terraform-version'))
+    const config = await readTerraformConfig({
+      terraformRoot: terraformDir,
+      secrets: {},
+    })
 
-    let command = 'terraform'
+    await initTerragruntDependencies(terraformDir, config)
 
-    if (existsSync(resolve(terraformDir, 'terragrunt.hcl'))) {
-      core.info('Setup Terragrunt and alias terraform')
-      await setupTerragrunt({ terraformDir })
-      command = 'terragrunt'
-      // Must init all modules in case of dependencies
-      await exec(
-        command,
-        [
-          'run-all',
-          'init',
-          `-backend-config=environments/${environment}-backend-config.hcl`,
-          `-reconfigure`,
-        ],
-        {
-          ...execOptions,
-          cwd: process.env.GITHUB_WORKSPACE,
-          ignoreReturnCode: true,
-        }
-      )
-    } else {
-      core.info('Terraform init')
-      await exec(
-        command,
-        [
-          'init',
-          `-backend-config=environments/${environment}-backend-config.hcl`,
-          `-reconfigure`,
-        ],
-        execOptions
-      )
-    }
+    const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
+    const args = getInitArgs({ environment, terraformDir })
+
+    core.info('Terraform init')
+    await exec(command, args, execOptions)
 
     core.info('Terraform validate')
     await exec(command, ['validate', '-no-color'], execOptions)
@@ -190,15 +156,18 @@ export async function deployTerraformPlan({
       : storageBucket
 
     core.info('Download plan data from Google Storage')
-    await exec('gsutil', [
+    await exec('gcloud', [
+      'alpha',
+      'storage',
       'cp',
       `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
       terraformDir,
     ])
 
     core.info('Terraform plan')
+    const varFileArg = getVarFileArg({ environment, terraformDir })
     await exec(
-      `/bin/bash -c "${command} plan -no-color -input=false -out=${planFilepath}.new -var-file=environments/${environment}.tfvars`,
+      `/bin/bash -c "${command} plan -no-color -input=false -out=${planFilepath}.new ${varFileArg}`,
       undefined,
       execOptions
     )
