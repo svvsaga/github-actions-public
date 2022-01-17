@@ -51,6 +51,11 @@ on:
         type: string
         required: false
         default: ../gradlew
+      publish_glob:
+        description: Glob pattern to match artifacts to publish. Defaults to `*.zip`.
+        type: string
+        required: false
+        default: "*.zip"
     secrets:
       storage_bucket_sa_publisher_key:
         description: Key for service account that has permission to upload to the given GCP storage bucket
@@ -108,5 +113,5 @@ jobs:
         with:
           path: ${{ inputs.saga_app_root }}
           destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.saga_app_root }}
-          glob: "*.zip"
+          glob: ${{ inputs.publish_glob }}
           parent: false
