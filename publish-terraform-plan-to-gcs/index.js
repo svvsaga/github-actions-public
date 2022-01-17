@@ -104,7 +104,7 @@ function publishTerraformPlan({ projectRoot, environment, terraformVars, storage
         yield (0, exec_1.exec)(`/bin/bash -c "${command} show -no-color ${planFilepath} > ${planFilepath}.txt"`, undefined, execOptions);
         const projectFolder = `gs://${storagePath}/terraform-plans/${projectRoot}`;
         core.info('Publish plan data to Google Storage');
-        yield (0, exec_1.exec)('gcloud', ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder], execOptions);
+        yield (0, exec_1.exec)('gcloud', ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder, '--quiet'], execOptions);
         if (terraformVars) {
             core.info('Upload Terraform variables');
             yield (0, exec_1.exec)('gcloud', [
@@ -113,6 +113,7 @@ function publishTerraformPlan({ projectRoot, environment, terraformVars, storage
                 'cp',
                 'extra.auto.tfvars',
                 `${projectFolder}/${planFilename}.auto.tfvars`,
+                '--quiet',
             ], execOptions);
         }
         if ((0, fs_1.existsSync)((0, path_1.resolve)(terraformDir, 'extra.auto.tfvars.json'))) {
@@ -123,6 +124,7 @@ function publishTerraformPlan({ projectRoot, environment, terraformVars, storage
                 'cp',
                 'extra.auto.tfvars.json',
                 `${projectFolder}/${planFilename}.auto.tfvars.json`,
+                '--quiet',
             ], execOptions);
         }
         if (releaseId) {

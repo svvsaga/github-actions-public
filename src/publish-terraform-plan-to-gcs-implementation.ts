@@ -107,7 +107,7 @@ export async function publishTerraformPlan({
   core.info('Publish plan data to Google Storage')
   await exec(
     'gcloud',
-    ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder],
+    ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder, '--quiet'],
     execOptions
   )
 
@@ -121,6 +121,7 @@ export async function publishTerraformPlan({
         'cp',
         'extra.auto.tfvars',
         `${projectFolder}/${planFilename}.auto.tfvars`,
+        '--quiet',
       ],
       execOptions
     )
@@ -136,6 +137,7 @@ export async function publishTerraformPlan({
         'cp',
         'extra.auto.tfvars.json',
         `${projectFolder}/${planFilename}.auto.tfvars.json`,
+        '--quiet',
       ],
       execOptions
     )

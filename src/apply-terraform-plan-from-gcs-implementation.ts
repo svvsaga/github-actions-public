@@ -162,6 +162,7 @@ export async function deployTerraformPlan({
       'cp',
       `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
       terraformDir,
+      '--quiet',
     ])
 
     core.info('Terraform plan')

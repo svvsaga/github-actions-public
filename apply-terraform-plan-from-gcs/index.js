@@ -144,6 +144,7 @@ function deployTerraformPlan({ projectRoot, storageBucket, environment, githubTo
                 'cp',
                 `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
                 terraformDir,
+                '--quiet',
             ]);
             core.info('Terraform plan');
             const varFileArg = (0, terragrunt_1.getVarFileArg)({ environment, terraformDir });
