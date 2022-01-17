@@ -57,6 +57,7 @@ export async function publishTerraformPlan({
   }
 
   execOptions.env.TF_INPUT = 'false'
+  execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
 
   const gitSha = await getGitSha(execOptions, terraformDir)
   const planFilename = `plan_${environment}_${gitSha}.plan`
@@ -107,7 +108,7 @@ export async function publishTerraformPlan({
   core.info('Publish plan data to Google Storage')
   await exec(
     'gcloud',
-    ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder, '--quiet'],
+    ['alpha', 'storage', 'cp', `${planFilepath}*`, projectFolder],
     execOptions
   )
 
@@ -121,7 +122,6 @@ export async function publishTerraformPlan({
         'cp',
         'extra.auto.tfvars',
         `${projectFolder}/${planFilename}.auto.tfvars`,
-        '--quiet',
       ],
       execOptions
     )
@@ -137,7 +137,6 @@ export async function publishTerraformPlan({
         'cp',
         'extra.auto.tfvars.json',
         `${projectFolder}/${planFilename}.auto.tfvars.json`,
-        '--quiet',
       ],
       execOptions
     )

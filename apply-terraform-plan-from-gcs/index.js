@@ -88,6 +88,7 @@ function deployTerraformPlan({ projectRoot, storageBucket, environment, githubTo
             env: process.env,
         };
         execOptions.env.TF_INPUT = 'false';
+        execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1';
         const gitSha = yield (0, terragrunt_1.getGitSha)(execOptions, terraformDir);
         const rootSha = yield (0, terragrunt_1.getGitSha)(execOptions);
         core.info(`Create deployment for ref ${rootSha}`);
@@ -144,7 +145,6 @@ function deployTerraformPlan({ projectRoot, storageBucket, environment, githubTo
                 'cp',
                 `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
                 terraformDir,
-                '--quiet',
             ]);
             core.info('Terraform plan');
             const varFileArg = (0, terragrunt_1.getVarFileArg)({ environment, terraformDir });

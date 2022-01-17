@@ -82,6 +82,7 @@ export async function deployTerraformPlan({
   }
 
   execOptions.env.TF_INPUT = 'false'
+  execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
 
   const gitSha = await getGitSha(execOptions, terraformDir)
 
@@ -162,7 +163,6 @@ export async function deployTerraformPlan({
       'cp',
       `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
       terraformDir,
-      '--quiet',
     ])
 
     core.info('Terraform plan')
