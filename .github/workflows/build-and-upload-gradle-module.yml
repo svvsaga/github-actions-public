@@ -115,3 +115,4 @@ jobs:
           destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.saga_app_root }}
           glob: ${{ inputs.publish_glob }}
           parent: false
+          gzip: false
