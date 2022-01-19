@@ -14,6 +14,7 @@
     "package:install-tfmask": "ncc build lib/install-tfmask.js -o install-tfmask",
     "package:post-issue-to-card": "ncc build lib/post-issue-to-card.js -o post-issue-to-card",
     "package:read-terraform-config": "ncc build lib/read-terraform-config.js -o read-terraform-config",
+    "package:read-integration-testing-config": "ncc build lib/read-integration-testing-config.js -o read-integration-testing-config",
     "package:apply-terraform-plan-from-gcs": "ncc build lib/apply-terraform-plan-from-gcs.js -o apply-terraform-plan-from-gcs",
     "package:publish-terraform-plan-to-gcs": "ncc build lib/publish-terraform-plan-to-gcs.js -o publish-terraform-plan-to-gcs",
     "package": "run-p package:*",
