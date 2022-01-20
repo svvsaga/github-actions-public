@@ -43,6 +43,7 @@ function readIntTestingConfig(projectDir, configFileName) {
         let workloadIdentityProjectId = undefined;
         let workloadIdentityProjectNumber = undefined;
         let environment = 'SHARED';
+        let serviceAccount = 'project-service-account';
         const configPath = `${projectDir}/${configFileName}`;
         if (fs.existsSync(configPath)) {
             const file = fs.readFileSync(configPath, 'utf-8');
@@ -56,10 +57,14 @@ function readIntTestingConfig(projectDir, configFileName) {
             if (config.environment) {
                 environment = config.environment;
             }
+            if (config.serviceAccount) {
+                serviceAccount = config.serviceAccount;
+            }
             return {
                 environment,
                 workloadIdentityProjectId,
                 workloadIdentityProjectNumber,
+                serviceAccount,
             };
         }
         else {
@@ -78,7 +83,7 @@ function run() {
                 core.setFailed('No integration testing config file found');
             }
             else {
-                const { environment, workloadIdentityProjectId, workloadIdentityProjectNumber, } = res;
+                const { environment, workloadIdentityProjectId, workloadIdentityProjectNumber, serviceAccount, } = res;
                 if (environment) {
                     core.setOutput('environment', environment);
                 }
@@ -88,6 +93,7 @@ function run() {
                 if (workloadIdentityProjectNumber) {
                     core.setOutput('workload_identity_project_number', workloadIdentityProjectNumber);
                 }
+                core.setOutput('service_account', serviceAccount);
             }
         }
         catch (error) {

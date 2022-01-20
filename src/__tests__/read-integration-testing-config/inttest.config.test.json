@@ -1,5 +1,6 @@
 {
   "workloadIdentityProjectId": "testproject",
   "workloadIdentityProjectNumber": "1234",
-  "environment": "STM"
+  "environment": "STM",
+  "serviceAccount": "some-service-account"
 }

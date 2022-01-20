@@ -9,12 +9,14 @@ type ActionConfig = {
   workloadIdentityProjectId?: string
   workloadIdentityProjectNumber?: string
   environment?: string
+  serviceAccount?: string
 }
 
 export type IntTestingConfig = {
   environment: string
   workloadIdentityProjectId?: string
   workloadIdentityProjectNumber?: string
+  serviceAccount: string
 }
 
 export async function readIntTestingConfig(
@@ -24,6 +26,7 @@ export async function readIntTestingConfig(
   let workloadIdentityProjectId: string | undefined = undefined
   let workloadIdentityProjectNumber: string | undefined = undefined
   let environment = 'SHARED'
+  let serviceAccount: string = 'project-service-account'
 
   const configPath = `${projectDir}/${configFileName}`
   if (fs.existsSync(configPath)) {
@@ -38,11 +41,16 @@ export async function readIntTestingConfig(
     if (config.environment) {
       environment = config.environment
     }
+    if (config.serviceAccount) {
+      serviceAccount = config.serviceAccount
+    }
+
     return {
       environment,
       workloadIdentityProjectId,
       workloadIdentityProjectNumber,
-    }
+      serviceAccount,
+    } as IntTestingConfig
   } else {
     core.info(`No ${configFileName} found. Unable to run integration tests.`)
     return null
@@ -61,6 +69,7 @@ async function run(): Promise<void> {
         environment,
         workloadIdentityProjectId,
         workloadIdentityProjectNumber,
+        serviceAccount,
       } = res
 
       if (environment) {
@@ -80,6 +89,8 @@ async function run(): Promise<void> {
           workloadIdentityProjectNumber
         )
       }
+
+      core.setOutput('service_account', serviceAccount)
     }
   } catch (error: any) {
     core.setFailed(error)
