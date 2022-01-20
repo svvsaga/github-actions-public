@@ -20,6 +20,7 @@ describe('readIntTestingConfig', () => {
       environment: 'SHARED',
       workloadIdentityProjectId: undefined,
       workloadIdentityProjectNumber: undefined,
+      serviceAccount: 'project-service-account',
     } as IntTestingConfig)
   })
 
@@ -32,6 +33,7 @@ describe('readIntTestingConfig', () => {
       environment: 'STM',
       workloadIdentityProjectId: 'testproject',
       workloadIdentityProjectNumber: '1234',
-    })
+      serviceAccount: 'some-service-account',
+    } as IntTestingConfig)
   })
 })
