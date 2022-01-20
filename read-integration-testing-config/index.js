@@ -56,16 +56,16 @@ function readIntTestingConfig(projectDir, configFileName) {
             if (config.environment) {
                 environment = config.environment;
             }
+            return {
+                environment,
+                workloadIdentityProjectId,
+                workloadIdentityProjectNumber,
+            };
         }
         else {
             core.info(`No ${configFileName} found. Unable to run integration tests.`);
             return null;
         }
-        return {
-            environment,
-            workloadIdentityProjectId,
-            workloadIdentityProjectNumber,
-        };
     });
 }
 exports.readIntTestingConfig = readIntTestingConfig;
