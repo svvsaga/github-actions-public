@@ -14,10 +14,6 @@ on:
         description: Application ID, e.g. reisetid-ingest
         type: string
         required: true
-      terraform_vars:
-        description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'
-        type: string
-        required: false
       release_id:
         description: ID of GitHub release, typically output from actions/create-release
         type: string
@@ -51,6 +47,9 @@ on:
       service_account_key_prod:
         description: Service account key to use with `gcloud` for PROD
         required: true
+      terraform_vars:
+        description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'
+        required: false
     
 jobs:
   publish_plans:
@@ -102,4 +101,4 @@ jobs:
           storage_bucket: ${{ matrix.storage_bucket }}
           storage_prefix: ${{ inputs.app_id }}
           release_id: ${{ inputs.release_id }}
-          terraform_vars: ${{ inputs.terraform_vars }}
+          terraform_vars: ${{ secrets.terraform_vars }}
