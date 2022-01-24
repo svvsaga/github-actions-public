@@ -10,10 +10,6 @@ on:
         description: Path to source code project from root of Git repo
         type: string
         required: true
-      app_id:
-        description: Application ID, e.g. reisetid-ingest
-        type: string
-        required: true
       release_id:
         description: ID of GitHub release, typically output from actions/create-release
         type: string
@@ -99,6 +95,5 @@ jobs:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
           storage_bucket: ${{ matrix.storage_bucket }}
-          storage_prefix: ${{ inputs.app_id }}
           release_id: ${{ inputs.release_id }}
           terraform_vars: ${{ secrets.terraform_vars }}
