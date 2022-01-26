@@ -13,6 +13,11 @@ on:
         type: string
         required: false
         default: ""
+      build_and_inttest_cmd:
+        description: Command to run for each module
+        type: string
+        required: false
+        default: "./gradlew inttest"
 
     secrets:
       slack_webhook_url:
@@ -86,7 +91,7 @@ jobs:
       - name: Gradle build and integration test
         id: build-and-inttest
         continue-on-error: true
-        run: ./gradlew inttest
+        run: ${{ inputs.build_and_inttest_cmd }}
 
       - name: Send integration test errors to Slack channel
         uses: slackapi/slack-github-action@v1.17.0
