@@ -1,4 +1,4 @@
-import findUp from 'find-up'
+import { findUp } from 'find-up'
 import { readFileSync } from 'fs'
 import orderBy from 'lodash-es/orderBy'
 import { resolve } from 'path'

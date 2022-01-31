@@ -2,7 +2,7 @@ module.exports = {
   plugins: ['jest', '@typescript-eslint', 'prettier'],
   extends: ['plugin:github/recommended', 'plugin:prettier/recommended'],
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ['jest.config.cjs', '.eslintrc.cjs'],
+  ignorePatterns: ['*.cjs', '*.cts', '*.config.ts'],
   parserOptions: {
     ecmaVersion: 9,
     sourceType: 'module',
