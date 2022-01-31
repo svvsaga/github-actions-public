@@ -1,0 +1,35 @@
+name: Replace Terraform variables with secrets
+
+inputs:
+  secrets_json:
+    description: JSON string containing secrets to use for Terraform.
+    required: true
+  terraform_dir:
+    description: The working directory, e.g. where the Terraform files are located.
+    required: true
+  secrets_file:
+    description: The path to the Terraform tvars secrets file.
+    required: true
+    default: secrets.auto.tfvars
+
+runs:
+  using: composite
+  steps:
+    - name: Replace Terraform variables with secrets
+      working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
+      run: |
+        test -z ${{ inputs.secrets_file }} && echo 'No secrets file found' && exit 0
+        echo '${{ inputs.secrets_json }}' > secrets.json
+        declare -A secrets
+        while IFS="=" read -r key value
+        do
+            secrets[$key]="$value"
+        done < <(jq -r 'to_entries|map("(.key)=(.value)")|.[]' secrets.json)
+        grep -Po '\$\w+' | cut -c 2- | while read var; do
+          if [[ -n secrets[$var] ]]; then
+            echo "Replace $var with secrets[$var]"
+            sed -i "s/\$var/secrets[$var]/g" ${{ inputs.secrets_file }}
+          fi
+        done
+        rm secrets.json
