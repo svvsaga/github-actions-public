@@ -14,8 +14,10 @@ inputs:
     default: terragrunt.hcl
   ignore_modules:
     description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
+    required: false
   ignore_modules_regex:
     description: Regex of modules to ignore, e.g. 'utils/.*'.
+    required: false
   cwd:
     description: Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root.
     required: true
