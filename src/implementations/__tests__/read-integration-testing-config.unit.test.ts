@@ -4,7 +4,9 @@ import {
 } from '~/read-integration-testing-config'
 
 describe('readIntTestingConfig', () => {
-  const testDir = 'src/__tests__/read-integration-testing-config'
+  const testDir = new URL('read-integration-testing-config', import.meta.url)
+    .pathname
+  console.log(testDir)
 
   it('should return null if no config file found', async () => {
     const result = await readIntTestingConfig('.', 'non-existing-file.json')

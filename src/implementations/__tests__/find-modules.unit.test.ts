@@ -1,8 +1,9 @@
+import { resolve } from 'path'
 import { findAffectedModules, findModules } from '../../utils/modules'
 
 describe('find-terraform-changes', () => {
   describe('findModules', () => {
-    const findModuleTestDir = 'src/__tests__/find-modules'
+    const findModuleTestDir = new URL('find-modules', import.meta.url).pathname
     it('finds all modules in repo', async () => {
       const expectedModules = ['.', './module', './module/submodule']
 
@@ -34,7 +35,7 @@ describe('find-terraform-changes', () => {
     it('includes only subfolders of cwd', async () => {
       expect(
         await findModules('marker.txt', {
-          cwd: 'src/__tests__/find-modules/module',
+          cwd: resolve(findModuleTestDir, 'module'),
         })
       ).toEqual(['.', './submodule'])
     })
