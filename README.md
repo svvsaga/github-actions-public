@@ -16,13 +16,9 @@ A new version will automatically be published when a push or PR merge is done wi
 ## Add new actions
 
 - Make a file in `src`, e.g. `src/my-action.ts`
-- Add an npm script similar to `"package:my-action": "ncc build lib/my-action.js --source-map -o my-action"`
+- Add optional implementation details or utils in their respective subfolders
 - Make a folder `my-action`
-- Add a `action.yml` file
-
-### Tree shaking
-
-**NOTE: No tree shaking is applied, so import e.g. `lodash-es`-modules directly: `import uniq from 'lodash-es/uniq'` rather than `import { uniq } from 'lodash-es`.**
+- Add a `action.yml` file to that folder
 
 ## Use actions
 
