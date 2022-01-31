@@ -83,6 +83,7 @@ export async function deployTerraformPlan({
 
   execOptions.env.TF_INPUT = 'false'
   execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
+  execOptions.env.TF_VAR_ENV = environment
 
   const gitSha = await getGitSha(execOptions, terraformDir)
 

@@ -79,6 +79,7 @@ runs:
           const cwd = process.env.CWD;
           const env = process.env;
           env.TF_INPUT = 'false'
+          env.TF_VAR_ENV = environment
           if (dependencies && dependencies.length > 0) {
             const args = [
               'init',
@@ -105,6 +106,7 @@ runs:
       shell: bash
       env:
         ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
         TF_INPUT: 'false'
       run: |
         if [ -n "$ENVIRONMENT" ]; then
@@ -117,6 +119,8 @@ runs:
       working-directory: ${{ inputs.terraform_dir }}
       id: fmt
       shell: bash
+      env:
+        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
       run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform plan
@@ -125,6 +129,7 @@ runs:
       shell: bash
       env:
         ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
         TF_VARS: ${{ steps.read-terraform-config.outputs.tf_vars }}
         TF_INPUT: 'false'
       run: |
