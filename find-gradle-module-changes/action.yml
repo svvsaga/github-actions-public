@@ -1,8 +1,8 @@
 name: Find Gradle module changes
 description: Find changes in Gradle root modules, defined as a folder with `gradlew` present.
 runs:
-  using: 'node12'
-  main: './index.js'
+  using: node16
+  main: ./index.js
 inputs:
   token:
     description: GitHub token. Defaults to `github.token`.

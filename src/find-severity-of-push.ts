@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { findSeverityOfPush } from './find-severity-of-push-implementation'
+import { findSeverityOfPush } from './implementations/find-severity-of-push'
 
 async function run(): Promise<void> {
   try {

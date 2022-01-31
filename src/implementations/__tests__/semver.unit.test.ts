@@ -1,4 +1,4 @@
-import { getLatestTag, getNextVersionTag } from '../utils/semver'
+import { getLatestTag, getNextVersionTag } from '../../utils/semver'
 
 describe('getNextVersionTag', () => {
   describe('when given a version tag', () => {

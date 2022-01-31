@@ -26,7 +26,7 @@ export async function readIntTestingConfig(
   let workloadIdentityProjectId: string | undefined = undefined
   let workloadIdentityProjectNumber: string | undefined = undefined
   let environment = 'SHARED'
-  let serviceAccount: string = 'project-service-account'
+  let serviceAccount = 'project-service-account'
 
   const configPath = `${projectDir}/${configFileName}`
   if (fs.existsSync(configPath)) {

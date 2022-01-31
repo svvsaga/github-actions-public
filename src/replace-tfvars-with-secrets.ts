@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
-import { bumpSemverTag } from './implementations/bump-semver-tag'
+import replaceTfvarsWithSecrets from './implementations/replace-tfvars-with-secrets'
 
 async function run(): Promise<void> {
   try {
-    await bumpSemverTag()
+    await replaceTfvarsWithSecrets()
   } catch (error) {
     core.setFailed(error as Error)
   }

@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import { createMatrixForAffectedModules } from './utils/matrix'
-import { getIgnoreModules } from './utils/modules'
+import { createMatrixForAffectedModules } from '../utils/matrix'
+import { getIgnoreModules } from '../utils/modules'
 
 export async function findTerraformChanges(): Promise<void> {
   const marker = core.getInput('marker')

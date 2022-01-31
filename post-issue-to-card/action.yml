@@ -1,8 +1,8 @@
 name: Post PR to card
 description: Uses a http POST to add PR to Kanbanize Card
 runs:
-  using: 'node12'
-  main: './index.js'
+  using: node16
+  main: ./index.js
 inputs:
   token:
     description: GitHub token. Defaults to `github.token`.

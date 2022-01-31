@@ -1,7 +1,4 @@
-import {
-  findNextPr,
-  getPrefixAndCardId,
-} from '../post-issue-to-card-implementation'
+import { findNextPr, getPrefixAndCardId } from '../post-issue-to-card'
 
 describe('post-issue-to-card', () => {
   describe('findNextPr', () => {

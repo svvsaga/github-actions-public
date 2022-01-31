@@ -4,14 +4,14 @@ import * as github from '@actions/github'
 import { readFileSync } from 'fs'
 import last from 'lodash/last'
 import { resolve } from 'path'
-import { readTerraformConfig } from './read-terraform-config'
-import { getTerraformDir } from './utils/path'
+import { readTerraformConfig } from '../read-terraform-config'
+import { getTerraformDir } from '../utils/path'
 import {
   getGitSha,
   getInitArgs,
   getVarFileArg,
   initTerragruntDependencies,
-} from './utils/terragrunt'
+} from '../utils/terragrunt'
 
 interface DeployTerraformPlanOptions {
   projectRoot: string

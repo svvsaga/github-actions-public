@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import postIssueToCard from './post-issue-to-card-implementation'
+import postIssueToCard from './implementations/post-issue-to-card'
 
 async function run(): Promise<void> {
   try {

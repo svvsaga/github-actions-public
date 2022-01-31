@@ -1,8 +1,8 @@
 name: Read Integration testing config
 description: Finds integration testing settings
 runs:
-  using: 'node12'
-  main: './index.js'
+  using: node16
+  main: ./index.js
 inputs:
   cwd:
     description: Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root.
