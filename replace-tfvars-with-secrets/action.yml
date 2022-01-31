@@ -13,23 +13,5 @@ inputs:
     default: secrets.auto.tfvars
 
 runs:
-  using: composite
-  steps:
-    - name: Replace Terraform variables with secrets
-      working-directory: ${{ inputs.terraform_dir }}
-      shell: bash
-      run: |
-        test -z ${{ inputs.secrets_file }} && echo 'No secrets file found' && exit 0
-        echo '${{ inputs.secrets_json }}' > secrets.json
-        declare -A secrets
-        while IFS="=" read -r key value
-        do
-            secrets[$key]="$value"
-        done < <(jq -r 'to_entries|map("(.key)=(.value)")|.[]' secrets.json)
-        grep -Po '\$\w+' | cut -c 2- | while read var; do
-          if [[ -n secrets[$var] ]]; then
-            echo "Replace $var with secrets[$var]"
-            sed -i "s/\$var/secrets[$var]/g" ${{ inputs.secrets_file }}
-          fi
-        done
-        rm secrets.json
+  using: node16
+  main: ./index.js

@@ -1,4 +1,4 @@
-import { extractOperations } from '../apply-terraform-plan-from-gcs-implementation'
+import { extractOperations } from '../apply-terraform-plan-from-gcs'
 
 describe('extractOperations', () => {
   it('strips start and end of plan', () => {

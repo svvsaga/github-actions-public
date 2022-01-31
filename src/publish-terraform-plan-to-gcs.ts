@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { publishTerraformPlanWithInputs } from './publish-terraform-plan-to-gcs-implementation'
+import { publishTerraformPlanWithInputs } from './implementations/publish-terraform-plan-to-gcs'
 
 async function run(): Promise<void> {
   try {

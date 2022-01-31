@@ -76,6 +76,7 @@ module.exports = {
     '@typescript-eslint/type-annotation-spacing': 'error',
     '@typescript-eslint/unbound-method': 'error',
     '@typescript-eslint/no-floating-promises': 'error',
+    'filenames/match-regex': 'off',
   },
   env: {
     node: true,

@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { exec } from '@actions/exec'
-import { findSeverityOfPush } from './find-severity-of-push-implementation'
-import { getLatestTag, getNextVersionTag } from './utils/semver'
+import { getLatestTag, getNextVersionTag } from '../utils/semver'
+import { findSeverityOfPush } from './find-severity-of-push'
 
 export async function bumpSemverTag(): Promise<void> {
   const severity = await findSeverityOfPush()

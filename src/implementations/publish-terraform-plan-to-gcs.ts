@@ -2,15 +2,15 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { readTerraformConfig } from './read-terraform-config'
-import { getTerraformDir } from './utils/path'
+import { readTerraformConfig } from '../read-terraform-config'
+import { getTerraformDir } from '../utils/path'
 import {
   getGitSha,
   getInitArgs,
   getVarFileArg,
   initTerragruntDependencies,
-} from './utils/terragrunt'
-import uploadReleaseAsset from './vendor/upload-release-asset'
+} from '../utils/terragrunt'
+import uploadReleaseAsset from '../vendor/upload-release-asset'
 
 interface PublishTerraformPlanOptions {
   projectRoot: string

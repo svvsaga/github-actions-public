@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { deployTerraformPlanWithInputs } from './apply-terraform-plan-from-gcs-implementation'
+import { deployTerraformPlanWithInputs } from './implementations/apply-terraform-plan-from-gcs'
 
 async function run(): Promise<void> {
   try {
