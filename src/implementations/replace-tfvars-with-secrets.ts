@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 
 const regex = /\$(\w+)/
@@ -12,9 +12,13 @@ export async function replaceTfvarsWithSecrets({
   terraformDir: string
   secretsFile: string
 }): Promise<void> {
-  const tfvars = readFileSync(resolve(terraformDir, secretsFile), 'utf8')
-  const replaced = replaceTfvars(tfvars, secrets)
-  writeFileSync(resolve(terraformDir, secretsFile), replaced)
+  const secretsFilePath = resolve(terraformDir, secretsFile)
+
+  if (existsSync(secretsFilePath)) {
+    const tfvars = readFileSync(secretsFilePath, 'utf8')
+    const replaced = replaceTfvars(tfvars, secrets)
+    writeFileSync(resolve(terraformDir, secretsFile), replaced)
+  }
 }
 export default replaceTfvarsWithSecrets
 
