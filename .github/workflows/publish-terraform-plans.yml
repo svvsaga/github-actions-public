@@ -90,7 +90,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Publish plan for ${{ matrix.environment }}
-        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v5.0.6
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v7.4.1
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
