@@ -1,0 +1,48 @@
+name: Test Gradle modules on PR
+
+on:
+  workflow_call:
+    inputs:
+      ignore_modules:
+        description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
+        required: false
+        type: string
+      ignore_modules_regex:
+        description: Regex of modules to ignore, e.g. 'utils/.*'.
+        required: false
+        type: string
+
+jobs:
+  find-module-changes:
+    name: Find module changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Find modules with changes
+        id: find-module-changes
+        uses: svvsaga/github-actions-public/find-gradle-module-changes@v7.5.0
+        with:
+          token: ${{ github.token }}
+    outputs:
+      matrix: ${{ steps.find-module-changes.outputs.matrix }}
+      has_results: ${{ steps.find-module-changes.outputs.has_results }}
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    if: needs.find-module-changes.outputs.has_results == 'true'
+    needs: find-module-changes
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.find-module-changes.outputs.matrix) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.path }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Gradle build and test
+        run: ./gradlew test
