@@ -1,4 +1,4 @@
-name: Test Gradle modules on PR
+name: Test NPM modules
 
 on:
   workflow_call:
@@ -22,15 +22,17 @@ jobs:
 
       - name: Find modules with changes
         id: find-module-changes
-        uses: svvsaga/github-actions-public/find-gradle-module-changes@v7.5.0
+        uses: svvsaga/github-actions-public/find-module-changes@v7.5.0
         with:
-          token: ${{ github.token }}
+          marker: package.json
+          ignore_modules: ${{ inputs.ignore_modules }}
+          ignore_modules_regex: ${{ inputs.ignore_modules_regex }}
     outputs:
       matrix: ${{ steps.find-module-changes.outputs.matrix }}
       has_results: ${{ steps.find-module-changes.outputs.has_results }}
 
-  build-and-test:
-    name: Build and test
+  run-test:
+    name: Run tests
     runs-on: ubuntu-latest
     if: needs.find-module-changes.outputs.has_results == 'true'
     needs: find-module-changes
@@ -44,5 +46,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Gradle build and test
-        run: ./gradlew test
+      - name: Run NPM tests
+        run: npm run test --if-present
