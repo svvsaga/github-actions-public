@@ -46,5 +46,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: NPM Install
+        run: npm ci
+
       - name: Run NPM tests
         run: npm run test --if-present
