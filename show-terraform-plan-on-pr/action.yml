@@ -141,8 +141,14 @@ runs:
         else
           terragrunt plan -no-color -out="tf.plan"
         fi
+        # Maximum length of github comments is 65536 Unicode characters, so we cut the plan to 60000 chars if it is too long
+        # See https://github.community/t/maximum-length-for-the-comment-body-in-issues-and-pr/148867
+        PLAN=$(terragrunt show -no-color tf.plan)
+        if [[ ${#PLAN} -gt 60000 ]] ; then
+            PLAN="${PLAN::60000}"$'\n...\nPlan too long to be shown in full'
+        fi
         echo 'PLAN<<EOF' >> $GITHUB_ENV
-        terragrunt show -no-color tf.plan >> $GITHUB_ENV
+        echo "$PLAN" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Show Terraform status
@@ -150,11 +156,7 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
-          // Maximum length of github comments is 65536 Unicode characters, so we cut the plan if it is too long
-          // See https://github.community/t/maximum-length-for-the-comment-body-in-issues-and-pr/148867
-          const plan = (process.env.PLAN.length > 60000
-            ? (process.env.PLAN.slice(0, 60000) + "\n...\nPlan too long to be shown")
-            : process.env.PLAN);
+          const plan = process.env.PLAN;
           const output = `
           <h1>${{ inputs.terraform_dir == '.' && 'root' || inputs.terraform_dir }}</h1>
 
