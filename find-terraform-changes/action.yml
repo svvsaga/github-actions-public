@@ -8,6 +8,10 @@ inputs:
     description: GitHub token. Defaults to `github.token`.
     required: true
     default: ${{ github.token }}
+  include_all:
+    description: Whether to list all modules, or only changed modules. Defaults to `false`.
+    required: true
+    default: false
   marker:
     description: A file that marks the root of a Terraform module. Defaults to `terragrunt.hcl`.
     required: true

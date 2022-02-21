@@ -10,12 +10,14 @@ export async function findTerraformChanges(): Promise<void> {
   const ignoreModules = getIgnoreModules()
   const ignoreModulesRegex = core.getInput('ignore_modules_regex')
   const cwd = core.getInput('cwd') || '.'
+  const includeAll = core.getInput('include_all').toLowerCase() === 'true'
 
   const { matrix, hasResults } = await createMatrixForAffectedModules(marker, {
     ignoreModules,
     ignoreModulesRegex,
     cwd,
     includeRemoved: true,
+    includeAll,
   })
 
   core.setOutput('matrix', matrix)
