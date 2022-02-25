@@ -34,42 +34,48 @@ runs:
       with:
         token: ${{ inputs.github_token }}
 
-    - name: Read Terraform config
-      id: read-terraform-config
-      uses: svvsaga/github-actions-public/read-terraform-config@v4.0.6
+    - name: Read Terraform PR config
+      id: read-terraform-pr-config
+      uses: svvsaga/github-actions-public/read-terraform-pr-config@v8.0.0
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
+    - name: Read Terraform dependencies
+      id: read-terraform-dependencies
+      uses: svvsaga/github-actions-public/read-terraform-dependencies@v8.0.0
+      with:
+        cwd: ${{ inputs.terraform_dir }}
+
     - name: Setup Google Cloud SDK with service account key
-      if: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
+      if: ${{ inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.6
       with:
-        service_account_key: ${{ inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key }}
+        service_account_key: ${{ inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
-      if: ${{ !(inputs.service_account_key || steps.read-terraform-config.outputs.sa_secret_key) }}
+      if: ${{ !(inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key) }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v4.0.6
       with:
-        project_id: ${{ inputs.workload_identity_project_id || steps.read-terraform-config.outputs.workload_identity_project_id }}
-        project_number: ${{ inputs.workload_identity_project_number || steps.read-terraform-config.outputs.workload_identity_project_number }}
+        project_id: ${{ inputs.workload_identity_project_id || steps.read-terraform-pr-config.outputs.workload_identity_project_id }}
+        project_number: ${{ inputs.workload_identity_project_number || steps.read-terraform-pr-config.outputs.workload_identity_project_number }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: ${{ steps.read-terraform-config.outputs.tf_version }}
+        terraform_version: ${{ steps.read-terraform-dependencies.outputs.tf_version }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
       uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
       with:
-        terragrunt_version: ${{ steps.read-terraform-config.outputs.tg_version }}
+        terragrunt_version: ${{ steps.read-terraform-dependencies.outputs.tg_version }}
 
     - name: Terraform init dependencies
       uses: actions/github-script@v5
       env:
-        DEPENDENCIES: ${{ steps.read-terraform-config.outputs.tg_dependencies }}
-        ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
+        DEPENDENCIES: ${{ steps.read-terraform-dependencies.outputs.tg_dependencies }}
+        ENVIRONMENT: ${{ steps.read-terraform-pr-config.outputs.environment }}
         CWD: ${{ inputs.terraform_dir }}
       with:
         script: |
@@ -105,12 +111,11 @@ runs:
       id: init
       shell: bash
       env:
-        ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
-        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_VAR_ENV: ${{ steps.read-terraform-pr-config.outputs.environment }}
         TF_INPUT: 'false'
       run: |
-        if [ -n "$ENVIRONMENT" ]; then
-          terragrunt init -backend-config="environments/${ENVIRONMENT}-backend-config.hcl" && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
+        if [ -n "$TF_VAR_ENV" ]; then
+          terragrunt init -backend-config="environments/${TF_VAR_ENV}-backend-config.hcl" && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
         else
           terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
         fi
@@ -120,7 +125,7 @@ runs:
       id: fmt
       shell: bash
       env:
-        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
+        TF_VAR_ENV: ${{ steps.read-terraform-pr-config.outputs.environment }}
       run: terragrunt fmt -check -diff -recursive && echo "FMT_OUTCOME=success" >> $GITHUB_ENV || echo "FMT_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Terraform plan
@@ -128,16 +133,15 @@ runs:
       id: plan
       shell: bash
       env:
-        ENVIRONMENT: ${{ steps.read-terraform-config.outputs.environment }}
-        TF_VAR_ENV: ${{ steps.read-terraform-config.outputs.environment }}
-        TF_VARS: ${{ steps.read-terraform-config.outputs.tf_vars }}
+        TF_VAR_ENV: ${{ steps.read-terraform-pr-config.outputs.environment }}
+        TF_VARS: ${{ steps.read-terraform-pr-config.outputs.tf_vars }}
         TF_INPUT: 'false'
       run: |
         if [ -n "$TF_VARS" ]; then
           echo "$TF_VARS" > extra.auto.tfvars.json
         fi
-        if [ -n "$ENVIRONMENT" ]; then
-          terragrunt plan -no-color -var-file="environments/$ENVIRONMENT.tfvars" -out="tf.plan"
+        if [ -n "$TF_VAR_ENV" ]; then
+          terragrunt plan -no-color -var-file="environments/$TF_VAR_ENV.tfvars" -out="tf.plan"
         else
           terragrunt plan -no-color -out="tf.plan"
         fi

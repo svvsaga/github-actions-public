@@ -1,5 +1,5 @@
-name: Read Terraform config
-description: Finds Terraform settings, including .terraform-version and .terragrunt-version, as well as environment and tf_vars.
+name: Read Terraform PR-specific config
+description: Finds Terraform settings to use when running PR actions.
 runs:
   using: node16
   main: ./index.js
@@ -13,12 +13,6 @@ inputs:
     required: false
     default: "{}"
 outputs:
-  tf_version:
-    description: Terraform version
-  tg_version:
-    description: Terragrunt version
-  tg_dependencies:
-    description: Terragrunt dependencies (as a list of strings)
   tf_vars:
     description: Terraform variables (as stringified JSON)
   sa_secret:
@@ -26,7 +20,7 @@ outputs:
   sa_secret_key:
     description: Service account secret key
   environment:
-    description: Environment name
+    description: Environment name to use when running Terraform PR actions
   workload_identity_project_id:
     description: Project ID for the workload identity federation authentication
   workload_identity_project_number:

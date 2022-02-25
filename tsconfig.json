@@ -12,5 +12,6 @@
       "~/*": ["./src/*"]
     },
     "allowJs": true
-  }
+  },
+  "exclude": ["**/index.js"]
 }

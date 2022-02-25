@@ -1,0 +1,17 @@
+name: Read Terraform dependencies
+description: Finds Terraform settings, including .terraform-version, .terragrunt-version and terragrunt dependencies.
+runs:
+  using: node16
+  main: ./index.js
+inputs:
+  cwd:
+    description: Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root.
+    required: true
+    default: .
+outputs:
+  tf_version:
+    description: Terraform version
+  tg_version:
+    description: Terragrunt version
+  tg_dependencies:
+    description: Terragrunt dependencies (as a list of strings)

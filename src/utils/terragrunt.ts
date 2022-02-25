@@ -2,13 +2,14 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
-import { TerraformConfig } from '../read-terraform-config'
+import { TerraformConfig } from '~/implementations/read-terraform-dependencies'
 import setupTerraform from '../vendor/setup-terraform'
 import setupTerragrunt from '../vendor/setup-terragrunt'
 
 export async function initTerragruntDependencies(
   terraformRoot: string,
-  config: TerraformConfig
+  config: TerraformConfig,
+  environment: string
 ): Promise<void> {
   const execOptions = {
     cwd: terraformRoot,
@@ -17,13 +18,7 @@ export async function initTerragruntDependencies(
 
   execOptions.env.TF_INPUT = 'false'
 
-  const {
-    tfVersion,
-    tgVersion,
-    environment,
-    tgDependencies,
-    isTerragruntModule,
-  } = config
+  const { tfVersion, tgVersion, tgDependencies, isTerragruntModule } = config
 
   core.info('Setup Terraform')
   await setupTerraform(tfVersion)
