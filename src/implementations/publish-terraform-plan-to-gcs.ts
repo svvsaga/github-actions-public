@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { readTerraformConfig } from '../read-terraform-config'
 import { getTerraformDir } from '../utils/path'
 import {
   getGitSha,
@@ -11,6 +10,7 @@ import {
   initTerragruntDependencies,
 } from '../utils/terragrunt'
 import uploadReleaseAsset from '../vendor/upload-release-asset'
+import { readTerraformDependencies } from './read-terraform-dependencies'
 
 interface PublishTerraformPlanOptions {
   projectRoot: string
@@ -67,12 +67,11 @@ export async function publishTerraformPlan({
     ? `${storageBucket}/${storagePrefix}`
     : storageBucket
 
-  const config = await readTerraformConfig({
+  const config = await readTerraformDependencies({
     terraformRoot: terraformDir,
-    secrets: {},
   })
 
-  await initTerragruntDependencies(terraformDir, config)
+  await initTerragruntDependencies(terraformDir, config, environment)
 
   const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
 

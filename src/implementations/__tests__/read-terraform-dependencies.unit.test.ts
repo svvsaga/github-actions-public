@@ -1,4 +1,4 @@
-import { readTerragruntDependencies } from '~/read-terraform-config'
+import { readTerragruntDependencies } from '../read-terraform-dependencies'
 
 describe('readTerragruntDependencies', () => {
   it('should return an empty array when no dependencies are found', () => {

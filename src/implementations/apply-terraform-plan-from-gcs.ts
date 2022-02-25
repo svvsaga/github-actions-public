@@ -4,7 +4,6 @@ import * as github from '@actions/github'
 import { readFileSync } from 'fs'
 import last from 'lodash/last'
 import { resolve } from 'path'
-import { readTerraformConfig } from '../read-terraform-config'
 import { getTerraformDir } from '../utils/path'
 import {
   getGitSha,
@@ -12,6 +11,7 @@ import {
   getVarFileArg,
   initTerragruntDependencies,
 } from '../utils/terragrunt'
+import { readTerraformDependencies } from './read-terraform-dependencies'
 
 interface DeployTerraformPlanOptions {
   projectRoot: string
@@ -135,12 +135,11 @@ export async function deployTerraformPlan({
   let success = false
 
   try {
-    const config = await readTerraformConfig({
+    const config = await readTerraformDependencies({
       terraformRoot: terraformDir,
-      secrets: {},
     })
 
-    await initTerragruntDependencies(terraformDir, config)
+    await initTerragruntDependencies(terraformDir, config, environment)
 
     const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
     const args = getInitArgs({ environment, terraformDir })
