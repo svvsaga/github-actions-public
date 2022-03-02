@@ -36,26 +36,26 @@ runs:
 
     - name: Read Terraform PR config
       id: read-terraform-pr-config
-      uses: svvsaga/github-actions-public/read-terraform-pr-config@v8.0.0
+      uses: svvsaga/github-actions-public/read-terraform-pr-config@v8.0.1
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Read Terraform dependencies
       id: read-terraform-dependencies
-      uses: svvsaga/github-actions-public/read-terraform-dependencies@v8.0.0
+      uses: svvsaga/github-actions-public/read-terraform-dependencies@v8.0.1
       with:
         cwd: ${{ inputs.terraform_dir }}
 
     - name: Setup Google Cloud SDK with service account key
       if: ${{ inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.6
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
       with:
         service_account_key: ${{ inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
       if: ${{ !(inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key) }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v4.0.6
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.0.1
       with:
         project_id: ${{ inputs.workload_identity_project_id || steps.read-terraform-pr-config.outputs.workload_identity_project_id }}
         project_number: ${{ inputs.workload_identity_project_number || steps.read-terraform-pr-config.outputs.workload_identity_project_number }}

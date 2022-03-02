@@ -95,13 +95,13 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v5.0.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
         if: ${{ !inputs.workload_identity_project_id }}
         with:
           service_account_key: ${{ secrets.storage_bucket_sa_publisher_key }}
 
       - name: Setup Google Cloud SDK with Workload Identity Federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v5.0.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.0.1
         if: ${{ inputs.workload_identity_project_id }}
         with:
           project_id: ${{ inputs.workload_identity_project_id }}

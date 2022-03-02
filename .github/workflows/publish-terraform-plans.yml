@@ -73,7 +73,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v4.0.6
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
         with:
           service_account_key: ${{ secrets[matrix.sa_key_secret] }}
 
@@ -90,7 +90,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Publish plan for ${{ matrix.environment }}
-        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v7.4.1
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v8.0.1
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
