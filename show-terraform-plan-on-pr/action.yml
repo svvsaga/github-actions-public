@@ -80,6 +80,7 @@ runs:
       with:
         script: |
           const path = require('path')
+          const fs = require('fs')
           const dependencies = process.env.DEPENDENCIES && JSON.parse(process.env.DEPENDENCIES);
           const environment = process.env.ENVIRONMENT;
           const cwd = process.env.CWD;
@@ -91,8 +92,9 @@ runs:
               'init',
               '-reconfigure'
             ]
-            if (environment) {
-              args.push(`-backend-config=environments/${environment}-backend-config.hcl`)
+            const backendConfigFile = `environments/${environment}-backend-config.hcl`
+            if (environment && fs.existsSync(path.resolve(cwd, backendConfigFile))) {
+              args.push(`-backend-config=${backendConfigFile}`)
             }
             for (const dependency of dependencies) {
               console.log("cwd", cwd, "dependency", dependency)
