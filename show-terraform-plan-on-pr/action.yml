@@ -92,15 +92,16 @@ runs:
               'init',
               '-reconfigure'
             ]
-            const backendConfigFile = `environments/${environment}-backend-config.hcl`
-            if (environment && fs.existsSync(path.resolve(cwd, backendConfigFile))) {
-              args.push(`-backend-config=${backendConfigFile}`)
-            }
             for (const dependency of dependencies) {
               console.log("cwd", cwd, "dependency", dependency)
               const resolved = path.resolve(cwd, dependency)
               console.log("resolved", resolved)
-              await exec.exec('terragrunt', args, {
+              const backendConfigFile = `environments/${environment}-backend-config.hcl`
+              const dependencyArgs = args.slice()
+              if (environment && fs.existsSync(path.resolve(resolved, backendConfigFile))) {
+                dependencyArgs.push(`-backend-config=${backendConfigFile}`)
+              }
+              await exec.exec('terragrunt', dependencyArgs, {
                 env,
                 cwd: resolved,
                 ignoreReturnCode: true
@@ -116,7 +117,7 @@ runs:
         TF_VAR_ENV: ${{ steps.read-terraform-pr-config.outputs.environment }}
         TF_INPUT: 'false'
       run: |
-        if [ -n "$TF_VAR_ENV" ]; then
+        if [ -n "$TF_VAR_ENV" ] && [ -f "environments/${TF_VAR_ENV}-backend-config.hcl" ]; then
           terragrunt init -backend-config="environments/${TF_VAR_ENV}-backend-config.hcl" && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
         else
           terragrunt init && echo "INIT_OUTCOME=success" >> $GITHUB_ENV || echo "INIT_OUTCOME=failure" >> $GITHUB_ENV
@@ -142,7 +143,7 @@ runs:
         if [ -n "$TF_VARS" ]; then
           echo "$TF_VARS" > extra.auto.tfvars.json
         fi
-        if [ -n "$TF_VAR_ENV" ]; then
+        if [ -n "$TF_VAR_ENV" ] & [ -f "environments/$TF_VAR_ENV.tfvars" ]; then
           terragrunt plan -no-color -var-file="environments/$TF_VAR_ENV.tfvars" -out="tf.plan"
         else
           terragrunt plan -no-color -out="tf.plan"
