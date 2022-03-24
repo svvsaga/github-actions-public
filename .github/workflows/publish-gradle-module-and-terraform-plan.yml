@@ -1,0 +1,182 @@
+name: Publish gradle shadowjar module and terraform plan
+
+on:
+  workflow_call:
+    inputs:
+      app_id:
+        required: true
+        type: string
+        description: Identifier of the app, used to create the release name. Use lowercase, dashes and numbers only.
+      app_root:
+        required: true
+        type: string
+        description: Relative path to the app to deploy, in which the gradle module and terraform folder exists.
+      artifact_bucket:
+        required: true
+        type: string
+        description: GCS storage bucket where gradle module should be uploaded.
+      artifact_destination_path:
+        description: Path within storage bucket where to upload artifact. Defaults to `app_root`.
+        type: string
+        required: false
+        default: ""
+      publish_glob:
+        description: Glob pattern to match artifacts to publish. Defaults to `*.zip`.
+        type: string
+        required: false
+        default: "*.zip"
+      version_property:
+        description: Project property used to set app version.
+        required: false
+        type: string
+        default: appVersion
+      app_version:
+        description: Will set the app version of the JAR to be built and published.
+        required: false
+        type: string
+        default: ${{ github.run_number }}
+      ref:
+        description: Which ref to create release for. Defaults to same as workflow is run from if empty.
+        required: false
+        type: string
+        default: ${{ github.sha }}
+      terraform_plan_bucket_stm:
+        description: Storage bucket for Terraform plan in STM.
+        type: string
+        required: true
+      terraform_plan_bucket_atm:
+        description: Storage bucket for Terraform plan in ATM.
+        type: string
+        required: true
+      terraform_plan_bucket_prod:
+        description: Storage bucket for Terraform plan in PROD.
+        type: string
+        required: true
+
+    secrets:
+      artifact_publisher_key:
+        description: Service account key used to publish JAR to artifact bucket.
+        required: true
+      github_app_private_key:
+        description: Private key for GitHub application to get app token.
+        required: true
+      github_app_id:
+        description: GitHub application ID to get app token.
+        required: true
+      service_account_key_stm:
+        description: Service account key to use with `gcloud` for STM.
+        required: true
+      service_account_key_atm:
+        description: Service account key to use with `gcloud` for ATM.
+        required: true
+      service_account_key_prod:
+        description: Service account key to use with `gcloud` for PROD.
+        required: true
+      terraform_vars:
+        description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'.
+        required: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REF: ${{ inputs.ref || github.sha }}
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ inputs.app_id }}-v${{ inputs.app_version }}
+          release_name: ${{ inputs.app_id }}-v${{ inputs.app_version }}
+          commitish: ${{ env.REF }}
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+
+  build_module:
+    name: Build module and publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_root }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.REF }}
+
+      - name: Build module
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
+          build-root-directory: ${{ inputs.app_root }}
+
+      - name: Zip jars
+        run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
+
+      - name: Setup Google Cloud SDK with service account key
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
+        with:
+          service_account_key: ${{ secrets.artifact_publisher_key }}
+
+      - name: Publish to GCS
+        uses: google-github-actions/upload-cloud-storage@v0.5.0
+        with:
+          path: ${{ inputs.app_root }}
+          destination: ${{ inputs.artifact_bucket }}/${{ inputs.artifact_destination_path || inputs.app_root }}
+          glob: ${{ inputs.publish_glob }}
+          parent: false
+          gzip: false
+
+  publish_plans:
+    name: Publish Terraform plans
+    runs-on: ubuntu-latest
+    needs: create_release
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [ STM, ATM, PROD ]
+        include:
+          - environment: STM
+            sa_key_secret: service_account_key_stm
+            terraform_plan_bucket: ${{ inputs.terraform_plan_bucket_stm }}
+          - environment: ATM
+            sa_key_secret: service_account_key_atm
+            terraform_plan_bucket: ${{ inputs.terraform_plan_bucket_atm }}
+          - environment: PROD
+            sa_key_secret: service_account_key_prod
+            terraform_plan_bucket: ${{ inputs.terraform_plan_bucket_prod }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Google Cloud SDK with service account key
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
+        with:
+          service_account_key: ${{ secrets[matrix.sa_key_secret] }}
+
+      - name: Get app token
+        id: get_token
+        uses: tibdex/github-app-token@36464acb844fc53b9b8b2401da68844f6b05ebb0
+        with:
+          private_key: ${{ secrets.github_app_private_key }}
+          app_id: ${{ secrets.github_app_id }}
+
+      - name: Set GitHub token
+        run: |
+          git config --global url."https://x-access-token:${{ steps.get_token.outputs.token }}@github.com".insteadOf https://github.com
+          echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
+
+      - name: Publish plan for ${{ matrix.environment }}
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v8.0.1
+        with:
+          environment: ${{ matrix.environment }}
+          project_root: ${{ inputs.app_root }}
+          terraform_plan_bucket: ${{ matrix.terraform_plan_bucket }}
+          release_id: ${{ needs.create_release.outputs.release_id }}
+          terraform_vars: ${{ secrets.terraform_vars }}
