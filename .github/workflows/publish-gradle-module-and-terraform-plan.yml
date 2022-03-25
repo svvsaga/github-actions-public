@@ -112,6 +112,7 @@ jobs:
         with:
           arguments: shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
           build-root-directory: ${{ inputs.app_root }}
+          gradle-version: current
 
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
@@ -177,6 +178,6 @@ jobs:
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
-          terraform_plan_bucket: ${{ matrix.terraform_plan_bucket }}
+          storage_bucket: ${{ matrix.terraform_plan_bucket }}
           release_id: ${{ needs.create_release.outputs.release_id }}
           terraform_vars: ${{ secrets.terraform_vars }}
