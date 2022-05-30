@@ -1,0 +1,26 @@
+name: Read project config
+description: Finds project IDs by environment
+
+inputs:
+  cwd:
+    description: Relative path to use for searching. Defaults to repo root.
+    required: true
+    default: .
+  config_file:
+    description: Which file that contains the project config. Defaults to "projects.config.json".
+    required: true
+    default: projects.config.json
+
+runs:
+  using: composite
+  steps:
+    - name: Read project config
+      id: read_project_config
+      working-directory: ${{ inputs.cwd }}
+      shell: bash
+      run: echo ::set-output name=project_ids_by_environment::$(cat ${{ inputs.config_file }})
+
+outputs:
+  project_ids_by_environment:
+    description: Project IDs by environment (as stringified JSON)
+    value: ${{ steps.read_project_config.outputs.project_ids_by_environment }}
