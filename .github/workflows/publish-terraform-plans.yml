@@ -15,17 +15,17 @@ on:
         type: string
         required: true
       storage_bucket_stm:
-        description: Storage bucket for Terraform plan in STM
+        description: Storage bucket for Terraform plan in STM (tries to use projects.config.json if not set)
         type: string
-        required: true
+        required: false
       storage_bucket_atm:
-        description: Storage bucket for Terraform plan in ATM
+        description: Storage bucket for Terraform plan in ATM (tries to use projects.config.json if not set)
         type: string
-        required: true
+        required: false
       storage_bucket_prod:
-        description: Storage bucket for Terraform plan in PROD
+        description: Storage bucket for Terraform plan in PROD (tries to use projects.config.json if not set)
         type: string
-        required: true
+        required: false
       
     secrets:
       github_app_private_key:
@@ -48,9 +48,21 @@ on:
         required: false
     
 jobs:
+  read_config:
+    name: Read project config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read project config
+        id: read_config
+        uses: svvsaga/github-actions-public/read-project-config@v8.3.0
+        with:
+          cwd: ${{ inputs.app_root }}
+    outputs:
+        project_ids_by_environment: ${{ fromJSON(steps.read_config.outputs.project_ids_by_environment) }}
   publish_plans:
     name: Publish Terraform plans
     runs-on: ubuntu-latest
+    needs: [read_config]
     strategy:
       fail-fast: false
       matrix:
@@ -58,13 +70,13 @@ jobs:
         include:
           - environment: STM
             sa_key_secret: service_account_key_stm
-            storage_bucket: ${{ inputs.storage_bucket_stm }}
+            storage_bucket: ${{ inputs.storage_bucket_stm || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.STM) }}
           - environment: ATM
             sa_key_secret: service_account_key_atm
-            storage_bucket: ${{ inputs.storage_bucket_atm }}
+            storage_bucket: ${{ inputs.storage_bucket_atm || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.ATM) }}
           - environment: PROD
             sa_key_secret: service_account_key_prod
-            storage_bucket: ${{ inputs.storage_bucket_prod }}
+            storage_bucket: ${{ inputs.storage_bucket_prod || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.PROD) }}
 
     steps:
       - name: Checkout code

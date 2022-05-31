@@ -18,7 +18,10 @@ runs:
       id: read_project_config
       working-directory: ${{ inputs.cwd }}
       shell: bash
-      run: echo ::set-output name=project_ids_by_environment::$(cat ${{ inputs.config_file }})
+      run: |
+        if [ -f "${{ inputs.config_file }}" ]; then
+          echo ::set-output name=project_ids_by_environment::$(cat ${{ inputs.config_file }})
+        fi
 
 outputs:
   project_ids_by_environment:
