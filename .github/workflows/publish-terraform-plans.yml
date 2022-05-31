@@ -52,6 +52,11 @@ jobs:
     name: Read project config
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+
       - name: Read project config
         id: read_config
         uses: svvsaga/github-actions-public/read-project-config@v8.3.0
