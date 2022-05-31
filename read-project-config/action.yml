@@ -20,21 +20,16 @@ runs:
       shell: bash
       run: |
         FILE="${{ inputs.config_file }}"
-        search_up() {
-            local look=${PWD%/}
-        
-            while [[ -n $look ]]; do
-              [[ -e $look/$FILE ]] && {
-              printf '%s\n' "$look"
-              return
-            }
-            
-            look=${look%/*}
+        if ! [ -f "$FILE" ]; then
+          CONFIG_FILE=$(DIR=`pwd`
+            while [ "$DIR" != "/" ] ; do
+              DIR=`dirname "$DIR"`
+              find "$DIR" -maxdepth 1 -name "$FILE"
             done
-        
-            [[ -e /$FILE ]] && echo /
-        }
-        CONFIG_FILE=$(search_up "${{ inputs.config_file }}")
+          )
+        else
+          CONFIG_FILE="$FILE"
+        fi
         if [ -f "$CONFIG_FILE" ]; then
           echo ::set-output name=project_ids_by_environment::$(cat $CONFIG_FILE)
         fi

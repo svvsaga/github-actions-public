@@ -59,7 +59,7 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.3.5
+        uses: svvsaga/github-actions-public/read-project-config@v8.3.6
         with:
           cwd: ${{ inputs.app_root }}
     outputs:
