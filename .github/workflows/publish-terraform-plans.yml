@@ -63,7 +63,7 @@ jobs:
         with:
           cwd: ${{ inputs.app_root }}
     outputs:
-        project_ids_by_environment: ${{ fromJSON(steps.read_config.outputs.project_ids_by_environment) }}
+        project_ids_by_environment: ${{ steps.read_config.outputs.project_ids_by_environment }}
   publish_plans:
     name: Publish Terraform plans
     runs-on: ubuntu-latest
@@ -75,13 +75,13 @@ jobs:
         include:
           - environment: STM
             sa_key_secret: service_account_key_stm
-            storage_bucket: ${{ inputs.storage_bucket_stm || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.STM) }}
+            storage_bucket: ${{ inputs.storage_bucket_stm || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).STM) }}
           - environment: ATM
             sa_key_secret: service_account_key_atm
-            storage_bucket: ${{ inputs.storage_bucket_atm || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.ATM) }}
+            storage_bucket: ${{ inputs.storage_bucket_atm || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).ATM) }}
           - environment: PROD
             sa_key_secret: service_account_key_prod
-            storage_bucket: ${{ inputs.storage_bucket_prod || format('svv-{0}', needs.read_config.outputs.project_ids_by_environment.PROD) }}
+            storage_bucket: ${{ inputs.storage_bucket_prod || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).PROD) }}
 
     steps:
       - name: Checkout code
