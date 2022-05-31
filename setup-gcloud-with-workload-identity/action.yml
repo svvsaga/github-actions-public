@@ -3,11 +3,17 @@ description: Setup Workload Identity Federation and GCloud SDK. Code must be che
 
 inputs:
   project_id:
-    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `<service_account>@<project_id>.iam.gserviceaccount.com` service account.
-    required: true
+    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `<service_account>@<project_id>.iam.gserviceaccount.com` service account. If not set, `environment` and `app_root` must be set and `projects.config.json` must be present.
+    required: false
   project_number:
-    description: The project number of the project where the workload identity provider exists. Will be used to set workload identity provider to `projects/<project_number>/locations/global/workloadIdentityPools/<pool_id>/providers/<provider_id>`.
-    required: true
+    description: The project number of the project where the workload identity provider exists. Will be used to set workload identity provider to `projects/<project_number>/locations/global/workloadIdentityPools/<pool_id>/providers/<provider_id>`. If not set, `environment` and `app_root` must be set and `projects.config.json` must be present.
+    required: false
+  environment:
+    description: The environment to use for finding the project ID and workload identity provider. If not set, `project_id` and `project_number` must be set.
+    required: false
+  app_root:
+    description: The root directory to use for searching for `projects.config.json`. If not set, `project_id` and `project_number` must be set.
+    required: false
   service_account:
     description: The service account to use with `gcloud`. Defaults to `terraform`.
     required: false
@@ -33,12 +39,40 @@ runs:
           exit 1
         fi
 
+    - name: Read project config
+      id: read_project_config
+      if: ${{ !inputs.project_id }}
+      uses: svvsaga/github-actions-public/read-project-config@v8.3.6
+      with:
+        cwd: ${{ inputs.app_root }}
+
+    - name: Check project ID and number
+      working-directory: .
+      shell: bash
+      if: ${{ !inputs.project_id || !inputs.project_number }}
+      env:
+        PROJECT_ID: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
+        PROJECT_NUMBER: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment.project_numbers[inputs.environment] }}
+      run: |
+        if [ -z "$PROJECT_ID" ]; then
+          echo "ERROR: Project ID not found for environment '${{ inputs.environment }}'"
+          exit 1
+        fi
+        
+        if [ -z "$PROJECT_NUMBER" ]; then
+          echo "ERROR: Project number not found for environment '${{ inputs.environment }}'"
+          exit 1
+        fi
+
     - name: Authenticate to Google Cloud with Terraform service account
       id: auth
       uses: google-github-actions/auth@v0
+      env:
+        PROJECT_ID: ${{ inputs.project_id || fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
+        PROJECT_NUMBER: ${{ inputs.project_number || fromJson(steps.read_project_config.outputs.project_ids_by_environment).project_numbers[inputs.environment] }}
       with:
-        workload_identity_provider: projects/${{ inputs.project_number }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }}/providers/${{ inputs.provider_id }}
-        service_account: ${{ inputs.service_account }}@${{ inputs.project_id }}.iam.gserviceaccount.com
+        workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }}/providers/${{ inputs.provider_id }}
+        service_account: ${{ inputs.service_account }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
         token_format: access_token
 
     - name: Setup Google Cloud SDK

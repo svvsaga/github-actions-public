@@ -36,3 +36,17 @@ export function getTerraformDir(projectRoot: string): string {
 
   return resolve(workspace, projectRoot, 'terraform')
 }
+
+export function readPaths(
+  environment: string,
+  gitSha: string,
+  storagePrefix: string | undefined,
+  storageBucket: string
+): { planFilename: string; planFilepath: string; storagePath: String } {
+  const planFilename = `plan_${environment}_${gitSha}.plan`
+  const planFilepath = resolve(process.env.GITHUB_WORKSPACE || '', planFilename)
+  const storagePath = storagePrefix
+    ? `${storageBucket}/${storagePrefix}`
+    : storageBucket
+  return { planFilename, planFilepath, storagePath }
+}

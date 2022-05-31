@@ -2,7 +2,10 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
-import { TerraformConfig } from '~/implementations/read-terraform-dependencies'
+import {
+  readTerraformDependencies,
+  TerraformConfig,
+} from '~/implementations/read-terraform-dependencies'
 import setupTerraform from '../vendor/setup-terraform'
 import setupTerragrunt from '../vendor/setup-terragrunt'
 
@@ -85,4 +88,41 @@ export function getVarFileArg({
   const varFile = `environments/${environment}.tfvars`
   const path = resolve(terraformDir, varFile)
   return existsSync(path) ? `-var-file=environments/${environment}.tfvars` : ''
+}
+
+export function getExecOptions(
+  terraformDir: string,
+  environment: string
+): { cwd: string; env: Record<string, string> } {
+  const execOptions = {
+    cwd: terraformDir,
+    env: process.env as Record<string, string>,
+  }
+
+  execOptions.env.TF_INPUT = 'false'
+  execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
+  execOptions.env.TF_VAR_ENV = environment
+  return execOptions
+}
+
+export async function initTerraformAndDependencies(
+  terraformDir: string,
+  environment: string,
+  execOptions: { cwd: string; env: Record<string, string> }
+): Promise<string> {
+  const config = await readTerraformDependencies({
+    terraformRoot: terraformDir,
+  })
+
+  await initTerragruntDependencies(terraformDir, config, environment)
+
+  const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
+  const args = getInitArgs({ environment, terraformDir })
+
+  core.info('Terraform init')
+  await exec(command, args, execOptions)
+
+  core.info('Terraform validate')
+  await exec(command, ['validate', '-no-color'], execOptions)
+  return command
 }

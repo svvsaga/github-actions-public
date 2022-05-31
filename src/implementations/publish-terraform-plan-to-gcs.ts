@@ -2,15 +2,14 @@ import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { existsSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { getTerraformDir } from '../utils/path'
+import { getTerraformDir, readPaths } from '~/utils/path'
 import {
+  getExecOptions,
   getGitSha,
-  getInitArgs,
   getVarFileArg,
-  initTerragruntDependencies,
-} from '../utils/terragrunt'
-import uploadReleaseAsset from '../vendor/upload-release-asset'
-import { readTerraformDependencies } from './read-terraform-dependencies'
+  initTerraformAndDependencies,
+} from '~/utils/terragrunt'
+import uploadReleaseAsset from '~/vendor/upload-release-asset'
 
 interface PublishTerraformPlanOptions {
   projectRoot: string
@@ -50,38 +49,19 @@ export async function publishTerraformPlan({
   storagePrefix,
 }: PublishTerraformPlanOptions): Promise<void> {
   const terraformDir = getTerraformDir(projectRoot)
-
-  const execOptions = {
-    cwd: terraformDir,
-    env: process.env as Record<string, string>,
-  }
-
-  execOptions.env.TF_INPUT = 'false'
-  execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
-  execOptions.env.TF_VAR_ENV = environment
-
+  const execOptions = getExecOptions(terraformDir, environment)
   const gitSha = await getGitSha(execOptions, terraformDir)
-  const planFilename = `plan_${environment}_${gitSha}.plan`
-  const planFilepath = resolve(process.env.GITHUB_WORKSPACE || '', planFilename)
-  const storagePath = storagePrefix
-    ? `${storageBucket}/${storagePrefix}`
-    : storageBucket
-
-  const config = await readTerraformDependencies({
-    terraformRoot: terraformDir,
-  })
-
-  await initTerragruntDependencies(terraformDir, config, environment)
-
-  const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
-
-  const args = getInitArgs({ environment, terraformDir })
-
-  core.info('Terraform init')
-  await exec(command, args, execOptions)
-
-  core.info('Terraform validate')
-  await exec(command, ['validate', '-no-color'], execOptions)
+  const command = await initTerraformAndDependencies(
+    terraformDir,
+    environment,
+    execOptions
+  )
+  const { planFilename, planFilepath, storagePath } = readPaths(
+    environment,
+    gitSha,
+    storagePrefix,
+    storageBucket
+  )
 
   if (terraformVars) {
     core.info('Save Terraform variables')

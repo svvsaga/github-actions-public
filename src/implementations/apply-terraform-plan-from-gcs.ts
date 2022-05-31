@@ -3,15 +3,13 @@ import { exec } from '@actions/exec'
 import * as github from '@actions/github'
 import { readFileSync } from 'fs'
 import last from 'lodash/last'
-import { resolve } from 'path'
-import { getTerraformDir } from '../utils/path'
+import { getTerraformDir, readPaths } from '~/utils/path'
 import {
+  getExecOptions,
   getGitSha,
-  getInitArgs,
   getVarFileArg,
-  initTerragruntDependencies,
-} from '../utils/terragrunt'
-import { readTerraformDependencies } from './read-terraform-dependencies'
+  initTerraformAndDependencies,
+} from '~/utils/terragrunt'
 
 interface DeployTerraformPlanOptions {
   projectRoot: string
@@ -65,6 +63,22 @@ and found no differences, so no changes are needed.`,
     .trim()
 }
 
+async function downloadPlanData(
+  storagePath: String,
+  projectRoot: string,
+  planFilename: string,
+  terraformDir: string
+): Promise<void> {
+  core.info('Download plan data from Google Storage')
+  await exec('gcloud', [
+    'alpha',
+    'storage',
+    'cp',
+    `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
+    terraformDir,
+  ])
+}
+
 export async function deployTerraformPlan({
   projectRoot,
   storageBucket,
@@ -75,18 +89,8 @@ export async function deployTerraformPlan({
   storagePrefix,
 }: DeployTerraformPlanOptions): Promise<void> {
   const terraformDir = getTerraformDir(projectRoot)
-
-  const execOptions = {
-    cwd: terraformDir,
-    env: process.env as Record<string, string>,
-  }
-
-  execOptions.env.TF_INPUT = 'false'
-  execOptions.env.CLOUDSDK_CORE_DISABLE_PROMPTS = '1'
-  execOptions.env.TF_VAR_ENV = environment
-
+  const execOptions = getExecOptions(terraformDir, environment)
   const gitSha = await getGitSha(execOptions, terraformDir)
-
   const rootSha = await getGitSha(execOptions)
 
   core.info(`Create deployment for ref ${rootSha}`)
@@ -135,35 +139,18 @@ export async function deployTerraformPlan({
   let success = false
 
   try {
-    const config = await readTerraformDependencies({
-      terraformRoot: terraformDir,
-    })
-
-    await initTerragruntDependencies(terraformDir, config, environment)
-
-    const command = config.isTerragruntModule ? 'terragrunt' : 'terraform'
-    const args = getInitArgs({ environment, terraformDir })
-
-    core.info('Terraform init')
-    await exec(command, args, execOptions)
-
-    core.info('Terraform validate')
-    await exec(command, ['validate', '-no-color'], execOptions)
-
-    const planFilename = `plan_${environment}_${gitSha}.plan`
-    const planFilepath = resolve(terraformDir, planFilename)
-    const storagePath = storagePrefix
-      ? `${storageBucket}/${storagePrefix}`
-      : storageBucket
-
-    core.info('Download plan data from Google Storage')
-    await exec('gcloud', [
-      'alpha',
-      'storage',
-      'cp',
-      `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
+    const command = await initTerraformAndDependencies(
       terraformDir,
-    ])
+      environment,
+      execOptions
+    )
+    const { planFilename, planFilepath, storagePath } = readPaths(
+      environment,
+      gitSha,
+      storagePrefix,
+      storageBucket
+    )
+    await downloadPlanData(storagePath, projectRoot, planFilename, terraformDir)
 
     core.info('Terraform plan')
     const varFileArg = getVarFileArg({ environment, terraformDir })
