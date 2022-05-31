@@ -3,7 +3,7 @@ description: Finds project IDs by environment
 
 inputs:
   cwd:
-    description: Relative path to use for searching. Defaults to repo root.
+    description: Relative path to use for searching. Defaults to repo root. Will search upwards for config_file.
     required: true
     default: .
   config_file:
@@ -19,8 +19,23 @@ runs:
       working-directory: ${{ inputs.cwd }}
       shell: bash
       run: |
-        if [ -f "${{ inputs.config_file }}" ]; then
-          echo ::set-output name=project_ids_by_environment::$(cat ${{ inputs.config_file }})
+        search_up() {
+            local look=${PWD%/}
+        
+            while [[ -n $look ]]; do
+            [[ -e $look/$1 ]] && {
+            printf '%s\n' "$look"
+            return
+            }
+            
+            look=${look%/*}
+            done
+        
+            [[ -e /$1 ]] && echo /
+        }
+        CONFIG_FILE=$(search_up "${{ inputs.config_file }}")
+        if [ -f "$CONFIG_FILE" ]; then
+          echo ::set-output name=project_ids_by_environment::$(cat $CONFIG_FILE)
         fi
 
 outputs:
