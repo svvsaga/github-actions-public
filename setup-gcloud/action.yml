@@ -1,0 +1,59 @@
+name: Setup GCloud
+description: Setup GCloud SDK. If service account key is passed, it will be used, otherwise the action looks for a `projects.config.json` file in the app root, and uses the project ID and number for the given environment.
+
+inputs:
+  service_account_key:
+    description: The service account JSON secret key to use with `gcloud`.
+    required: false
+  app_root:
+    description: The root directory to use for searching for `projects.config.json`.
+    required: false
+  environment:
+    description: The environment to use for finding the project ID and number.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Verify that the code has been checked out
+      working-directory: .
+      shell: bash
+      run: |
+        if [ ! -d .git ]; then
+          echo "ERROR: Code must be checked out first"
+          exit 1
+        fi
+
+    - name: Check for service account key
+      id: check_service_account_key
+      working-directory: .
+      shell: bash
+      run: |
+        if [[ -z "${{ secrets[matrix.sa_key_secret] }}" ]]; then
+          echo ::set-output name=sa_key_found::false
+        else
+          echo ::set-output name=sa_key_found::true
+        fi
+
+    - name: Setup Google Cloud SDK with service account key
+      id: setup_gcloud_with_service_account_key
+      if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'true' }}
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.3
+      with:
+        service_account_key: ${{ inputs.service_account_key }}
+
+    - name: Setup Google Cloud SDK with workload identity federation
+      id: setup_gcloud_with_workload_identity
+      if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'false' }}
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.4.3
+      with:
+        app_root: ${{ inputs.app_root }}
+        environment: ${{ inputs.environment }}
+
+outputs:
+  credentials_file_path:
+    description: The path to the credentials file used by `gcloud` to authenticate with the Workload Identity provider.
+    value: ${{ steps.setup_gcloud_with_service_account_key.outputs.credentials_file_path || steps.setup_gcloud_with_workload_identity.outputs.credentials_file_path }}
+  access_token:
+    description: The access token to use with `gcloud`
+    value: ${{ steps.setup_gcloud_with_workload_identity.outputs.access_token }}

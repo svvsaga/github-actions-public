@@ -92,25 +92,10 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Check for service account key
-        id: check_service_account_key
-        run: |
-          if [[ -z "${{ secrets[matrix.sa_key_secret] }}" ]]; then
-            echo ::set-output name=sa_key_found::false
-          else
-            echo ::set-output name=sa_key_found::true
-          fi
-
-      - name: Setup Google Cloud SDK with service account key
-        if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'true' }}
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.3
+      - name: Setup Google Cloud SDK
+        uses: svvsaga/github-actions-public/setup-gcloud@v8.5.0
         with:
           service_account_key: ${{ secrets[matrix.sa_key_secret] }}
-
-      - name: Setup Google Cloud SDK with workload identity federation
-        if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'false' }}
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.4.3
-        with:
           app_root: ${{ inputs.app_root }}
           environment: ${{ matrix.environment }}
 
