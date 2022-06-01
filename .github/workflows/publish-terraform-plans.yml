@@ -93,7 +93,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v8.5.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v8.5.3
         with:
           service_account_key: ${{ secrets[matrix.sa_key_secret] }}
           app_root: ${{ inputs.app_root }}
