@@ -28,7 +28,7 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        if [ -z "${{ inputs.service_account_key }}" ] || [ -z "${{ inputs.app_root }}" ] && [ -z "${{ inputs.environment }}" ]; then
+        if [ -z "${{ inputs.service_account_key }}" ] && ([ -z "${{ inputs.app_root }}" ] || [ -z "${{ inputs.environment }}" ]); then
           echo "ERROR: Either service_account_key must be set, or both app_root and environment"
           exit 1
         fi

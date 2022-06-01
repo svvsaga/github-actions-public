@@ -43,7 +43,7 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        if [ -z "${{ inputs.project_id }}" ] && [ -z "${{ inputs.project_number }}" ] || [ -z "${{ inputs.environment }}" ] && [ -z "${{ inputs.app_root }}" ]; then
+        if ([ -z "${{ inputs.project_id }}" ] || [ -z "${{ inputs.project_number }}" ]) && ([ -z "${{ inputs.environment }}" ] || [ -z "${{ inputs.app_root }}" ]); then
           echo "ERROR: Either project_id and project_number must be set, or environment and app_root must be set"
           exit 1
         fi
