@@ -52,7 +52,7 @@ runs:
       if: ${{ !inputs.project_id || !inputs.project_number }}
       env:
         PROJECT_ID: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
-        PROJECT_NUMBER: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment.project_numbers[inputs.environment] }}
+        PROJECT_NUMBER: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment).project_numbers[inputs.environment] }}
       run: |
         if [ -z "$PROJECT_ID" ]; then
           echo "ERROR: Project ID not found for environment '${{ inputs.environment }}'"
