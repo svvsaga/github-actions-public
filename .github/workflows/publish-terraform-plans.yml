@@ -66,6 +66,9 @@ jobs:
       project_ids_by_environment: ${{ steps.read_config.outputs.project_ids_by_environment }}
 
   publish_plans:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     name: Publish Terraform plans
     runs-on: ubuntu-latest
     needs: [ read_config ]
