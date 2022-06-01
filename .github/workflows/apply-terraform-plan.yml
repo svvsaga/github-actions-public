@@ -19,17 +19,17 @@ on:
         type: string
         required: true
       storage_bucket:
-        description: GCP Storage bucket where Terraform plans are stored
+        description: GCP Storage bucket where Terraform plans are stored (tries to use projects.config.json if not set)
         type: string
-        required: true
+        required: false
       application_name:
         description: Name of application, e.g. Reisetid - Ingest
         type: string
         required: true
     secrets:
       service_account_key:
-        description: SA key for service account used to deploy plan
-        required: true
+        description: SA key for service account used to deploy plan. If not set, attempts to use workload identity federation from projects.config.json.
+        required: false
       github_app_private_key:
         description: Private key for GitHub application to get app token
         required: true
@@ -47,10 +47,18 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
+      - name: Read project config
+        id: read_config
+        uses: svvsaga/github-actions-public/read-project-config@v8.4.0
+        with:
+          cwd: ${{ inputs.saga_app_root }}
+
+      - name: Setup Google Cloud SDK
+        uses: svvsaga/github-actions-public/setup-gcloud@v8.5.5
         with:
           service_account_key: ${{ secrets.service_account_key }}
+          app_root: ${{ inputs.saga_app_root }}
+          environment: ${{ inputs.environment }}
 
       - name: Get app token
         id: get_token
@@ -69,7 +77,7 @@ jobs:
         with:
           environment: ${{ inputs.environment }}
           project_root: ${{ inputs.saga_app_root }}
-          storage_bucket: ${{ inputs.storage_bucket }}
+          storage_bucket: ${{ inputs.storage_bucket || format('svv-{0}', fromJson(steps.read_config.outputs.project_ids_by_environment)[inputs.environment]) }}
           application: ${{ inputs.application_name }}
           github_token: ${{ github.token }}
           skip_diff: ${{ inputs.skip_diff }}
