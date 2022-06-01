@@ -24,27 +24,25 @@ runs:
           exit 1
         fi
 
-    - name: Check for service account key
-      id: check_service_account_key
+    - name: Check inputs
       working-directory: .
       shell: bash
       run: |
-        if [[ -z "${{ secrets[matrix.sa_key_secret] }}" ]]; then
-          echo ::set-output name=sa_key_found::false
-        else
-          echo ::set-output name=sa_key_found::true
+        if [ -z "${{ inputs.service_account_key }}" ] || [ -z "${{ inputs.app_root }}" ] && [ -z "${{ inputs.environment }}" ]; then
+          echo "ERROR: Either service_account_key must be set, or both app_root and environment"
+          exit 1
         fi
 
     - name: Setup Google Cloud SDK with service account key
       id: setup_gcloud_with_service_account_key
-      if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'true' }}
+      if: ${{ inputs.service_account_key }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.3
       with:
         service_account_key: ${{ inputs.service_account_key }}
 
     - name: Setup Google Cloud SDK with workload identity federation
       id: setup_gcloud_with_workload_identity
-      if: ${{ steps.check_service_account_key.outputs.sa_key_found == 'false' }}
+      if: ${{ !inputs.service_account_key }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.4.3
       with:
         app_root: ${{ inputs.app_root }}
