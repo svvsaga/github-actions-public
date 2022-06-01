@@ -14,6 +14,15 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Verify that the code has been checked out
+      working-directory: .
+      shell: bash
+      run: |
+        if [ ! -d .git ]; then
+          echo "ERROR: Code must be checked out first"
+          exit 1
+        fi
+        
     - name: Read project config
       id: read_project_config
       working-directory: ${{ inputs.cwd }}

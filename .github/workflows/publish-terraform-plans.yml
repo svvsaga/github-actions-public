@@ -90,14 +90,14 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.0
-        if: ${{ !secrets[matrix.sa_key_secret] }}
+        if: ${{ !needs.read_config.outputs.project_ids_by_environment }}
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.1
         with:
           service_account_key: ${{ secrets[matrix.sa_key_secret] }}
 
       - name: Setup Google Cloud SDK with workload identity federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.4.0
-        if: ${{ !secrets[matrix.sa_key_secret] }}
+        if: ${{ needs.read_config.outputs.project_ids_by_environment }}
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.4.1
 
       - name: Get app token
         id: get_token
