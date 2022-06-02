@@ -115,13 +115,13 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.9.1
+        uses: svvsaga/github-actions-public/read-project-config@v8.4.0
         with:
           cwd: ${{ inputs.app_root }}
 
       - name: Read shared project config
         id: read_shared_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.9.1
+        uses: svvsaga/github-actions-public/read-project-config@v8.4.0
         with:
           cwd: ${{ inputs.shared_project_config_root }}
 
