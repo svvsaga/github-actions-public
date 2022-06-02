@@ -22,7 +22,7 @@ runs:
           echo "ERROR: Code must be checked out first"
           exit 1
         fi
-        
+
     - name: Read project config
       id: read_project_config
       working-directory: ${{ inputs.cwd }}
@@ -41,6 +41,9 @@ runs:
         fi
         if [ -f "$CONFIG_FILE" ]; then
           echo ::set-output name=project_ids_by_environment::$(cat $CONFIG_FILE)
+          cat $CONFIG_FILE
+        else
+          echo "Could not find $CONFIG_FILE"
         fi
 
 outputs:
