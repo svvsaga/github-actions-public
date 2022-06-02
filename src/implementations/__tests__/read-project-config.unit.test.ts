@@ -3,9 +3,15 @@ import { readProjectConfig } from '../read-project-config'
 describe('readProjectConfig', () => {
   const testDir = new URL('read-project-config', import.meta.url).pathname
 
-  it('should return empty string if no config file found', async () => {
+  it('should return empty string if no config file found and not required', async () => {
     const result = await readProjectConfig({ cwd: '.' })
     expect(result).toBe('')
+  })
+
+  it('should fail if no config file found and required', async () => {
+    await expect(
+      readProjectConfig({ cwd: '.', required: true })
+    ).rejects.toThrow()
   })
 
   it('should return empty string if config file is empty', async () => {

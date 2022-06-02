@@ -5,10 +5,12 @@ async function run(): Promise<void> {
   try {
     const cwd = core.getInput('cwd')
     const configFile = core.getInput('config_file')
+    const required = core.getBooleanInput('required')
 
     const json = await readProjectConfig({
       cwd,
       configFile,
+      required,
     })
 
     core.setOutput('project_ids_by_environment', json)

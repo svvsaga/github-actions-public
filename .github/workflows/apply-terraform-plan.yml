@@ -53,12 +53,12 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.10.0
+        uses: svvsaga/github-actions-public/read-project-config@v8.10.2
         with:
           cwd: ${{ inputs.saga_app_root }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v8.10.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v8.10.2
         with:
           service_account_key: ${{ secrets.service_account_key }}
           app_root: ${{ inputs.saga_app_root }}

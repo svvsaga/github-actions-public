@@ -10,6 +10,10 @@ inputs:
     description: Which file that contains the project config. Defaults to "projects.config.json".
     required: true
     default: projects.config.json
+  required:
+    description: Whether action should fail if no config file is found.
+    required: false
+    default: 'false'
 
 runs:
   using: node16
@@ -18,4 +22,3 @@ runs:
 outputs:
   project_ids_by_environment:
     description: Project IDs by environment (as stringified JSON)
-    value: ${{ steps.read_project_config.outputs.project_ids_by_environment }}
