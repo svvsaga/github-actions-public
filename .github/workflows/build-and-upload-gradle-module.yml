@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       storage_bucket:
-        description: The GCP storage bucket into which to upload artifact
+        description: The GCP storage bucket into which to upload artifacts.
         type: string
         required: true
       saga_app_root:

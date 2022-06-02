@@ -45,6 +45,7 @@ runs:
       run: |
         echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
+        echo ::set-output name=TF_INPUT::false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK with service account key
       if: ${{ inputs.service_account_key }}
