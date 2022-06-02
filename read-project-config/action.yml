@@ -41,6 +41,7 @@ runs:
         fi
         if [ -f "$CONFIG_FILE" ]; then
           echo ::set-output name=project_ids_by_environment::$(cat $CONFIG_FILE)
+          echo "Found $CONFIG_FILE:"
           cat $CONFIG_FILE
         else
           echo "Could not find $CONFIG_FILE"

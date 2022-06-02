@@ -51,7 +51,7 @@ runs:
     - name: Read project config
       id: read_project_config
       if: ${{ !inputs.project_id }}
-      uses: svvsaga/github-actions-public/read-project-config@v8.4.1
+      uses: svvsaga/github-actions-public/read-project-config@v8.9.1
       with:
         cwd: ${{ inputs.app_root }}
 
