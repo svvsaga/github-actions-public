@@ -85,6 +85,10 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REF: ${{ inputs.ref || github.sha }}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   create_release:
     name: Create release
