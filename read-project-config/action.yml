@@ -12,40 +12,8 @@ inputs:
     default: projects.config.json
 
 runs:
-  using: composite
-  steps:
-    - name: Verify that the code has been checked out
-      working-directory: .
-      shell: bash
-      run: |
-        if [ ! -d .git ]; then
-          echo "ERROR: Code must be checked out first"
-          exit 1
-        fi
-
-    - name: Read project config
-      id: read_project_config
-      working-directory: ${{ inputs.cwd }}
-      shell: bash
-      run: |
-        FILE="${{ inputs.config_file }}"
-        if ! [ -f "$FILE" ]; then
-          CONFIG_FILE=$(DIR=`pwd`
-            while [ "$DIR" != "/" ] ; do
-              DIR=`dirname "$DIR"`
-              find "$DIR" -maxdepth 1 -name "$FILE"
-            done
-          )
-        else
-          CONFIG_FILE="$FILE"
-        fi
-        if [ -f "$CONFIG_FILE" ]; then
-          echo ::set-output name=project_ids_by_environment::$(cat $CONFIG_FILE)
-          echo "Found $CONFIG_FILE:"
-          cat $CONFIG_FILE
-        else
-          echo "Could not find $CONFIG_FILE"
-        fi
+  using: node16
+  main: ./index.js
 
 outputs:
   project_ids_by_environment:
