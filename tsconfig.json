@@ -9,9 +9,13 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true
   },
-  "exclude": ["**/index.js"]
+  "exclude": [
+    "**/index.js"
+  ]
 }
