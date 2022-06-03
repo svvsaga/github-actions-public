@@ -77,7 +77,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Deploy plan for ${{ inputs.environment }}
-        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v9.0.0
+        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v9.0.1
         with:
           environment: ${{ inputs.environment }}
           project_root: ${{ inputs.app_root }}

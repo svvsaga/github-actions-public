@@ -41,10 +41,11 @@ export function readPaths(
   environment: string,
   gitSha: string,
   storagePrefix: string | undefined,
-  storageBucket: string
+  storageBucket: string,
+  terraformDir: string
 ): { planFilename: string; planFilepath: string; storagePath: String } {
   const planFilename = `plan_${environment}_${gitSha}.plan`
-  const planFilepath = resolve(process.env.GITHUB_WORKSPACE || '', planFilename)
+  const planFilepath = resolve(terraformDir, planFilename)
   const storagePath = storagePrefix
     ? `${storageBucket}/${storagePrefix}`
     : storageBucket

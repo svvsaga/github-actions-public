@@ -148,7 +148,8 @@ export async function deployTerraformPlan({
       environment,
       gitSha,
       storagePrefix,
-      storageBucket
+      storageBucket,
+      terraformDir
     )
     await downloadPlanData(storagePath, projectRoot, planFilename, terraformDir)
 

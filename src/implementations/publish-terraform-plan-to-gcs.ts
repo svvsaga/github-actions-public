@@ -60,7 +60,8 @@ export async function publishTerraformPlan({
     environment,
     gitSha,
     storagePrefix,
-    storageBucket
+    storageBucket,
+    terraformDir
   )
 
   if (terraformVars) {
