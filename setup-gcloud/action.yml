@@ -36,14 +36,14 @@ runs:
     - name: Setup Google Cloud SDK with service account key
       id: setup_gcloud_with_service_account_key
       if: ${{ inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.5.3
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v9.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
 
     - name: Setup Google Cloud SDK with workload identity federation
       id: setup_gcloud_with_workload_identity
       if: ${{ !inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.10.2
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v9.0.0
       with:
         app_root: ${{ inputs.app_root }}
         environment: ${{ inputs.environment }}

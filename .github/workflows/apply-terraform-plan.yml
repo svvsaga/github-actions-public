@@ -14,7 +14,7 @@ on:
         required: false
         type: string
         description: Set to 'true' to apply Terraform plan without checking if state has changed since plan was created.
-      saga_app_root:
+      app_root:
         description: Path to source code project from root of Git repo
         type: string
         required: true
@@ -53,15 +53,15 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.10.2
+        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
         with:
-          cwd: ${{ inputs.saga_app_root }}
+          cwd: ${{ inputs.app_root }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v8.10.2
+        uses: svvsaga/github-actions-public/setup-gcloud@v9.0.0
         with:
           service_account_key: ${{ secrets.service_account_key }}
-          app_root: ${{ inputs.saga_app_root }}
+          app_root: ${{ inputs.app_root }}
           environment: ${{ inputs.environment }}
 
       - name: Get app token
@@ -77,10 +77,10 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Deploy plan for ${{ inputs.environment }}
-        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v8.0.1
+        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v9.0.0
         with:
           environment: ${{ inputs.environment }}
-          project_root: ${{ inputs.saga_app_root }}
+          project_root: ${{ inputs.app_root }}
           storage_bucket: ${{ inputs.storage_bucket || format('svv-{0}', fromJson(steps.read_config.outputs.project_ids_by_environment)[inputs.environment]) }}
           application: ${{ inputs.application_name }}
           github_token: ${{ github.token }}

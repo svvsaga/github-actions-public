@@ -59,7 +59,7 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v8.10.2
+        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
         with:
           cwd: ${{ inputs.app_root }}
     outputs:
@@ -93,7 +93,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v8.10.2
+        uses: svvsaga/github-actions-public/setup-gcloud@v9.0.0
         with:
           service_account_key: ${{ secrets[matrix.sa_key_secret] }}
           app_root: ${{ inputs.app_root }}
@@ -112,7 +112,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Publish plan for ${{ matrix.environment }}
-        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v8.4.0
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v9.0.0
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}

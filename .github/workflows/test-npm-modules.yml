@@ -22,7 +22,7 @@ jobs:
 
       - name: Find modules with changes
         id: find-module-changes
-        uses: svvsaga/github-actions-public/find-module-changes@v8.0.1
+        uses: svvsaga/github-actions-public/find-module-changes@v9.0.0
         with:
           marker: package.json
           ignore_modules: ${{ inputs.ignore_modules }}

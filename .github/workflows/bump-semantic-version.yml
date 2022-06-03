@@ -2,7 +2,7 @@ name: Bump semantic version
 
 on:
   workflow_call:
-    
+
 jobs:
   bump-semantic-version:
     name: Bump semantic version
@@ -12,9 +12,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          
+
       - name: Bump semantic version
-        uses: svvsaga/github-actions-public/bump-semver-tag@v8.0.0
+        uses: svvsaga/github-actions-public/bump-semver-tag@v9.0.0
         id: bump-semver-tag
 
       - name: Push tag

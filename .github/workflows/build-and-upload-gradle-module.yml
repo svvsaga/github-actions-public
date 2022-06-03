@@ -7,12 +7,12 @@ on:
         description: The GCP storage bucket into which to upload artifacts.
         type: string
         required: true
-      saga_app_root:
+      app_root:
         description: Path to source code project from root of Git repo
         type: string
         required: true
       destination_path:
-        description: Path within storage bucket where to upload artifact. Defaults to `saga_app_root`.
+        description: Path within storage bucket where to upload artifact. Defaults to `app_root`.
         type: string
         required: false
         default: ""
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.saga_app_root }}
+        working-directory: ${{ inputs.app_root }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -95,13 +95,13 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v8.0.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v9.0.0
         if: ${{ !inputs.workload_identity_project_id }}
         with:
           service_account_key: ${{ secrets.storage_bucket_sa_publisher_key }}
 
       - name: Setup Google Cloud SDK with Workload Identity Federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v8.10.2
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v9.0.0
         if: ${{ inputs.workload_identity_project_id }}
         with:
           project_id: ${{ inputs.workload_identity_project_id }}
@@ -111,8 +111,8 @@ jobs:
       - name: Publish to GCS
         uses: google-github-actions/upload-cloud-storage@v0
         with:
-          path: ${{ inputs.saga_app_root }}
-          destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.saga_app_root }}
+          path: ${{ inputs.app_root }}
+          destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.app_root }}
           glob: ${{ inputs.publish_glob }}
           parent: false
           gzip: false
