@@ -31,21 +31,6 @@ on:
         required: false
         type: string
         default: ${{ github.sha }}
-      workload_identity_project_id:
-        description: The project ID of the workload identity project to use with `gcloud`.
-        type: string
-        required: false
-        default: ""
-      workload_identity_project_number:
-        description: The project number of the workload identity project to use with `gcloud`.
-        type: string
-        required: false
-        default: ""
-      workload_identity_service_account:
-        description: The username of the service account to use with `gcloud` (before the @). Will be used with the workload_identity_project_id. Defaults to `publisher`.
-        type: string
-        required: false
-        default: publisher
       gradlew_path:
         description: Relative path to the gradle wrapper. Defaults to `../gradlew`.
         type: string
@@ -56,9 +41,14 @@ on:
         type: string
         required: false
         default: "*.zip"
+      shared_project_config_root:
+        description: Relative path to the shared project config root (where the projects.config.json for the team shared project can be found). Defaults to repo root.
+        type: string
+        required: false
+        default: "."
     secrets:
       storage_bucket_sa_publisher_key:
-        description: Key for service account that has permission to upload to the given GCP storage bucket
+        description: Service account key used to publish JAR to artifact bucket. If not set, attempts to use Workload Identity Federation with shared project ID from `projects.config.json` in shared_project_config_root.
         required: false
 
 env:
@@ -94,19 +84,12 @@ jobs:
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
-      - name: Setup Google Cloud SDK with service account key
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v9.0.0
-        if: ${{ !inputs.workload_identity_project_id }}
+      - name: Setup Google Cloud SDK
+        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v12.0.0
         with:
+          app_root: ${{ inputs.shared_project_config_root }}
+          environment: SHARED
           service_account_key: ${{ secrets.storage_bucket_sa_publisher_key }}
-
-      - name: Setup Google Cloud SDK with Workload Identity Federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v9.0.0
-        if: ${{ inputs.workload_identity_project_id }}
-        with:
-          project_id: ${{ inputs.workload_identity_project_id }}
-          project_number: ${{ inputs.workload_identity_project_number }}
-          service_account: ${{ inputs.workload_identity_service_account }}
 
       - name: Publish to GCS
         uses: google-github-actions/upload-cloud-storage@v0
