@@ -4,9 +4,9 @@ on:
   workflow_call:
     inputs:
       storage_bucket:
-        description: The GCP storage bucket into which to upload artifacts.
+        description: GCS storage bucket where gradle module should be uploaded. If not set, attempts to use project ID from `projects.config.json` in shared_project_config_root.
         type: string
-        required: true
+        required: false
       app_root:
         description: Path to source code project from root of Git repo
         type: string
@@ -68,6 +68,12 @@ jobs:
         with:
           ref: ${{ env.REF }}
 
+      - name: Read shared project config
+        id: read_shared_config
+        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
+        with:
+          cwd: ${{ inputs.shared_project_config_root }}
+
       - name: Cache Gradle
         uses: actions/cache@v2
         with:
@@ -85,7 +91,7 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v12.0.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v10.0.0
         with:
           app_root: ${{ inputs.shared_project_config_root }}
           environment: SHARED
@@ -93,9 +99,12 @@ jobs:
 
       - name: Publish to GCS
         uses: google-github-actions/upload-cloud-storage@v0
+        env:
+          ARTIFACT_BUCKET: ${{ inputs.storage_bucket || format('{0}-artifacts', fromJson(steps.read_shared_config.outputs.project_ids_by_environment).SHARED) }}
+          ARTIFACT_PREFIX: ${{ inputs.destination_path || inputs.app_root }}
         with:
           path: ${{ inputs.app_root }}
-          destination: ${{ inputs.storage_bucket }}/${{ inputs.destination_path || inputs.app_root }}
+          destination: ${{ env.ARTIFACT_BUCKET }}/${{ env.ARTIFACT_PREFIX }}
           glob: ${{ inputs.publish_glob }}
           parent: false
           gzip: false
