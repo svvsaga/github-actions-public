@@ -55,6 +55,10 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REF: ${{ github.inputs.ref }}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build_module:
     name: Build module and publish
