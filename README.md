@@ -29,7 +29,7 @@ jobs:
   build:
     steps:
       - name: My Action
-        uses: svvsaga/github-actions-public/my-action@main
+        uses: svvsaga/github-actions-public/my-action@v10.0.2 # Check tags for latest release
 ```
 
 ## Naming conventions
