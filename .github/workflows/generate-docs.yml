@@ -26,7 +26,7 @@ jobs:
           token: ${{ steps.set-token.outputs.token }}
       
       - name: Generate docs
-        run: find . -iname action.yml -execdir sh -c 'npx action-docs --no-banner > README.md' \;
+        run: for file in **/action.yml; do pushd $(dirname "$file") && npx action-docs --no-banner > README.md && popd; done
 
       - name: Commit and push
         uses: EndBug/add-and-commit@998652d28d7702d095d40f52ae42982a80ae8c7d
