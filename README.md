@@ -1,5 +1,7 @@
 # GitHub Actions
 
+![Latest version](https://img.shields.io/github/v/tag/svvsaga/github-actions-public?label=Latest)
+
 Useful GitHub Actions!
 
 ## Publishing new versions
