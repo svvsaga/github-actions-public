@@ -13,5 +13,11 @@ jobs:
     name: Generate docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: find . -iname action.yml -execdir sh -c 'action-docs > README.md' \;
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Generate docs
+        run: find . -iname action.yml -execdir sh -c 'action-docs --no-banner > README.md' \;
+      
+      - name: Commit docs
+        run: git add . && git commit -m "Update docs" && git push origin main
