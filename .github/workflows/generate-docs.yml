@@ -18,7 +18,13 @@ jobs:
       
       - name: Generate docs
         run: find . -iname action.yml -execdir sh -c 'action-docs --no-banner > README.md' \;
-      
+
+      - name: Set GitHub token
+        uses: ./set-github-app-token
+        with:
+          private_key: ${{ secrets.PUBLIC_ACTIONS_APP_PEM }}
+          app_id: ${{ secrets.PUBLIC_ACTIONS_APP_ID }}
+          
       - name: Commit and push
         uses: EndBug/add-and-commit@998652d28d7702d095d40f52ae42982a80ae8c7d
         with:
