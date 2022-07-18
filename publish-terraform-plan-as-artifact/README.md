@@ -16,6 +16,7 @@ Publish Terraform plan as artifact
 | github_token | Token used when authenticating with GitHub. Defaults to `github.token`. | `false` | ${{ github.token }} |
 | plan_artifact_name | Name of the plan file to upload to GitHub artifacts. Defaults to "terraform.plan". | `false` | terraform.plan |
 | tf_backend_config | Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration. | `false` |  |
+| secrets_json | Secrets to use for Terraform, used to replace environment variables in "secrets.auto.tfvars". Optional. | `false` |  |
 
 
 ## Outputs

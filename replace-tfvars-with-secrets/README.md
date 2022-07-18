@@ -1,6 +1,6 @@
 ## Description
 
-undefined
+Replace Terraform variables with secrets
 
 ## Inputs
 
