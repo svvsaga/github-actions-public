@@ -1,4 +1,5 @@
 name: Replace Terraform variables with secrets
+description: Replace Terraform variables with secrets
 
 inputs:
   secrets_json:
