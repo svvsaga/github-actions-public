@@ -11,7 +11,7 @@ inputs:
   environment:
     description: The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED".
     required: false
-  wif_service_account:
+  service_account:
     description: The service account to use with Workload Identity Federation. Defaults to `terraform`. Not used if `service_account_key` is set.
     required: false
     default: terraform
@@ -51,7 +51,7 @@ runs:
       with:
         app_root: ${{ inputs.app_root }}
         environment: ${{ inputs.environment }}
-        service_account: ${{ inputs.wif_service_account }}
+        service_account: ${{ inputs.service_account }}
 
 outputs:
   credentials_file_path:
