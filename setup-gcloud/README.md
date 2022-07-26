@@ -9,7 +9,7 @@ Setup GCloud SDK. If service account key is passed, it will be used, otherwise t
 | service_account_key | The service account JSON secret key to use with `gcloud`. Either this or `app_root` and `environment` must be set. | `false` |  |
 | app_root | The root directory to use for searching for `projects.config.json`. | `false` |  |
 | environment | The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED". | `false` |  |
-| wif_service_account | The service account to use with Workload Identity Federation. Defaults to `terraform`. Not used if `service_account_key` is set. | `false` | terraform |
+| service_account | The service account to use with Workload Identity Federation. Defaults to `terraform`. Not used if `service_account_key` is set. | `false` | terraform |
 
 
 ## Outputs
