@@ -1,16 +1,20 @@
 name: Setup GCloud
-description: Setup GCloud SDK. If service account key is passed, it will be used, otherwise the action looks for a `projects.config.json` file in the app root, and uses the project ID and number for the given environment.
+description: Setup GCloud SDK. If service account key is passed, it will be used, otherwise the action looks for a `projects.config.json` file in the app root, and uses the project ID and number for the given environment to set up Workload Identity Federation. To generate a `projects.config.json`, see `npx generate-gcp-project-config` from https://github.com/svvsaga/node-modules-public.
 
 inputs:
   service_account_key:
-    description: The service account JSON secret key to use with `gcloud`.
+    description: The service account JSON secret key to use with `gcloud`. Either this or `app_root` and `environment` must be set.
     required: false
   app_root:
     description: The root directory to use for searching for `projects.config.json`.
     required: false
   environment:
-    description: The environment to use for finding the project ID and number.
+    description: The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED".
     required: false
+  wif_service_account:
+    description: The service account to use with Workload Identity Federation. Defaults to `terraform`. Not used if `service_account_key` is set.
+    required: false
+    default: terraform
 
 runs:
   using: composite
@@ -47,11 +51,12 @@ runs:
       with:
         app_root: ${{ inputs.app_root }}
         environment: ${{ inputs.environment }}
+        service_account: ${{ inputs.wif_service_account }}
 
 outputs:
   credentials_file_path:
-    description: The path to the credentials file used by `gcloud` to authenticate with the Workload Identity provider.
+    description: The path to the credentials file used by `gcloud`.
     value: ${{ steps.setup_gcloud_with_service_account_key.outputs.credentials_file_path || steps.setup_gcloud_with_workload_identity.outputs.credentials_file_path }}
   access_token:
-    description: The access token to use with `gcloud`
+    description: The access token used with `gcloud` if WIF is used.
     value: ${{ steps.setup_gcloud_with_workload_identity.outputs.access_token }}
