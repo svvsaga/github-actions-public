@@ -39,22 +39,36 @@ runs:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
 
+    - name: Check if plan exists
+      id: check-plan
+      uses: xSAVIKx/artifact-exists-action@95dbb80b8ad88baf1227ad1896c6761e4013a4c8
+      with:
+        name: ${{ inputs.plan_artifact_name }}
+
+    - name: Download plan
+      uses: actions/download-artifact@v3
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
+      with:
+        name: ${{ inputs.plan_artifact_name }}
+        path: ${{ inputs.terraform_dir }}
+
     - name: Read TF and TG versions
       working-directory: .
       shell: bash
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       run: |
         echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK with service account key
-      if: ${{ inputs.service_account_key }}
+      if: ${{ inputs.service_account_key && steps.check-plan.outputs.exists == 'true' }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v9.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
 
     - name: Setup Google Cloud SDK with Workload Identity Federation
-      if: ${{ !inputs.service_account_key }}
+      if: ${{ !inputs.service_account_key && steps.check-plan.outputs.exists == 'true' }}
       uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v9.0.0
       with:
         project_id: ${{ inputs.workload_identity_project_id }}
@@ -62,27 +76,25 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terraform_version: ${{ env.TF_VERSION }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
       uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
-    - name: Download plan
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ inputs.plan_artifact_name }}
-        path: ${{ inputs.terraform_dir }}
-
     - name: Terragrunt apply
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       env:

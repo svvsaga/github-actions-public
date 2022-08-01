@@ -101,14 +101,6 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: terragrunt plan -no-color -input=false -out="${{ inputs.plan_artifact_name }}"
 
-    - name: Upload plan
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ inputs.plan_artifact_name }}
-        path: ${{ inputs.terraform_dir }}/${{ inputs.plan_artifact_name }}
-        retention-days: 1
-        if-no-files-found: error
-
     - name: Set plan description filename env variable
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
@@ -119,19 +111,29 @@ runs:
       shell: bash
       run: terragrunt show -no-color ${{ inputs.plan_artifact_name }} > ${{ env.PLAN_TXT_FILENAME }}
 
-    - name: Publish plan description
-      id: publish-plan-description
-      uses: google-github-actions/upload-cloud-storage@v0
-      with:
-        path: ${{ inputs.terraform_dir }}/${{ env.PLAN_TXT_FILENAME }}
-        destination: ${{ inputs.plan_bucket }}/${{ inputs.plan_prefix }}
-        gzip: false
-
     - name: Set whether plan has changes
       id: set-has-changes
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       run: grep -q "No changes. Your infrastructure matches the configuration." "${{ env.PLAN_TXT_FILENAME }}" && echo "::set-output name=has_changes::0" && echo "No changes found." || echo "::set-output name=has_changes::1" && echo "Changes found."
+
+    - name: Upload plan
+      uses: actions/upload-artifact@v2
+      if: steps.set-has-changes.outputs.has_changes == 1
+      with:
+        name: ${{ inputs.plan_artifact_name }}
+        path: ${{ inputs.terraform_dir }}/${{ inputs.plan_artifact_name }}
+        retention-days: 1
+        if-no-files-found: error
+
+    - name: Publish plan description
+      id: publish-plan-description
+      if: steps.set-has-changes.outputs.has_changes == 1
+      uses: google-github-actions/upload-cloud-storage@v0
+      with:
+        path: ${{ inputs.terraform_dir }}/${{ env.PLAN_TXT_FILENAME }}
+        destination: ${{ inputs.plan_bucket }}/${{ inputs.plan_prefix }}
+        gzip: false
 
 outputs:
   has_changes:
