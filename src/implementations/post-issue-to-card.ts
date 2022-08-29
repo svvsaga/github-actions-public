@@ -23,6 +23,7 @@ export function getPrefixAndCardId(
 const boardIdByPrefix = new Map([
   ['KB', '9'],
   ['KBi', '20'],
+  ['KBv', '23'],
 ])
 
 interface Card {
@@ -39,7 +40,7 @@ export function findNextPr(card: Card, html_url: string): number | undefined {
     field.name.startsWith('Relatert PR')
   )
 
-  // Don't do anything if PR allready on card
+  // Don't do anything if PR already on card
   if (filtered.some((field) => field.value === html_url)) {
     return undefined
   }
