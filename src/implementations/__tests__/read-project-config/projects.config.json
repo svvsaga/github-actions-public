@@ -1,4 +1,9 @@
 {
+  "project_numbers": {
+    "STM": "123",
+    "ATM": "456",
+    "PROD": "789"
+  },
   "STM": "my-project-stm-123",
   "ATM": "my-project-atm-456",
   "PROD": "my-project-prod-789"
