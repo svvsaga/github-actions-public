@@ -1,4 +1,9 @@
 {
+  "project_numbers": {
+    "STM": "1233",
+    "ATM": "4566",
+    "PROD": "7899"
+  },
   "STM": "my-project-stm-abc",
   "ATM": "my-project-atm-def",
   "PROD": "my-project-prod-ghi"

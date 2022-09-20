@@ -1,11 +1,17 @@
-import { readProjectConfig } from '../read-project-config'
+import { ProjectConfig, readProjectConfig } from '../read-project-config'
 
 describe('readProjectConfig', () => {
   const testDir = new URL('read-project-config', import.meta.url).pathname
+  const emptyResult: ProjectConfig = {
+    project_ids: {},
+    project_numbers: {},
+    environments: [],
+  }
 
-  it('should return empty string if no config file found and not required', async () => {
+  it('should return empty objects if no config file found and not required', async () => {
     const result = await readProjectConfig({ cwd: '.' })
-    expect(result).toBe('')
+
+    expect(result).toEqual(emptyResult)
   })
 
   it('should fail if no config file found and required', async () => {
@@ -14,22 +20,30 @@ describe('readProjectConfig', () => {
     ).rejects.toThrow()
   })
 
-  it('should return empty string if config file is empty', async () => {
+  it('should return empty objects if config file is empty', async () => {
     const result = await readProjectConfig({
       cwd: testDir,
       configFile: 'projects.config.empty.json',
     })
-    expect(result).toBe('')
+    expect(result).toEqual(emptyResult)
   })
 
   it('should return values from test config file', async () => {
     const result = await readProjectConfig({
       cwd: testDir,
     })
-    expect(JSON.parse(result)).toEqual({
-      STM: 'my-project-stm-123',
-      ATM: 'my-project-atm-456',
-      PROD: 'my-project-prod-789',
+    expect(result).toEqual({
+      project_ids: {
+        STM: 'my-project-stm-123',
+        ATM: 'my-project-atm-456',
+        PROD: 'my-project-prod-789',
+      },
+      project_numbers: {
+        STM: '123',
+        ATM: '456',
+        PROD: '789',
+      },
+      environments: ['STM', 'ATM', 'PROD'],
     })
   })
 
@@ -37,10 +51,18 @@ describe('readProjectConfig', () => {
     const result = await readProjectConfig({
       cwd: `${testDir}/inner-project/inner-inner-project`,
     })
-    expect(JSON.parse(result)).toEqual({
-      STM: 'my-project-stm-abc',
-      ATM: 'my-project-atm-def',
-      PROD: 'my-project-prod-ghi',
+    expect(result).toEqual({
+      project_ids: {
+        STM: 'my-project-stm-abc',
+        ATM: 'my-project-atm-def',
+        PROD: 'my-project-prod-ghi',
+      },
+      project_numbers: {
+        STM: '1233',
+        ATM: '4566',
+        PROD: '7899',
+      },
+      environments: ['STM', 'ATM', 'PROD'],
     })
   })
 
@@ -48,10 +70,18 @@ describe('readProjectConfig', () => {
     const result = await readProjectConfig({
       cwd: `${testDir}/inner-project`,
     })
-    expect(JSON.parse(result)).toEqual({
-      STM: 'my-project-stm-abc',
-      ATM: 'my-project-atm-def',
-      PROD: 'my-project-prod-ghi',
+    expect(result).toEqual({
+      project_ids: {
+        STM: 'my-project-stm-abc',
+        ATM: 'my-project-atm-def',
+        PROD: 'my-project-prod-ghi',
+      },
+      project_numbers: {
+        STM: '1233',
+        ATM: '4566',
+        PROD: '7899',
+      },
+      environments: ['STM', 'ATM', 'PROD'],
     })
   })
 })

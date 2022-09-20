@@ -14,18 +14,6 @@ on:
         description: ID of GitHub release, typically output from actions/create-release
         type: string
         required: true
-      storage_bucket_stm:
-        description: Storage bucket for Terraform plan in STM (tries to use projects.config.json if not set)
-        type: string
-        required: false
-      storage_bucket_atm:
-        description: Storage bucket for Terraform plan in ATM (tries to use projects.config.json if not set)
-        type: string
-        required: false
-      storage_bucket_prod:
-        description: Storage bucket for Terraform plan in PROD (tries to use projects.config.json if not set)
-        type: string
-        required: false
 
     secrets:
       github_app_private_key:
@@ -34,15 +22,6 @@ on:
       github_app_id:
         description: GitHub application ID to get app token
         required: true
-      service_account_key_stm:
-        description: Service account key to use with `gcloud` for STM. If not set, attempts to use workload identity federation from projects.config.json.
-        required: false
-      service_account_key_atm:
-        description: Service account key to use with `gcloud` for ATM. If not set, attempts to use workload identity federation from projects.config.json.
-        required: false
-      service_account_key_prod:
-        description: Service account key to use with `gcloud` for PROD. If not set, attempts to use workload identity federation from projects.config.json.
-        required: false
       terraform_vars:
         description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'
         required: false
@@ -59,11 +38,11 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
+        uses: svvsaga/github-actions-public/read-project-config@v15.0.0
         with:
           cwd: ${{ inputs.app_root }}
     outputs:
-      project_ids_by_environment: ${{ steps.read_config.outputs.project_ids_by_environment }}
+      matrix: ${{ steps.read_config.outputs.matrix }}
 
   publish_plans:
     permissions:
@@ -74,18 +53,9 @@ jobs:
     needs: [ read_config ]
     strategy:
       fail-fast: false
-      matrix:
-        environment: [ STM, ATM, PROD ]
-        include:
-          - environment: STM
-            sa_key_secret: service_account_key_stm
-            storage_bucket: ${{ inputs.storage_bucket_stm || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).STM) }}
-          - environment: ATM
-            sa_key_secret: service_account_key_atm
-            storage_bucket: ${{ inputs.storage_bucket_atm || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).ATM) }}
-          - environment: PROD
-            sa_key_secret: service_account_key_prod
-            storage_bucket: ${{ inputs.storage_bucket_prod || format('svv-{0}', fromJson(needs.read_config.outputs.project_ids_by_environment).PROD) }}
+      matrix: ${{ fromJson(needs.read_config.outputs.matrix) }}
+    env:
+      STORAGE_BUCKET: ${{ format('svv-{0}', matrix.project_id) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -95,7 +65,6 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: svvsaga/github-actions-public/setup-gcloud@v9.0.0
         with:
-          service_account_key: ${{ secrets[matrix.sa_key_secret] }}
           app_root: ${{ inputs.app_root }}
           environment: ${{ matrix.environment }}
 
@@ -116,6 +85,6 @@ jobs:
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
-          storage_bucket: ${{ matrix.storage_bucket }}
+          storage_bucket: ${{ env.STORAGE_BUCKET }}
           release_id: ${{ inputs.release_id }}
           terraform_vars: ${{ secrets.terraform_vars }}
