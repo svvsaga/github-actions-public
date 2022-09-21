@@ -56,7 +56,6 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       uses: svvsaga/github-actions-public/setup-gcloud@v15.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
