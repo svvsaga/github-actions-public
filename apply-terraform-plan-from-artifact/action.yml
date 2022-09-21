@@ -9,14 +9,11 @@ inputs:
     description: Which commit, tag or branch to plan terraform from. Defaults to same as workflow is run from if empty.
     required: false
     default: ${{ github.sha }}
-  workload_identity_project_id:
-    description: The project ID of the workload identity project to use with `gcloud`. Will be used to set the `terraform@<workload_identity_project_id>.iam.gserviceaccount.com` service account.
-    required: false
-  workload_identity_project_number:
-    description: The project number of the workload identity project to use with `gcloud`. Will be used to set workload identity provider to `projects/<workload_identity_project_number>/locations/global/workloadIdentityPools/default/providers/github`.
-    required: false
   service_account_key:
     description: Service account key for the Terraform service account. Use either this or Workload Identity Federation.
+    required: false
+  environment:
+    description: STM, ATM, PROD or SHARED. Used to setup Workload Identity Federation. Must be set if service_account_key is not set.
     required: false
   github_token:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
@@ -61,18 +58,13 @@ runs:
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo TF_INPUT=false >> $GITHUB_ENV
 
-    - name: Setup Google Cloud SDK with service account key
-      if: ${{ inputs.service_account_key && steps.check-plan.outputs.exists == 'true' }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v9.0.0
+    - name: Setup Google Cloud SDK
+      if: ${{ steps.check-plan.outputs.exists == 'true' }}
+      uses: svvsaga/github-actions-public/setup-gcloud@v15.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
-
-    - name: Setup Google Cloud SDK with Workload Identity Federation
-      if: ${{ !inputs.service_account_key && steps.check-plan.outputs.exists == 'true' }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v9.0.0
-      with:
-        project_id: ${{ inputs.workload_identity_project_id }}
-        project_number: ${{ inputs.workload_identity_project_number }}
+        app_root: ${{ inputs.terraform_dir }}
+        environment: ${{ inputs.environment }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
