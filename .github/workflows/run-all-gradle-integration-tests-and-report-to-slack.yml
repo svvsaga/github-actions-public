@@ -86,11 +86,16 @@ jobs:
 
       - name: Gradle build and integration test
         id: build-and-inttest
+        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         continue-on-error: true
-        run: ${{ inputs.build_and_inttest_cmd }}
+        with:
+          timeout_minutes: 10
+          max_attempts: 2
+          retry_on: error
+          command: ${{ inputs.build_and_inttest_cmd }}
 
       - name: Send integration test errors to Slack channel
-        uses: slackapi/slack-github-action@v1.17.0
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844 # Corresponding to v1.23.0
         if: steps.build-and-inttest.outcome == 'failure'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
