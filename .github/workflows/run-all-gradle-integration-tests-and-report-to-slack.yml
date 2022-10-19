@@ -100,3 +100,6 @@ jobs:
               "project_name": "${{ matrix.folder }}",
               "github_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             }
+      - name: Fail job if integration tests fail
+        if: steps.build-and-inttest.outcome == 'failure'
+        run: exit 1
