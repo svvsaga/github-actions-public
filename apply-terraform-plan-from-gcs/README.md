@@ -6,7 +6,7 @@ Apply Terraform plan from storage bucket. Requires that Google Cloud SDK has bee
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | project_root | Where to find the terraform directory. | `true` |  |
 | environment | Which environment to deploy plan for (STM, ATM, PROD). | `true` | STM |
 | storage_bucket | Where to read the Terraform plan. | `true` |  |

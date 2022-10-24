@@ -5,7 +5,7 @@ Apply Terraform plan from artifact in previous job
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | terraform_dir | The working directory, e.g. where the Terraform files are located. | `true` |  |
 | ref | Which commit, tag or branch to plan terraform from. Defaults to same as workflow is run from if empty. | `false` | ${{ github.sha }} |
 | service_account_key | Service account key for the Terraform service account. Use either this or Workload Identity Federation. | `false` |  |

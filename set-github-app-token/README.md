@@ -5,7 +5,7 @@ Creates a GitHub token for the GitHub App and sets it as GITHUB_TOKEN, as well a
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | private_key | Private key for the GitHub App | `true` |  |
 | app_id | GitHub App ID | `true` |  |
 
@@ -13,7 +13,7 @@ Creates a GitHub token for the GitHub App and sets it as GITHUB_TOKEN, as well a
 ## Outputs
 
 | parameter | description |
-| - | - |
+| --- | --- |
 | token | GitHub token |
 
 

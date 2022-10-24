@@ -5,7 +5,7 @@ Setup GCloud SDK. If service account key is passed, it will be used, otherwise t
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | service_account_key | The service account JSON secret key to use with `gcloud`. Either this or `app_root` and `environment` must be set. | `false` |  |
 | app_root | The root directory to use for searching for `projects.config.json`. | `false` |  |
 | environment | The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED". | `false` |  |
@@ -15,7 +15,7 @@ Setup GCloud SDK. If service account key is passed, it will be used, otherwise t
 ## Outputs
 
 | parameter | description |
-| - | - |
+| --- | --- |
 | credentials_file_path | The path to the credentials file used by `gcloud`. |
 | access_token | The access token used with `gcloud` if WIF is used. |
 

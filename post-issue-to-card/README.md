@@ -5,7 +5,7 @@ Uses a http POST to add PR to Kanbanize Card
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | token | GitHub token. Defaults to `github.token`. | `true` | ${{ github.token }} |
 | apikey | API key to Kanbanize. | `true` |  |
 | cardIdRegex | Regular expresion for obtaining cardId from pull request description. | `false` | (KB|KBi)-[0-9]+ |

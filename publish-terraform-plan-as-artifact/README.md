@@ -5,7 +5,7 @@ Publish Terraform plan as artifact
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | terraform_dir | The working directory, e.g. where the Terraform files are located. | `true` |  |
 | plan_bucket | The GCS bucket where the Terraform plan description will be stored. | `true` |  |
 | plan_prefix | Folder / prefix to add to the plan description file name in GCS. E.g. "terraform-plans/my-app". | `true` |  |
@@ -21,7 +21,7 @@ Publish Terraform plan as artifact
 ## Outputs
 
 | parameter | description |
-| - | - |
+| --- | --- |
 | has_changes | Whether the plan has changes. |
 | plan_description_url | Full URL of the plan description. |
 

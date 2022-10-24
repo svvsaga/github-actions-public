@@ -6,7 +6,7 @@ Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has bee
 ## Inputs
 
 | parameter | description | required | default |
-| - | - | - | - |
+| --- | --- | --- | --- |
 | project_root | Where to find the terraform directory. | `true` |  |
 | environment | Which environment to publish plan for (STM, ATM, PROD, SHARED). | `true` | STM |
 | release_id | If it should upload the plan text version to a release, add the release ID number. | `false` |  |
