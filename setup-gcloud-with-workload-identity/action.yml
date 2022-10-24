@@ -58,10 +58,10 @@ runs:
     - name: Check project ID and number
       working-directory: .
       shell: bash
-      if: ${{ !inputs.project_id || !inputs.project_number }}
+      if: ${{ !(inputs.project_id && inputs.project_number) }}
       env:
-        PROJECT_ID: ${{ fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
-        PROJECT_NUMBER: ${{ fromJson(steps.read_project_config.outputs.project_numbers_by_environment)[inputs.environment] }}
+        PROJECT_ID: ${{ !(inputs.project_id && inputs.project_number) && fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
+        PROJECT_NUMBER: ${{ !(inputs.project_id && inputs.project_number) && fromJson(steps.read_project_config.outputs.project_numbers_by_environment)[inputs.environment] }}
       run: |
         if [ -z "$PROJECT_ID" ]; then
           echo "ERROR: Project ID not found for environment '${{ inputs.environment }}'"
