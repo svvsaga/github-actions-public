@@ -78,7 +78,7 @@ jobs:
           cwd: ${{ matrix.path }}
 
       - name: Setup Google Cloud SDK with workload identity federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v16.0.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v16.1.1
         with:
           service_account: ${{ steps.read-integration-testing-config.outputs.service_account }}
           project_id: ${{ steps.read-integration-testing-config.outputs.workload_identity_project_id }}
