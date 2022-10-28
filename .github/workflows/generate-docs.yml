@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set GitHub token
-        uses: svvsaga/github-actions-public/set-github-app-token@v17.0.0
+        uses: svvsaga/github-actions-public/set-github-app-token@main
         id: set-token
         with:
           private_key: ${{ secrets.PUBLIC_ACTIONS_APP_PEM }}
