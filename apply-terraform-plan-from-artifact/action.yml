@@ -31,7 +31,7 @@ runs:
   using: composite
   steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
@@ -60,14 +60,14 @@ runs:
 
     - name: Setup Google Cloud SDK
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
-      uses: svvsaga/github-actions-public/setup-gcloud@v15.0.0
+      uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ inputs.environment }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terraform_version: ${{ env.TF_VERSION }}

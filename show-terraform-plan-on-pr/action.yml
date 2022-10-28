@@ -22,43 +22,43 @@ runs:
   using: composite
   steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         token: ${{ inputs.github_token }}
 
     - name: Read Terraform PR config
       id: read-terraform-pr-config
-      uses: svvsaga/github-actions-public/read-terraform-pr-config@v9.0.0
+      uses: svvsaga/github-actions-public/read-terraform-pr-config@v17.0.0
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Read Terraform dependencies
       id: read-terraform-dependencies
-      uses: svvsaga/github-actions-public/read-terraform-dependencies@v9.0.0
+      uses: svvsaga/github-actions-public/read-terraform-dependencies@v17.0.0
       with:
         cwd: ${{ inputs.terraform_dir }}
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v10.0.0
+      uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
       with:
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ steps.read-terraform-pr-config.outputs.environment }}
         service_account_key: ${{ inputs.service_account_key || steps.read-terraform-pr-config.outputs.sa_secret_key }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ steps.read-terraform-dependencies.outputs.tf_version }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
+      uses: autero1/action-terragrunt@d4de6a145d2e35e57ce5a5b856238ed3ada062b9
       with:
         terragrunt_version: ${{ steps.read-terraform-dependencies.outputs.tg_version }}
 
     - name: Terraform init dependencies
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       env:
         DEPENDENCIES: ${{ steps.read-terraform-dependencies.outputs.tg_dependencies }}
         ENVIRONMENT: ${{ steps.read-terraform-pr-config.outputs.environment }}
@@ -145,7 +145,7 @@ runs:
         echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
 
     - name: Show Terraform status
-      uses: actions/github-script@v3
+      uses: actions/github-script@v6
       with:
         github-token: ${{ github.token }}
         script: |

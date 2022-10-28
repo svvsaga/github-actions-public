@@ -68,13 +68,13 @@ jobs:
         working-directory: ${{ inputs.app_root }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ env.REF }}
 
       - name: Read shared project config
         id: read_shared_config
-        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
+        uses: svvsaga/github-actions-public/read-project-config@v17.0.0
         with:
           cwd: ${{ inputs.shared_project_config_root }}
 
@@ -91,7 +91,7 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v10.0.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
         with:
           app_root: ${{ inputs.shared_project_config_root }}
           environment: SHARED

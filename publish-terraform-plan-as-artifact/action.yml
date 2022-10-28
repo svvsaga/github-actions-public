@@ -42,7 +42,7 @@ runs:
   using: composite
   steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
@@ -56,14 +56,14 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v15.0.0
+      uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ inputs.environment }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ env.TF_VERSION }}
         terraform_wrapper: false
@@ -79,7 +79,7 @@ runs:
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Replace Terraform variables with secrets
-      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v8.1.1
+      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v17.0.0
       if: inputs.secrets_json != ''
       with:
         secrets_json: ${{ inputs.secrets_json }}

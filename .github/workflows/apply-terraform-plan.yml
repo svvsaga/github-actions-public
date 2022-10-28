@@ -47,18 +47,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ inputs.ref }}
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v9.0.0
+        uses: svvsaga/github-actions-public/read-project-config@v17.0.0
         with:
           cwd: ${{ inputs.app_root }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v9.0.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
         with:
           service_account_key: ${{ secrets.service_account_key }}
           app_root: ${{ inputs.app_root }}
@@ -66,7 +66,7 @@ jobs:
 
       - name: Get app token
         id: get_token
-        uses: tibdex/github-app-token@36464acb844fc53b9b8b2401da68844f6b05ebb0
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c
         with:
           private_key: ${{ secrets.github_app_private_key }}
           app_id: ${{ secrets.github_app_id }}
@@ -77,7 +77,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Deploy plan for ${{ inputs.environment }}
-        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v9.0.1
+        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v17.0.0
         with:
           environment: ${{ inputs.environment }}
           project_root: ${{ inputs.app_root }}
