@@ -106,7 +106,9 @@ runs:
       id: set-has-changes
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
-      run: grep -q "No changes. Your infrastructure matches the configuration." "${{ env.PLAN_TXT_FILENAME }}" && echo "::set-output name=has_changes::0" && echo "No changes found." || echo "::set-output name=has_changes::1" && echo "Changes found."
+      run: |
+        grep -q "No changes. Your infrastructure matches the configuration." "${{ env.PLAN_TXT_FILENAME }}"
+        echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Upload plan
       uses: actions/upload-artifact@v2
