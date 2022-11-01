@@ -22,7 +22,7 @@ jobs:
 
       - name: Find modules with changes
         id: find-module-changes
-        uses: svvsaga/github-actions-public/find-gradle-module-changes@v17.0.0
+        uses: svvsaga/github-actions-public/find-gradle-module-changes@v17.1.2
         with:
           token: ${{ github.token }}
     outputs:

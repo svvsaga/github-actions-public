@@ -74,7 +74,7 @@ jobs:
 
       - name: Read shared project config
         id: read_shared_config
-        uses: svvsaga/github-actions-public/read-project-config@v17.0.0
+        uses: svvsaga/github-actions-public/read-project-config@v17.1.2
         with:
           cwd: ${{ inputs.shared_project_config_root }}
 
@@ -91,7 +91,7 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v17.0.0
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.1.2
         with:
           app_root: ${{ inputs.shared_project_config_root }}
           environment: SHARED
