@@ -1,0 +1,113 @@
+name: Create release and publish terraform plans
+
+on:
+  workflow_call:
+    inputs:
+      app_id:
+        required: true
+        type: string
+        description: Identifier of the app, used to create the release name. Use lowercase, dashes and numbers only.
+      app_root:
+        required: true
+        type: string
+        description: Relative path to the app to deploy, in which the gradle module and terraform folder exists.
+      ref:
+        description: Which ref to create release for. Defaults to same as workflow is run from if empty.
+        required: false
+        type: string
+        default: ${{ github.sha }}
+
+    secrets:
+      github_app_private_key:
+        description: Private key for GitHub application to get app token.
+        required: true
+      github_app_id:
+        description: GitHub application ID to get app token.
+        required: true
+      terraform_vars:
+        description: Additional variables for Terraform in .tfvar-format with quotes escaped and newlines, e.g. 'foo = \"abc\"\nbar = \"def\"'.
+        required: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REF: ${{ inputs.ref || github.sha }}
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        with:
+          tag_name: ${{ inputs.app_id }}-v${{ inputs.app_version }}
+          target_commitish: ${{ env.REF }}
+          generate_release_notes: true
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+
+  read_config:
+    name: Read shared project config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Read project config
+        id: read_config
+        uses: svvsaga/github-actions-public/read-project-config@v17.0.2
+        with:
+          cwd: ${{ inputs.app_root }}
+
+    outputs:
+      matrix: ${{ steps.read_config.outputs.matrix }}
+
+  publish_plans:
+    name: Publish Terraform plans
+    runs-on: ubuntu-latest
+    needs: [ create_release, read_config ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.read_config.outputs.matrix) }}
+    env:
+      PLAN_BUCKET: ${{ format('svv-{0}', matrix.project_id) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Google Cloud SDK
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.0.2
+        with:
+          app_root: ${{ inputs.app_root }}
+          environment: ${{ matrix.environment }}
+
+      - name: Get app token
+        id: get_token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c
+        with:
+          private_key: ${{ secrets.github_app_private_key }}
+          app_id: ${{ secrets.github_app_id }}
+
+      - name: Set GitHub token
+        run: |
+          git config --global url."https://x-access-token:${{ steps.get_token.outputs.token }}@github.com".insteadOf https://github.com
+          echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
+
+      - name: Publish plan for ${{ matrix.environment }}
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v17.0.2
+        with:
+          environment: ${{ matrix.environment }}
+          project_root: ${{ inputs.app_root }}
+          storage_bucket: ${{ env.PLAN_BUCKET }}
+          release_id: ${{ needs.create_release.outputs.release_id }}
+          terraform_vars: ${{ secrets.terraform_vars }}
