@@ -71,7 +71,6 @@ async function downloadPlanData(
 ): Promise<void> {
   core.info('Download plan data from Google Storage')
   await exec('gcloud', [
-    'alpha',
     'storage',
     'cp',
     `gs://${storagePath}/terraform-plans/${projectRoot}/${planFilename}*`,
