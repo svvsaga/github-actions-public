@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { extractOperations } from '../apply-terraform-plan-from-gcs'
 
 describe('extractOperations', () => {

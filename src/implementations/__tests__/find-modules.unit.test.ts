@@ -1,5 +1,6 @@
 import { resolve } from 'path'
-import { findAffectedModules, findModules } from '../../utils/modules'
+import { findAffectedModules, findModules } from '~/utils/modules'
+import { describe, expect, it } from 'vitest'
 
 describe('find-terraform-changes', () => {
   describe('findModules', () => {

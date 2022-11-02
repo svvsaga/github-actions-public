@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { findNextPr, getPrefixAndCardId } from '../post-issue-to-card'
 
 describe('post-issue-to-card', () => {

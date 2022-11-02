@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { replaceTfvars } from '../replace-tfvars-with-secrets'
 
 describe('replaceTfvars', () => {

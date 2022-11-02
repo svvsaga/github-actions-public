@@ -1,5 +1,7 @@
 import { ProjectConfig, readProjectConfig } from '../read-project-config'
 
+import { describe, expect, it } from 'vitest'
+
 describe('readProjectConfig', () => {
   const testDir = new URL('read-project-config', import.meta.url).pathname
   const emptyResult: ProjectConfig = {
