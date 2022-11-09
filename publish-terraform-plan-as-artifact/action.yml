@@ -107,6 +107,7 @@ runs:
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       run: |
+        set +e
         grep -q "No changes. Your infrastructure matches the configuration." "${{ env.PLAN_TXT_FILENAME }}"
         echo "has_changes=$?" >> $GITHUB_OUTPUT
 
