@@ -87,7 +87,11 @@ jobs:
       - name: Gradle build and integration test
         id: build-and-inttest
         continue-on-error: true
-        run: ${{ inputs.build_and_inttest_cmd }}
+        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
+        with:
+          command: ${{ inputs.build_and_inttest_cmd }}
+          retry_wait_seconds: 60
+          max_attempts: 3
 
       - name: Send integration test errors to Slack channel
         uses: slackapi/slack-github-action@v1.17.0
