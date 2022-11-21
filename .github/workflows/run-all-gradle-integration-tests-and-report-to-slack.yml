@@ -91,6 +91,7 @@ jobs:
         with:
           command: ${{ inputs.build_and_inttest_cmd }}
           retry_wait_seconds: 60
+          timeout_minutes: 10
           max_attempts: 3
 
       - name: Send integration test errors to Slack channel
