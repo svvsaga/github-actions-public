@@ -89,7 +89,7 @@ jobs:
         continue-on-error: true
         uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         with:
-          command: ${{ inputs.build_and_inttest_cmd }}
+          command: cd ${{ matrix.path }} && ${{ inputs.build_and_inttest_cmd }}
           retry_wait_seconds: 60
           timeout_minutes: 10
           max_attempts: 3
