@@ -69,7 +69,7 @@ runs:
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@25ff9d20b92812c1870be23cce4b965c1ea59008
+      uses: autero1/action-terragrunt@d4de6a145d2e35e57ce5a5b856238ed3ada062b9
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
