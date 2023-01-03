@@ -94,13 +94,13 @@ jobs:
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v17.1.2
+        uses: svvsaga/github-actions-public/read-project-config@v17.2.3
         with:
           cwd: ${{ inputs.app_root }}
 
       - name: Read shared project config
         id: read_shared_config
-        uses: svvsaga/github-actions-public/read-project-config@v17.1.2
+        uses: svvsaga/github-actions-public/read-project-config@v17.2.3
         with:
           cwd: ${{ inputs.shared_project_config_root }}
 
@@ -138,7 +138,7 @@ jobs:
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v17.1.2
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.2.3
         with:
           app_root: ${{ inputs.shared_project_config_root }}
           environment: SHARED
@@ -173,7 +173,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v17.1.2
+        uses: svvsaga/github-actions-public/setup-gcloud@v17.2.3
         with:
           app_root: ${{ inputs.app_root }}
           environment: ${{ matrix.environment }}
@@ -191,7 +191,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Publish plan for ${{ matrix.environment }}
-        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v17.1.2
+        uses: svvsaga/github-actions-public/publish-terraform-plan-to-gcs@v17.2.3
         with:
           environment: ${{ matrix.environment }}
           project_root: ${{ inputs.app_root }}
