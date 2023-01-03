@@ -9,6 +9,6 @@ jobs:
     name: Post issue to card
     runs-on: ubuntu-latest
     steps:
-      - uses: svvsaga/github-actions-public/post-issue-to-card@v17.1.2
+      - uses: svvsaga/github-actions-public/post-issue-to-card@v17.2.3
         with:
           apikey: ${{ secrets.KANBANIZE_API_KEY }}
