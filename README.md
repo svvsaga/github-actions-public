@@ -62,7 +62,7 @@ jobs:
   build:
     steps:
       - name: My Action
-        uses: svvsaga/github-actions-public/my-action@v17.2.3
+        uses: svvsaga/github-actions-public/my-action@v17.2.6
 ```
 
 ## Publishing new versions

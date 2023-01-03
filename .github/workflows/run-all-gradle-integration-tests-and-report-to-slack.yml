@@ -38,7 +38,7 @@ jobs:
 
       - name: Find gradle modules
         id: find-gradle-modules
-        uses: svvsaga/github-actions-public/find-gradle-module-changes@v17.2.3
+        uses: svvsaga/github-actions-public/find-gradle-module-changes@v17.2.6
         with:
           include_all: true
           ignore_modules_regex: ${{ inputs.ignore_modules_regex }}
@@ -73,12 +73,12 @@ jobs:
 
       - name: Read integration testing config
         id: read-integration-testing-config
-        uses: svvsaga/github-actions-public/read-integration-testing-config@v17.2.3
+        uses: svvsaga/github-actions-public/read-integration-testing-config@v17.2.6
         with:
           cwd: ${{ matrix.path }}
 
       - name: Setup Google Cloud SDK with workload identity federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v17.2.3
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v17.2.6
         with:
           service_account: ${{ steps.read-integration-testing-config.outputs.service_account }}
           project_id: ${{ steps.read-integration-testing-config.outputs.workload_identity_project_id }}
