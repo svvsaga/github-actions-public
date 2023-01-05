@@ -43,7 +43,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: svvsaga/action-gh-release
+        uses: svvsaga/action-gh-release@master
         with:
           tag_name: ${{ inputs.app_id }}-v${{ github.run_number }}
           target_commitish: ${{ env.REF }}
@@ -93,7 +93,7 @@ jobs:
 
       - name: Get app token
         id: get_token
-        uses: svvsaga/github-app-token
+        uses: svvsaga/github-app-token@main
         with:
           private_key: ${{ secrets.github_app_private_key }}
           app_id: ${{ secrets.github_app_id }}
