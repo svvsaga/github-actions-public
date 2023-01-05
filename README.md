@@ -12,6 +12,8 @@ Useful GitHub Actions!
    - [Readme](./apply-terraform-plan-from-gcs/README.md)
  - **bump-semver-tag/**
    - [Readme](./bump-semver-tag/README.md)
+ - **end-deployment/**
+   - [Readme](./end-deployment/README.md)
  - **find-gradle-module-changes/**
    - [Readme](./find-gradle-module-changes/README.md)
  - **find-module-changes/**
@@ -48,6 +50,8 @@ Useful GitHub Actions!
    - [Readme](./setup-gcloud-with-workload-identity/README.md)
  - **show-terraform-plan-on-pr/**
    - [Readme](./show-terraform-plan-on-pr/README.md)
+ - **start-deployment/**
+   - [Readme](./start-deployment/README.md)
  - **tag-semantic-version/**
    - [Readme](./tag-semantic-version/README.md)
 
