@@ -28,19 +28,19 @@ runs:
 
     - name: Read Terraform PR config
       id: read-terraform-pr-config
-      uses: svvsaga/github-actions-public/read-terraform-pr-config@v17.2.6
+      uses: svvsaga/github-actions-public/read-terraform-pr-config@v19.0.1
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Read Terraform dependencies
       id: read-terraform-dependencies
-      uses: svvsaga/github-actions-public/read-terraform-dependencies@v17.2.6
+      uses: svvsaga/github-actions-public/read-terraform-dependencies@v19.0.1
       with:
         cwd: ${{ inputs.terraform_dir }}
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v17.2.6
+      uses: svvsaga/github-actions-public/setup-gcloud@v19.0.1
       with:
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ steps.read-terraform-pr-config.outputs.environment }}

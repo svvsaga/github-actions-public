@@ -56,7 +56,7 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v17.2.6
+      uses: svvsaga/github-actions-public/setup-gcloud@v19.0.1
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
@@ -79,7 +79,7 @@ runs:
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Replace Terraform variables with secrets
-      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v17.2.6
+      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v19.0.1
       if: inputs.secrets_json != ''
       with:
         secrets_json: ${{ inputs.secrets_json }}
