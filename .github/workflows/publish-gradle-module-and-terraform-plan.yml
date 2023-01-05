@@ -75,7 +75,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        uses: svvsaga/action-gh-release
         with:
           tag_name: ${{ inputs.app_id }}-v${{ inputs.app_version }}
           target_commitish: ${{ env.REF }}
@@ -180,7 +180,7 @@ jobs:
 
       - name: Get app token
         id: get_token
-        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c
+        uses: svvsaga/github-app-token
         with:
           private_key: ${{ secrets.github_app_private_key }}
           app_id: ${{ secrets.github_app_id }}
