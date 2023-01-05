@@ -32,11 +32,11 @@ inputs:
   tf_backend_config:
     description: Terraform backend configuration to use. See https://www.terraform.io/docs/language/settings/backends/configuration.html#partial-configuration.
     required: false
-    default: ""
+    default: ''
   secrets_json:
     description: Secrets to use for Terraform, used to replace environment variables in "secrets.auto.tfvars". Optional.
     required: false
-    default: ""
+    default: ''
 
 runs:
   using: composite
@@ -56,7 +56,7 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.1
+      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.2
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
@@ -69,7 +69,7 @@ runs:
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: svvsaga/action-terragrunt@master
+      uses: svvsaga/action-terragrunt@v1.2.0
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
@@ -79,7 +79,7 @@ runs:
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Replace Terraform variables with secrets
-      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v20.0.1
+      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v20.0.2
       if: inputs.secrets_json != ''
       with:
         secrets_json: ${{ inputs.secrets_json }}

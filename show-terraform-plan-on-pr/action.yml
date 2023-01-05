@@ -8,7 +8,7 @@ inputs:
   service_account_key:
     description: Terraform Service Account private key to use with `gcloud`. If not specified, will be read from 'tf-pr-action-config.json'. If not set there either, Workload Identity Federation with project.config.json will be used, based on environment in `tf-pr-action-config.json`.
     required: false
-    default: ""
+    default: ''
   github_token:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
     required: false
@@ -16,7 +16,7 @@ inputs:
   secrets_json:
     description: JSON string containing secrets to pass to Terraform.
     required: false
-    default: "{}"
+    default: '{}'
 
 runs:
   using: composite
@@ -28,19 +28,19 @@ runs:
 
     - name: Read Terraform PR config
       id: read-terraform-pr-config
-      uses: svvsaga/github-actions-public/read-terraform-pr-config@v20.0.1
+      uses: svvsaga/github-actions-public/read-terraform-pr-config@v20.0.2
       with:
         cwd: ${{ inputs.terraform_dir }}
         secrets_json: ${{ inputs.secrets_json }}
 
     - name: Read Terraform dependencies
       id: read-terraform-dependencies
-      uses: svvsaga/github-actions-public/read-terraform-dependencies@v20.0.1
+      uses: svvsaga/github-actions-public/read-terraform-dependencies@v20.0.2
       with:
         cwd: ${{ inputs.terraform_dir }}
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.1
+      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.2
       with:
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ steps.read-terraform-pr-config.outputs.environment }}
@@ -53,7 +53,7 @@ runs:
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: svvsaga/action-terragrunt@master
+      uses: svvsaga/action-terragrunt@v1.2.0
       with:
         terragrunt_version: ${{ steps.read-terraform-dependencies.outputs.tg_version }}
 
