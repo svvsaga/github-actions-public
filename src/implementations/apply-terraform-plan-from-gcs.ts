@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import { exec } from '@actions/exec'
-import * as github from '@actions/github'
 import { readFileSync } from 'fs'
 import last from 'lodash/last'
+import { endDeployment, startDeployment } from '~/utils/deployment'
 import { getTerraformDir, readPaths } from '~/utils/path'
 import {
   getExecOptions,
@@ -64,7 +64,7 @@ and found no differences, so no changes are needed.`,
 }
 
 async function downloadPlanData(
-  storagePath: String,
+  storagePath: string,
   projectRoot: string,
   planFilename: string,
   terraformDir: string
@@ -92,48 +92,13 @@ export async function deployTerraformPlan({
   const gitSha = await getGitSha(execOptions, terraformDir)
   const rootSha = await getGitSha(execOptions)
 
-  core.info(`Create deployment for ref ${rootSha}`)
-  const octokit = github.getOctokit(githubToken, {
-    previews: ['ant-man-preview', 'flash-preview'],
-  })
-
-  const { owner, repo } = github.context.repo
-
-  const deploymentResponse = await octokit.rest.repos.createDeployment({
-    owner,
-    repo,
+  const deployment_id = await startDeployment({
     ref: rootSha,
-    description: `Deploy ${application} ${gitSha} to ${environment}`,
-    environment: `${application} ${environment} TF`,
-    production_environment: environment === 'PROD',
-    auto_merge: false,
-    required_contexts: [],
+    application,
+    environment,
+    githubToken,
+    environmentSuffix: 'TF',
   })
-
-  if (deploymentResponse.status >= 300 || !('id' in deploymentResponse.data)) {
-    throw new Error(
-      `Failed to create deployment: ${
-        deploymentResponse.status
-      } - ${JSON.stringify(deploymentResponse.data)}`
-    )
-  }
-
-  core.info('Set deployment to "In progress"')
-  const { id: deployment_id } = deploymentResponse.data
-  const createDeploymentStatusResponse =
-    await octokit.rest.repos.createDeploymentStatus({
-      deployment_id,
-      owner,
-      repo,
-      state: 'in_progress',
-    })
-  if (createDeploymentStatusResponse.status >= 300) {
-    throw new Error(
-      `Failed to create deployment status: ${
-        createDeploymentStatusResponse.status
-      } - ${JSON.stringify(createDeploymentStatusResponse.data)}`
-    )
-  }
 
   let success = false
 
@@ -206,11 +171,6 @@ export async function deployTerraformPlan({
 
     success = true
   } finally {
-    await octokit.rest.repos.createDeploymentStatus({
-      deployment_id,
-      owner,
-      repo,
-      state: success ? 'success' : 'failure',
-    })
+    await endDeployment({ deployment_id, githubToken, success })
   }
 }

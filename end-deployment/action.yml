@@ -1,0 +1,16 @@
+name: End GitHub deployment
+description: End a GitHub deployment, setting status to either 'success' or 'failure'.
+runs:
+  using: node16
+  main: ./index.js
+inputs:
+  deployment_id:
+    description: ID of the deployment to end.
+    required: true
+  success:
+    description: Set to 'true' to end deployment with status 'success', otherwise 'failure'.
+    required: true
+  github_token:
+    description: Token used to update GitHub deployment. Defaults to `github.token`.
+    required: true
+    default: ${{ github.token }}

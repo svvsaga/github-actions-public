@@ -43,7 +43,7 @@ export function readPaths(
   storagePrefix: string | undefined,
   storageBucket: string,
   terraformDir: string
-): { planFilename: string; planFilepath: string; storagePath: String } {
+): { planFilename: string; planFilepath: string; storagePath: string } {
   const planFilename = `plan_${environment}_${gitSha}.plan`
   const planFilepath = resolve(terraformDir, planFilename)
   const storagePath = storagePrefix
