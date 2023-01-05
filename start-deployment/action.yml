@@ -1,0 +1,27 @@
+name: Start GitHub deployment
+description: Create a GitHub deployment and set status to in_progress. Will connect deployment to a GitHub Environment (see https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment).
+runs:
+  using: node16
+  main: ./index.js
+inputs:
+  ref:
+    description: Git ref to deploy. Defaults to current commit.
+    required: false
+    default: ${{ github.sha }}
+  environment:
+    description: Which environment to deploy plan for (e.g. STM, ATM, PROD). Will be used as part of GitHub Environment name. Optional.
+    required: false
+  application:
+    description: Name of the application that is being deployed, e.g. 'Oppetid'. Will be used as part of GitHub Environment name.
+    required: true
+  github_token:
+    description: Token used to create and update GitHub deployment. Defaults to `github.token`.
+    required: true
+    default: ${{ github.token }}
+  environment_suffix:
+    description: Suffix to add to GitHub Environment name, e.g. 'TF'.
+    required: false
+
+outputs:
+  deployment_id:
+    description: ID of the created GitHub deployment.

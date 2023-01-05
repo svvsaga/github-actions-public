@@ -59,7 +59,7 @@ export function getInitArgs({
 }
 
 export async function getGitSha(
-  execOptions: { cwd: string; env: Record<string, string> },
+  execOptions: { cwd?: string; env: Record<string, string> },
   terraformDir?: string
 ): Promise<string> {
   let gitSha: string | null = null
