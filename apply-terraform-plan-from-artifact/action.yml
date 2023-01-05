@@ -38,7 +38,7 @@ runs:
 
     - name: Check if plan exists
       id: check-plan
-      uses: xSAVIKx/artifact-exists-action@95dbb80b8ad88baf1227ad1896c6761e4013a4c8
+      uses: svvsaga/artifact-exists-action@master
       with:
         name: ${{ inputs.plan_artifact_name }}
 
@@ -60,7 +60,7 @@ runs:
 
     - name: Setup Google Cloud SDK
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
-      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.0
+      uses: svvsaga/github-actions-public/setup-gcloud@v20.0.1
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
@@ -74,7 +74,7 @@ runs:
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@d4de6a145d2e35e57ce5a5b856238ed3ada062b9
+      uses: svvsaga/action-terragrunt@master
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
