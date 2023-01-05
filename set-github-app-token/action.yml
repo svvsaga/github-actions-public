@@ -14,7 +14,7 @@ runs:
   steps:
     - name: Get app token
       id: get_token
-      uses: svvsaga/github-app-token@main
+      uses: svvsaga/github-app-token@v1
       with:
         private_key: ${{ inputs.private_key }}
         app_id: ${{ inputs.app_id }}
