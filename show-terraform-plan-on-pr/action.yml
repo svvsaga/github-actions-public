@@ -17,6 +17,10 @@ inputs:
     description: JSON string containing secrets to pass to Terraform.
     required: false
     default: '{}'
+  upload_plan_bucket:
+    description: GCS bucket to upload the plan to.
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -143,6 +147,15 @@ runs:
         echo 'PLAN<<EOF' >> $GITHUB_ENV
         echo "$PLAN" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
+        echo "$PLAN" >> tf.plan.txt
+
+    - name: Upload plan to GCS
+      id: upload-plan
+      if: env.PLAN_OUTCOME == 'success' && inputs.upload_plan_bucket != ''
+      uses: google-github-actions/upload-cloud-storage@v1
+      with:
+        path: ${{ inputs.terraform_dir }}/tf.plan.txt
+        destination: ${{ inputs.upload_plan_bucket }}/terraform-plans-pr/${{ inputs.terraform_dir }}/pr-${{ github.event.pull_request.number }}-${{ github.event.repository.updated_at }}
 
     - name: Show Terraform status
       uses: actions/github-script@v6
@@ -152,6 +165,8 @@ runs:
           const plan = process.env.PLAN;
           const output = `
           <h1>${{ inputs.terraform_dir == '.' && 'root' || inputs.terraform_dir }}</h1>
+          
+          ${{ steps.upload-plan.outputs.uploaded && format('<a href="https://storage.cloud.google.com/{0}/{1}">View plan</a>', inputs.upload_plan_bucket, steps.upload-plan.outputs.uploaded) || '' }}
 
           #### Terraform Format and Style 🖌\`${{ env.FMT_OUTCOME == 'success' && '✅' || env.FMT_OUTCOME == 'failure' && '❌' }}\`
           #### Terraform Initialization ⚙️\`${{ env.INIT_OUTCOME == 'success' && '✅' || env.INIT_OUTCOME == 'failure' && '❌' }}\`
