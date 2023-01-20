@@ -173,7 +173,7 @@ runs:
           #### Terraform Plan 📖\`${{ env.PLAN_OUTCOME == 'success' && '✅' || env.PLAN_OUTCOME == 'failure' && '❌' }}\`
 
 
-          <details><summary>Show Plan</summary>
+          <details><summary>Show Plan (${{ steps.read-terraform-pr-config.outputs.environment }})</summary>
 
           \`\`\`terraform\n${plan}\n\`\`\`
 
