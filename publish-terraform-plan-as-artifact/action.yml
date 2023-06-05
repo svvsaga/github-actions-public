@@ -75,9 +75,9 @@ runs:
 
     - name: Terragrunt init
       working-directory: ${{ inputs.terraform_dir }}
+      shell: bash
       env:
         TF_VAR_ENV: ${{ inputs.environment }}
-      shell: bash
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Replace Terraform variables with secrets
@@ -92,6 +92,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        TF_VAR_ENV: ${{ inputs.environment }}
       run: terragrunt plan -no-color -input=false -out="${{ inputs.plan_artifact_name }}"
 
     - name: Set plan description filename env variable
@@ -102,6 +103,8 @@ runs:
     - name: Render plan description
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
+      env:
+        TF_VAR_ENV: ${{ inputs.environment }}
       run: terragrunt show -no-color ${{ inputs.plan_artifact_name }} > ${{ env.PLAN_TXT_FILENAME }}
 
     - name: Set whether plan has changes

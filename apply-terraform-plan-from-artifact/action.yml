@@ -93,4 +93,5 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        TF_VAR_ENV: ${{ inputs.environment }}
       run: terragrunt apply -input=false -no-color -auto-approve ${{ inputs.plan_artifact_name }}
