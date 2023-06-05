@@ -75,6 +75,8 @@ runs:
 
     - name: Terragrunt init
       working-directory: ${{ inputs.terraform_dir }}
+      env:
+        TF_VAR_ENV: ${{ inputs.environment }}
       shell: bash
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
