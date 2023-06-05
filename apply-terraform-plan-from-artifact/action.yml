@@ -13,7 +13,7 @@ inputs:
     description: Service account key for the Terraform service account. Use either this or Workload Identity Federation.
     required: false
   environment:
-    description: STM, ATM, PROD or SHARED. Used to setup Workload Identity Federation. Must be set if service_account_key is not set.
+    description: STM, ATM, PROD or SHARED. Used to setup Terragrunt and Workload Identity Federation. Must be set if service_account_key is not set.
     required: false
   github_token:
     description: Token used when authenticating with GitHub. Defaults to `github.token`.
@@ -82,6 +82,8 @@ runs:
     - name: Terragrunt init
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       working-directory: ${{ inputs.terraform_dir }}
+      env:
+        TF_VAR_ENV: ${{ inputs.environment }}
       shell: bash
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
