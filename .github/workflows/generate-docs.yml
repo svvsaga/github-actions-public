@@ -32,6 +32,6 @@ jobs:
         run: ./.github/scripts/md_file_tree.py README.md
 
       - name: Commit and push
-        uses: svvsaga/add-and-commit@main
+        uses: EndBug/add-and-commit@ee75796
         with:
           message: Update action docs
