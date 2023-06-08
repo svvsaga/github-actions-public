@@ -38,7 +38,7 @@ runs:
 
     - name: Check if plan exists
       id: check-plan
-      uses: svvsaga/artifact-exists-action@master
+      uses: xSAVIKx/artifact-exists-action@3c5206b
       with:
         name: ${{ inputs.plan_artifact_name }}
 
