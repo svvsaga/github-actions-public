@@ -57,7 +57,7 @@ runs:
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: svvsaga/action-terragrunt@v1.2.0
+      uses: autero1/action-terragrunt@v1.2.0
       with:
         terragrunt_version: ${{ steps.read-terraform-dependencies.outputs.tg_version }}
 
