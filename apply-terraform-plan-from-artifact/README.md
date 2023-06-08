@@ -1,6 +1,6 @@
 ## Description
 
-Apply Terraform plan from artifact in previous job. We use this action when plan and apply happens in the same workflow. Github cleans up these artifacts.
+Apply Terraform plan from artifact in previous job
 
 ## Inputs
 

@@ -1,6 +1,7 @@
 ## Description
 
-Apply Terraform plan from storage bucket. Requires that Google Cloud SDK has been setup. We use this action when plan and apply happens in separate workflows.
+Apply Terraform plan from storage bucket. Requires that Google Cloud SDK has been setup.
+
 
 ## Inputs
 
