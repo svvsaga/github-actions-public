@@ -75,7 +75,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@d4e8205
+        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
         with:
           tag_name: ${{ inputs.app_id }}-v${{ inputs.app_version }}
           target_commitish: ${{ env.REF }}
