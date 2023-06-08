@@ -70,7 +70,7 @@ jobs:
 
       - name: Get app token
         id: get_token
-        uses: svvsaga/github-app-token@v1
+        uses: tibdex/github-app-token@v1
         with:
           private_key: ${{ secrets.github_app_private_key }}
           app_id: ${{ secrets.github_app_id }}
