@@ -87,7 +87,7 @@ jobs:
       - name: Gradle build and integration test
         id: build-and-inttest
         continue-on-error: true
-        uses: svvsaga/retry@master
+        uses: nick-fields/retry@943e742
         with:
           command: cd ${{ matrix.path }} && ${{ inputs.build_and_inttest_cmd }}
           retry_wait_seconds: 60
