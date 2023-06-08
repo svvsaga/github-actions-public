@@ -43,7 +43,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: svvsaga/action-gh-release@master
+        uses: softprops/action-gh-release@d4e8205
         with:
           tag_name: ${{ inputs.app_id }}-v${{ github.run_number }}
           target_commitish: ${{ env.REF }}
