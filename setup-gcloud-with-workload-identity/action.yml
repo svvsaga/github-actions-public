@@ -18,6 +18,10 @@ inputs:
     description: The service account to use with `gcloud`. Defaults to `terraform`.
     required: false
     default: terraform
+  access_token_scopes:
+    description: List of oauth 2.0 access scopes to be included in the generated token
+    required: false
+    default: https://www.googleapis.com/auth/cloud-platform
   pool_id:
     description: The pool ID of the workload identity pool to use with `gcloud`. Defaults to `default`.
     required: false
@@ -67,7 +71,7 @@ runs:
           echo "ERROR: Project ID not found for environment '${{ inputs.environment }}'"
           exit 1
         fi
-        
+
         if [ -z "$PROJECT_NUMBER" ]; then
           echo "ERROR: Project number not found for environment '${{ inputs.environment }}'"
           exit 1
@@ -83,6 +87,7 @@ runs:
         workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ inputs.pool_id }}/providers/${{ inputs.provider_id }}
         service_account: ${{ inputs.service_account }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
         token_format: access_token
+        access_token_scopes: ${{ inputs.access_token_scopes }}
 
     - name: Setup Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v0
