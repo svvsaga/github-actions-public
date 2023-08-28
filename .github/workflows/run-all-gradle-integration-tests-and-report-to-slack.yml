@@ -7,17 +7,17 @@ on:
         description: Regex of modules to ignore, e.g. 'utils/.*'.
         type: string
         required: false
-        default: ""
+        default: ''
       ignore_modules:
         description: Comma-separated list of relative paths to ignore. Must include dot at start of relative path, e.g. `., ./system/alpha`.
         type: string
         required: false
-        default: ""
+        default: ''
       build_and_inttest_cmd:
         description: Command to run for each module
         type: string
         required: false
-        default: "./gradlew inttest"
+        default: './gradlew inttest'
 
     secrets:
       slack_webhook_url:
@@ -38,7 +38,7 @@ jobs:
 
       - name: Find gradle modules
         id: find-gradle-modules
-        uses: svvsaga/github-actions-public/find-gradle-module-changes@v20.1.1
+        uses: svvsaga/github-actions-public/find-gradle-module-changes@v20.4.0
         with:
           include_all: true
           ignore_modules_regex: ${{ inputs.ignore_modules_regex }}
@@ -73,16 +73,17 @@ jobs:
 
       - name: Read integration testing config
         id: read-integration-testing-config
-        uses: svvsaga/github-actions-public/read-integration-testing-config@v20.1.1
+        uses: svvsaga/github-actions-public/read-integration-testing-config@v20.4.0
         with:
           cwd: ${{ matrix.path }}
 
       - name: Setup Google Cloud SDK with workload identity federation
-        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v20.1.1
+        uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v20.4.0
         with:
           service_account: ${{ steps.read-integration-testing-config.outputs.service_account }}
           project_id: ${{ steps.read-integration-testing-config.outputs.workload_identity_project_id }}
           project_number: ${{ steps.read-integration-testing-config.outputs.workload_identity_project_number }}
+          access_token_scopes: https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/cloud-platform
 
       - name: Gradle build and integration test
         id: build-and-inttest
