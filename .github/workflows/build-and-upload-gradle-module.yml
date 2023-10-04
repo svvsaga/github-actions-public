@@ -84,7 +84,7 @@ jobs:
           java-version: 17
           cache: gradle
 
-      - name: Build function
+      - name: Build deployable
         run: ${{ inputs.gradlew_path }} shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
 
       - name: Zip jars
