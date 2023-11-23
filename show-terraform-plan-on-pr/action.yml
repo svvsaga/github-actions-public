@@ -138,16 +138,17 @@ runs:
         else
           terragrunt plan -no-color -out="tf.plan"
         fi
+        PLAN=$(terragrunt show -no-color tf.plan)
+        echo "$PLAN" > tf.plan.txt
         # Maximum length of github comments is 65536 Unicode characters, so we cut the plan to 60000 chars if it is too long
         # See https://github.community/t/maximum-length-for-the-comment-body-in-issues-and-pr/148867
-        PLAN=$(terragrunt show -no-color tf.plan)
-        if [[ ${#PLAN} -gt 60000 ]] ; then
-            PLAN="${PLAN::60000}"$'\n...\nPlan too long to be shown in full'
+        TRIMMED_PLAN=$PLAN
+        if [[ ${#TRIMMED_PLAN} -gt 60000 ]] ; then
+            TRIMMED_PLAN="${TRIMMED_PLAN::60000}"$'\n...\nPlan too long to be shown in full'
         fi
-        echo 'PLAN<<EOF' >> $GITHUB_ENV
-        echo "$PLAN" >> $GITHUB_ENV
+        echo 'TRIMMED_PLAN<<EOF' >> $GITHUB_ENV
+        echo "$TRIMMED_PLAN" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV && echo "PLAN_OUTCOME=success" >> $GITHUB_ENV || echo "PLAN_OUTCOME=failure" >> $GITHUB_ENV
-        echo "$PLAN" >> tf.plan.txt
 
     - name: Upload plan to GCS
       id: upload-plan
@@ -162,7 +163,7 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
-          const plan = process.env.PLAN;
+          const plan = process.env.TRIMMED_PLAN;
           const output = `
           <h1>${{ inputs.terraform_dir == '.' && 'root' || inputs.terraform_dir }}</h1>
           
