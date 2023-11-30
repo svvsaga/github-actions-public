@@ -56,7 +56,7 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v22.2.0
+      uses: svvsaga/github-actions-public/setup-gcloud@v22.3.1
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
