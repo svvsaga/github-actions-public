@@ -40,7 +40,7 @@ runs:
     - name: Setup Google Cloud SDK with service account key
       id: setup_gcloud_with_service_account_key
       if: ${{ inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@22.1.0
+      uses: svvsaga/github-actions-public/setup-gcloud-with-json-key@v22.1.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
 
