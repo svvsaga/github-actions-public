@@ -44,7 +44,7 @@ runs:
         cwd: ${{ inputs.terraform_dir }}
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v22.3.1
+      uses: svvsaga/github-actions-public/setup-gcloud@v22.3.3
       with:
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ steps.read-terraform-pr-config.outputs.environment }}
