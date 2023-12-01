@@ -58,7 +58,7 @@ jobs:
           cwd: ${{ inputs.app_root }}
 
       - name: Setup Google Cloud SDK
-        uses: svvsaga/github-actions-public/setup-gcloud@v22.3.1
+        uses: svvsaga/github-actions-public/setup-gcloud@v22.3.3
         with:
           service_account_key: ${{ secrets.service_account_key }}
           app_root: ${{ inputs.app_root }}
