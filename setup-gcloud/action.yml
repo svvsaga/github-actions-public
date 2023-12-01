@@ -47,7 +47,7 @@ runs:
     - name: Setup Google Cloud SDK with workload identity federation
       id: setup_gcloud_with_workload_identity
       if: ${{ !inputs.service_account_key }}
-      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v20.1.1
+      uses: svvsaga/github-actions-public/setup-gcloud-with-workload-identity@v22.3.2
       with:
         app_root: ${{ inputs.app_root }}
         environment: ${{ inputs.environment }}
