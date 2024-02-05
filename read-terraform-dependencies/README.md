@@ -4,18 +4,18 @@ Finds Terraform settings, including .terraform-version, .terragrunt-version and 
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| cwd | Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root. | `true` | . |
+| `cwd` | <p>Relative path to use for searching and as root for <code>matrix.path</code> outputs. Defaults to repo root.</p> | `true` | `.` |
 
 
 ## Outputs
 
-| parameter | description |
+| name | description |
 | --- | --- |
-| tf_version | Terraform version |
-| tg_version | Terragrunt version |
-| tg_dependencies | Terragrunt dependencies (as a list of strings) |
+| `tf_version` | <p>Terraform version</p> |
+| `tg_version` | <p>Terragrunt version</p> |
+| `tg_dependencies` | <p>Terragrunt dependencies (as a list of strings)</p> |
 
 
 ## Runs

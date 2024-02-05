@@ -4,17 +4,17 @@ Creates a GitHub token for the GitHub App and sets it as GITHUB_TOKEN, as well a
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| private_key | Private key for the GitHub App | `true` |  |
-| app_id | GitHub App ID | `true` |  |
+| `private_key` | <p>Private key for the GitHub App</p> | `true` | `""` |
+| `app_id` | <p>GitHub App ID</p> | `true` | `""` |
 
 
 ## Outputs
 
-| parameter | description |
+| name | description |
 | --- | --- |
-| token | GitHub token |
+| `token` | <p>GitHub token</p> |
 
 
 ## Runs

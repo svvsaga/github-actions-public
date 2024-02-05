@@ -4,20 +4,20 @@ Setup GCloud SDK. If service account key is passed, it will be used, otherwise t
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| service_account_key | The service account JSON secret key to use with `gcloud`. Either this or `app_root` and `environment` must be set. | `false` |  |
-| app_root | The root directory to use for searching for `projects.config.json`. | `false` |  |
-| environment | The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED". | `false` |  |
-| service_account | The service account to use with Workload Identity Federation. Defaults to `terraform`. Not used if `service_account_key` is set. | `false` | terraform |
+| `service_account_key` | <p>The service account JSON secret key to use with <code>gcloud</code>. Either this or <code>app_root</code> and <code>environment</code> must be set.</p> | `false` | `""` |
+| `app_root` | <p>The root directory to use for searching for <code>projects.config.json</code>.</p> | `false` | `""` |
+| `environment` | <p>The environment to use for finding the project ID and number. Typically "STM", "ATM", "PROD" or "SHARED".</p> | `false` | `""` |
+| `service_account` | <p>The service account to use with Workload Identity Federation. Defaults to <code>terraform</code>. Not used if <code>service_account_key</code> is set.</p> | `false` | `terraform` |
 
 
 ## Outputs
 
-| parameter | description |
+| name | description |
 | --- | --- |
-| credentials_file_path | The path to the credentials file used by `gcloud`. |
-| access_token | The access token used with `gcloud` if WIF is used. |
+| `credentials_file_path` | <p>The path to the credentials file used by <code>gcloud</code>.</p> |
+| `access_token` | <p>The access token used with <code>gcloud</code> if WIF is used.</p> |
 
 
 ## Runs

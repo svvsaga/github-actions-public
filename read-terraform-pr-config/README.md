@@ -4,22 +4,22 @@ Finds Terraform settings to use when running PR actions.
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| cwd | Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root. | `true` | . |
-| secrets_json | JSON string containing secrets to use for Terraform. | `false` | {} |
+| `cwd` | <p>Relative path to use for searching and as root for <code>matrix.path</code> outputs. Defaults to repo root.</p> | `true` | `.` |
+| `secrets_json` | <p>JSON string containing secrets to use for Terraform.</p> | `false` | `{}` |
 
 
 ## Outputs
 
-| parameter | description |
+| name | description |
 | --- | --- |
-| tf_vars | Terraform variables (as stringified JSON) |
-| sa_secret | Name of service account secret |
-| sa_secret_key | Service account secret key |
-| environment | Environment name to use when running Terraform PR actions |
-| workload_identity_project_id | Project ID for the workload identity federation authentication |
-| workload_identity_project_number | Project number for the workload identity federation authentication |
+| `tf_vars` | <p>Terraform variables (as stringified JSON)</p> |
+| `sa_secret` | <p>Name of service account secret</p> |
+| `sa_secret_key` | <p>Service account secret key</p> |
+| `environment` | <p>Environment name to use when running Terraform PR actions</p> |
+| `workload_identity_project_id` | <p>Project ID for the workload identity federation authentication</p> |
+| `workload_identity_project_number` | <p>Project number for the workload identity federation authentication</p> |
 
 
 ## Runs

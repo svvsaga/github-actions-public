@@ -4,19 +4,19 @@ Finds integration testing settings
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| cwd | Relative path to use for searching and as root for `matrix.path` outputs. Defaults to repo root. | `true` | . |
+| `cwd` | <p>Relative path to use for searching and as root for <code>matrix.path</code> outputs. Defaults to repo root.</p> | `true` | `.` |
 
 
 ## Outputs
 
-| parameter | description |
+| name | description |
 | --- | --- |
-| environment | Environment name |
-| workload_identity_project_id | Project ID for the workload identity federation authentication |
-| workload_identity_project_number | Project number for the workload identity federation authentication |
-| service_account | Service account to be used to run integration tests. Only user part (until "@[domain]"). Default is "project-service-account". |
+| `environment` | <p>Environment name</p> |
+| `workload_identity_project_id` | <p>Project ID for the workload identity federation authentication</p> |
+| `workload_identity_project_number` | <p>Project number for the workload identity federation authentication</p> |
+| `service_account` | <p>Service account to be used to run integration tests. Only user part (until "@[domain]"). Default is "project-service-account".</p> |
 
 
 ## Runs

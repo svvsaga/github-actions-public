@@ -4,11 +4,11 @@ Replace Terraform variables with secrets
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| secrets_json | JSON string containing secrets to use for Terraform. | `true` |  |
-| terraform_dir | The working directory, e.g. where the Terraform files are located. | `true` |  |
-| secrets_file | The path to the Terraform tvars secrets file. | `true` | secrets.auto.tfvars |
+| `secrets_json` | <p>JSON string containing secrets to use for Terraform.</p> | `true` | `""` |
+| `terraform_dir` | <p>The working directory, e.g. where the Terraform files are located.</p> | `true` | `""` |
+| `secrets_file` | <p>The path to the Terraform tvars secrets file.</p> | `true` | `secrets.auto.tfvars` |
 
 
 ## Runs

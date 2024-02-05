@@ -18,14 +18,8 @@ Useful GitHub Actions!
    - [Readme](./find-gradle-module-changes/README.md)
  - **find-module-changes/**
    - [Readme](./find-module-changes/README.md)
- - **find-severity-of-push/**
-   - [Readme](./find-severity-of-push/README.md)
  - **find-terraform-changes/**
    - [Readme](./find-terraform-changes/README.md)
- - **install-tfmask/**
-   - [Readme](./install-tfmask/README.md)
- - **post-issue-to-card/**
-   - [Readme](./post-issue-to-card/README.md)
  - **publish-terraform-plan-as-artifact/**
    - [Readme](./publish-terraform-plan-as-artifact/README.md)
  - **publish-terraform-plan-to-gcs/**
@@ -52,8 +46,6 @@ Useful GitHub Actions!
    - [Readme](./show-terraform-plan-on-pr/README.md)
  - **start-deployment/**
    - [Readme](./start-deployment/README.md)
- - **tag-semantic-version/**
-   - [Readme](./tag-semantic-version/README.md)
 
 <!-- filetreestop -->
 

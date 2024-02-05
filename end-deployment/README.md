@@ -4,11 +4,11 @@ End a GitHub deployment, setting status to either 'success' or 'failure'.
 
 ## Inputs
 
-| parameter | description | required | default |
+| name | description | required | default |
 | --- | --- | --- | --- |
-| deployment_id | ID of the deployment to end. | `true` |  |
-| success | Set to 'true' to end deployment with status 'success', otherwise 'failure'. | `true` |  |
-| github_token | Token used to update GitHub deployment. Defaults to `github.token`. | `true` | ${{ github.token }} |
+| `deployment_id` | <p>ID of the deployment to end.</p> | `true` | `""` |
+| `success` | <p>Set to 'true' to end deployment with status 'success', otherwise 'failure'.</p> | `true` | `""` |
+| `github_token` | <p>Token used to update GitHub deployment. Defaults to <code>github.token</code>.</p> | `true` | `${{ github.token }}` |
 
 
 ## Runs
