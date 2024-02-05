@@ -1,6 +1,5 @@
-import { listCommitMessagesInPush } from '../utils/github'
-import { Severity } from '../utils/semver'
-
+import { listCommitMessagesInPush } from './github'
+import { Severity } from './semver'
 export async function findSeverityOfPush(): Promise<Severity> {
   const commitMsgs = await listCommitMessagesInPush()
   let severity: Severity = null
