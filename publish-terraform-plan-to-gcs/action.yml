@@ -2,7 +2,7 @@ name: Publish Terraform plan to GCS
 description: |
   Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has been setup.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   project_root:

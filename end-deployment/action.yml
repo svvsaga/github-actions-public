@@ -1,7 +1,7 @@
 name: End GitHub deployment
 description: End a GitHub deployment, setting status to either 'success' or 'failure'.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   deployment_id:
