@@ -23,6 +23,6 @@ Find changes in Gradle root modules, defined as a folder with `gradlew` present.
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

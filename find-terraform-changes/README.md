@@ -24,6 +24,6 @@ Find changes in Terraform modules in a pull request or push. Requires checking o
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

@@ -24,6 +24,6 @@ Finds Terraform settings to use when running PR actions.
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

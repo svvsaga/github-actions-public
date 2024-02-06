@@ -19,6 +19,6 @@ Reads the latest tag, increments the version if a \#major, \#minor or \#patch ta
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

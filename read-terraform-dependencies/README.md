@@ -20,6 +20,6 @@ Finds Terraform settings, including .terraform-version, .terragrunt-version and 
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

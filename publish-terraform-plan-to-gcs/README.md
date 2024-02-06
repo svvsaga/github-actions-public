@@ -17,6 +17,6 @@ Publish Terraform plan to storage bucket. Requires that Google Cloud SDK has bee
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

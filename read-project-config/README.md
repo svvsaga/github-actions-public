@@ -24,6 +24,6 @@ Finds project IDs by environment
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

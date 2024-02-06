@@ -13,6 +13,6 @@ End a GitHub deployment, setting status to either 'success' or 'failure'.
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

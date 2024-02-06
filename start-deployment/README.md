@@ -22,6 +22,6 @@ Create a GitHub deployment and set status to in_progress. Will connect deploymen
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 

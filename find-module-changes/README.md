@@ -25,6 +25,6 @@ Find changes in modules in a pull request or push. Requires checking out the cod
 
 ## Runs
 
-This action is a `node16` action.
+This action is a `node20` action.
 
 
