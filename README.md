@@ -58,7 +58,7 @@ jobs:
   build:
     steps:
       - name: My Action
-        uses: svvsaga/github-actions-public/my-action@v20.0.1
+        uses: svvsaga/github-actions-public/my-action@v24.0.0
 ```
 
 ## Publishing new versions
