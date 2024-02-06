@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Find modules with changes
         id: find-module-changes
-        uses: svvsaga/github-actions-public/find-gradle-module-changes@v20.1.1
+        uses: svvsaga/github-actions-public/find-gradle-module-changes@v24.0.0
         with:
           token: ${{ github.token }}
     outputs:
@@ -42,9 +42,9 @@ jobs:
         working-directory: ${{ matrix.path }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17

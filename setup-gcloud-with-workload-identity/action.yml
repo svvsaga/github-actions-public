@@ -55,7 +55,7 @@ runs:
     - name: Read project config
       id: read_project_config
       if: ${{ !inputs.project_id }}
-      uses: svvsaga/github-actions-public/read-project-config@v20.1.1
+      uses: svvsaga/github-actions-public/read-project-config@v24.0.0
       with:
         cwd: ${{ inputs.app_root }}
 
@@ -79,7 +79,7 @@ runs:
 
     - name: Authenticate to Google Cloud with Terraform service account
       id: auth
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       env:
         PROJECT_ID: ${{ inputs.project_id || fromJson(steps.read_project_config.outputs.project_ids_by_environment)[inputs.environment] }}
         PROJECT_NUMBER: ${{ inputs.project_number || fromJson(steps.read_project_config.outputs.project_numbers_by_environment)[inputs.environment] }}
@@ -90,7 +90,7 @@ runs:
         access_token_scopes: ${{ inputs.access_token_scopes }}
 
     - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+      uses: google-github-actions/setup-gcloud@v2
 
 outputs:
   credentials_file_path:

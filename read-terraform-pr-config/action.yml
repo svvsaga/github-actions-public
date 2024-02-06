@@ -1,7 +1,7 @@
 name: Read Terraform PR-specific config
 description: Finds Terraform settings to use when running PR actions.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   cwd:

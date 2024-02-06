@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import { chmodSync } from 'fs'
-import { getPlatformAndArch } from '../utils/platform'
+import { getPlatformAndArch } from '~/utils/platform'
 
 async function fetchCachedTerragrunt(version: string): Promise<string> {
   const { platform, arch } = getPlatformAndArch()

@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Find modules with changes
         id: find-module-changes
-        uses: svvsaga/github-actions-public/find-module-changes@v20.1.1
+        uses: svvsaga/github-actions-public/find-module-changes@v24.0.0
         with:
           marker: package.json
           ignore_modules: ${{ inputs.ignore_modules }}
@@ -44,7 +44,7 @@ jobs:
         working-directory: ${{ matrix.path }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: NPM Install
         run: npm ci

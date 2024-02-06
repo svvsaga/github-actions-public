@@ -2,7 +2,7 @@ name: Apply Terraform plan
 description: |
   Apply Terraform plan from storage bucket. Requires that Google Cloud SDK has been setup.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   project_root:

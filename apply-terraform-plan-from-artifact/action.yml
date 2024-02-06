@@ -31,19 +31,19 @@ runs:
   using: composite
   steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
 
     - name: Check if plan exists
       id: check-plan
-      uses: xSAVIKx/artifact-exists-action@3c5206b1411c0d2fc0840f56b7140646933d9d6a
+      uses: xSAVIKx/artifact-exists-action@v0.6
       with:
         name: ${{ inputs.plan_artifact_name }}
 
     - name: Download plan
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         name: ${{ inputs.plan_artifact_name }}
@@ -60,21 +60,21 @@ runs:
 
     - name: Setup Google Cloud SDK
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
-      uses: svvsaga/github-actions-public/setup-gcloud@v22.3.3
+      uses: svvsaga/github-actions-public/setup-gcloud@v24.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ inputs.environment }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terraform_version: ${{ env.TF_VERSION }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@v1.2.0
+      uses: autero1/action-terragrunt@v1.3.2
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terragrunt_version: ${{ env.TG_VERSION }}

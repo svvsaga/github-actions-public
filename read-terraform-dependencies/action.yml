@@ -1,7 +1,7 @@
 name: Read Terraform dependencies
 description: Finds Terraform settings, including .terraform-version, .terragrunt-version and terragrunt dependencies.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   cwd:

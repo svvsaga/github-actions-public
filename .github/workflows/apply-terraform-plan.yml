@@ -47,13 +47,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
 
       - name: Read project config
         id: read_config
-        uses: svvsaga/github-actions-public/read-project-config@v20.1.1
+        uses: svvsaga/github-actions-public/read-project-config@v24.0.0
         with:
           cwd: ${{ inputs.app_root }}
 
@@ -66,7 +66,7 @@ jobs:
 
       - name: Get app token
         id: get_token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@v2
         with:
           private_key: ${{ secrets.github_app_private_key }}
           app_id: ${{ secrets.github_app_id }}
@@ -77,7 +77,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ steps.get_token.outputs.token }}" >> $GITHUB_ENV
 
       - name: Deploy plan for ${{ inputs.environment }}
-        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v20.1.1
+        uses: svvsaga/github-actions-public/apply-terraform-plan-from-gcs@v24.0.0
         with:
           environment: ${{ inputs.environment }}
           project_root: ${{ inputs.app_root }}

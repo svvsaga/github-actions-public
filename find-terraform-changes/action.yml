@@ -1,7 +1,7 @@
 name: Find Terraform changes
 description: Find changes in Terraform modules in a pull request or push. Requires checking out the code beforehand.
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   token:

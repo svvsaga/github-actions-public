@@ -1,7 +1,7 @@
 name: Read Integration testing config
 description: Finds integration testing settings
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   cwd:

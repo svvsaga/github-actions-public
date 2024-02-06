@@ -42,7 +42,7 @@ runs:
   using: composite
   steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
@@ -56,20 +56,20 @@ runs:
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      uses: svvsaga/github-actions-public/setup-gcloud@v22.3.3
+      uses: svvsaga/github-actions-public/setup-gcloud@v24.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
         app_root: ${{ inputs.terraform_dir }}
         environment: ${{ inputs.environment }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ env.TF_VERSION }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@v1.2.0
+      uses: autero1/action-terragrunt@v1.3.2
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
@@ -81,7 +81,7 @@ runs:
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Replace Terraform variables with secrets
-      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v20.1.1
+      uses: svvsaga/github-actions-public/replace-tfvars-with-secrets@v24.0.0
       if: inputs.secrets_json != ''
       with:
         secrets_json: ${{ inputs.secrets_json }}
@@ -117,7 +117,7 @@ runs:
         echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Upload plan
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: steps.set-has-changes.outputs.has_changes == 1
       with:
         name: ${{ inputs.plan_artifact_name }}
@@ -128,7 +128,7 @@ runs:
     - name: Publish plan description
       id: publish-plan-description
       if: steps.set-has-changes.outputs.has_changes == 1
-      uses: google-github-actions/upload-cloud-storage@v1
+      uses: google-github-actions/upload-cloud-storage@v2
       with:
         path: ${{ inputs.terraform_dir }}/${{ env.PLAN_TXT_FILENAME }}
         destination: ${{ inputs.plan_bucket }}/${{ inputs.plan_prefix }}

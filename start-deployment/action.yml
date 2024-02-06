@@ -1,7 +1,7 @@
 name: Start GitHub deployment
 description: Create a GitHub deployment and set status to in_progress. Will connect deployment to a GitHub Environment (see https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment).
 runs:
-  using: node16
+  using: node20
   main: ./index.js
 inputs:
   ref:
