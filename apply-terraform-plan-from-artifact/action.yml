@@ -43,7 +43,7 @@ runs:
         name: ${{ inputs.plan_artifact_name }}
 
     - name: Download plan
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3 # Note: Upgrading this to v4 is a breaking change: https://github.com/xSAVIKx/artifact-exists-action/issues/10
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         name: ${{ inputs.plan_artifact_name }}
