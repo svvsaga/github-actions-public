@@ -117,7 +117,7 @@ runs:
         echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Upload plan
-      uses: actions/upload-artifact@v3 # Note: Upgrading this to v4 is a breaking change: https://github.com/xSAVIKx/artifact-exists-action/issues/10
+      uses: actions/upload-artifact@v4
       if: steps.set-has-changes.outputs.has_changes == 1
       with:
         name: ${{ inputs.plan_artifact_name }}

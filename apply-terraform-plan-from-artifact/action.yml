@@ -36,14 +36,8 @@ runs:
         ref: ${{ inputs.ref }}
         token: ${{ inputs.github_token }}
 
-    - name: Check if plan exists
-      id: check-plan
-      uses: xSAVIKx/artifact-exists-action@v0.6
-      with:
-        name: ${{ inputs.plan_artifact_name }}
-
     - name: Download plan
-      uses: actions/download-artifact@v3 # Note: Upgrading this to v4 is a breaking change: https://github.com/xSAVIKx/artifact-exists-action/issues/10
+      uses: actions/download-artifact@v4
       if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         name: ${{ inputs.plan_artifact_name }}
