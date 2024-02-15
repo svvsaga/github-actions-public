@@ -38,7 +38,6 @@ runs:
 
     - name: Download plan
       uses: actions/download-artifact@v4
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         name: ${{ inputs.plan_artifact_name }}
         path: ${{ inputs.terraform_dir }}
@@ -46,14 +45,12 @@ runs:
     - name: Read TF and TG versions
       working-directory: .
       shell: bash
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       run: |
         echo "TF_VERSION=$(cat .terraform-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo "TG_VERSION=$(cat .terragrunt-version | awk '{$1=$1};1')" >> $GITHUB_ENV
         echo TF_INPUT=false >> $GITHUB_ENV
 
     - name: Setup Google Cloud SDK
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       uses: svvsaga/github-actions-public/setup-gcloud@v24.0.0
       with:
         service_account_key: ${{ inputs.service_account_key }}
@@ -62,19 +59,16 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terraform_version: ${{ env.TF_VERSION }}
         terraform_wrapper: false
 
     - name: Setup Terragrunt
       uses: autero1/action-terragrunt@v1.3.2
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       with:
         terragrunt_version: ${{ env.TG_VERSION }}
 
     - name: Terragrunt init
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       working-directory: ${{ inputs.terraform_dir }}
       env:
         TF_VAR_ENV: ${{ inputs.environment }}
@@ -82,7 +76,6 @@ runs:
       run: test -z "${{ inputs.tf_backend_config }}" && terragrunt init -reconfigure || terragrunt init -reconfigure -backend-config=${{ inputs.tf_backend_config }}
 
     - name: Terragrunt apply
-      if: ${{ steps.check-plan.outputs.exists == 'true' }}
       working-directory: ${{ inputs.terraform_dir }}
       shell: bash
       env:
