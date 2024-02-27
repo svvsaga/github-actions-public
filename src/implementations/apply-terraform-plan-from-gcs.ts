@@ -12,6 +12,7 @@ import {
 } from '~/utils/terragrunt'
 
 interface DeployTerraformPlanOptions {
+  ref: string
   projectRoot: string
   storageBucket: string
   environment: string
@@ -22,6 +23,7 @@ interface DeployTerraformPlanOptions {
 }
 
 export async function deployTerraformPlanWithInputs(): Promise<void> {
+  const ref = core.getInput('ref', { required: true })
   const projectRoot = core.getInput('project_root', { required: true })
   const storageBucket = core.getInput('storage_bucket', { required: true })
   const environment = core.getInput('environment', { required: true })
@@ -31,6 +33,7 @@ export async function deployTerraformPlanWithInputs(): Promise<void> {
   const storagePrefix = core.getInput('storage_prefix')
 
   await deployTerraformPlan({
+    ref,
     application,
     environment,
     githubToken,
@@ -79,6 +82,7 @@ async function downloadPlanData(
 }
 
 export async function deployTerraformPlan({
+  ref,
   projectRoot,
   storageBucket,
   environment,
@@ -90,10 +94,9 @@ export async function deployTerraformPlan({
   const terraformDir = getTerraformDir(projectRoot)
   const execOptions = getExecOptions(terraformDir, environment)
   const gitSha = await getGitSha(execOptions, terraformDir)
-  const rootSha = await getGitSha(execOptions)
 
   const deployment_id = await startDeployment({
-    ref: rootSha,
+    ref,
     application,
     environment,
     githubToken,
