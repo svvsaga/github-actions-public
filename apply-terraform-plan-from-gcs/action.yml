@@ -5,6 +5,9 @@ runs:
   using: node20
   main: ./index.js
 inputs:
+  ref:
+    description: Which release to deploy, e.g. "datacatalog-web-v13"
+    required: true
   project_root:
     description: Where to find the terraform directory.
     required: true
