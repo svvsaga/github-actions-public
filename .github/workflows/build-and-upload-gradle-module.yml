@@ -15,7 +15,7 @@ on:
         description: Path within storage bucket where to upload artifact. Defaults to `app_root`.
         type: string
         required: false
-        default: ""
+        default: ''
       version_property:
         description: Project property used to set app version
         required: false
@@ -40,12 +40,17 @@ on:
         description: Glob pattern to match artifacts to publish. Defaults to `*.zip`.
         type: string
         required: false
-        default: "*.zip"
+        default: '*.zip'
       shared_project_config_root:
         description: Relative path to the shared project config root (where the projects.config.json for the team shared project can be found). Defaults to repo root.
         type: string
         required: false
-        default: "."
+        default: '.'
+      java_version:
+        description: The Java version to use in the `setup-java` step
+        type: number
+        required: false
+        default: 17
     secrets:
       storage_bucket_sa_publisher_key:
         description: Service account key used to publish JAR to artifact bucket. If not set, attempts to use Workload Identity Federation with shared project ID from `projects.config.json` in shared_project_config_root.
@@ -81,7 +86,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: ${{ inputs.java_version }}
           cache: gradle
 
       - name: Build deployable
