@@ -11,6 +11,11 @@ on:
         description: Regex of modules to ignore, e.g. 'utils/.*'.
         required: false
         type: string
+      java_version:
+        description: The Java version to use in the `setup-java` step
+        type: number
+        required: false
+        default: 17
 
 jobs:
   find-module-changes:
@@ -47,7 +52,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21 
+          java-version: ${{ inputs.java_version }}
           cache: gradle
 
       - name: Gradle build and test

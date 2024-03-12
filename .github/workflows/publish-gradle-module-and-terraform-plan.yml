@@ -19,12 +19,12 @@ on:
         description: Path within storage bucket where to upload artifact. Defaults to `app_root`.
         type: string
         required: false
-        default: ""
+        default: ''
       publish_glob:
         description: Glob pattern to match artifacts to publish. Defaults to `*.zip`.
         type: string
         required: false
-        default: "*.zip"
+        default: '*.zip'
       version_property:
         description: Project property used to set app version.
         required: false
@@ -44,7 +44,12 @@ on:
         description: Relative path to the shared project config root (where the projects.config.json for the team shared project can be found). Defaults to repo root.
         type: string
         required: false
-        default: "."
+        default: '.'
+      java_version:
+        description: The Java version to use in the `setup-java` step
+        type: number
+        required: false
+        default: 17
 
     secrets:
       artifact_publisher_key:
@@ -111,7 +116,7 @@ jobs:
   build_module:
     name: Build module and publish
     runs-on: ubuntu-latest
-    needs: [ read_config ]
+    needs: [read_config]
     defaults:
       run:
         working-directory: ${{ inputs.app_root }}
@@ -124,7 +129,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: ${{ inputs.java_version }}
           cache: gradle
 
       - name: Build module
@@ -159,7 +164,7 @@ jobs:
   publish_plans:
     name: Publish Terraform plans
     runs-on: ubuntu-latest
-    needs: [ create_release, read_config ]
+    needs: [create_release, read_config]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.read_config.outputs.matrix) }}
