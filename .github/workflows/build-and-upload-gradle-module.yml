@@ -31,11 +31,6 @@ on:
         required: false
         type: string
         default: ${{ github.sha }}
-      gradlew_path:
-        description: Relative path to the gradle wrapper. Defaults to `../gradlew`.
-        type: string
-        required: false
-        default: ../gradlew
       publish_glob:
         description: Glob pattern to match artifacts to publish. Defaults to `*.zip`.
         type: string
@@ -46,11 +41,6 @@ on:
         type: string
         required: false
         default: '.'
-      java_version:
-        description: The Java version to use in the `setup-java` step
-        type: number
-        required: false
-        default: 17
     secrets:
       storage_bucket_sa_publisher_key:
         description: Service account key used to publish JAR to artifact bucket. If not set, attempts to use Workload Identity Federation with shared project ID from `projects.config.json` in shared_project_config_root.
@@ -83,14 +73,13 @@ jobs:
         with:
           cwd: ${{ inputs.shared_project_config_root }}
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ inputs.java_version }}
-          cache: gradle
+      - uses: sdkman/sdkman-action@main
+        id: sdkman
 
       - name: Build deployable
-        run: ${{ inputs.gradlew_path }} shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
+        run: gradle shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
+        env:
+          JAVA_HOME: /home/runner/.sdkman/candidates/java/current
 
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;

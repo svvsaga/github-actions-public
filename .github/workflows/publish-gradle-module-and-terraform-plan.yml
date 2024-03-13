@@ -45,11 +45,6 @@ on:
         type: string
         required: false
         default: '.'
-      java_version:
-        description: The Java version to use in the `setup-java` step
-        type: number
-        required: false
-        default: 17
 
     secrets:
       artifact_publisher_key:
@@ -126,11 +121,8 @@ jobs:
         with:
           ref: ${{ env.REF }}
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ inputs.java_version }}
-          cache: gradle
+      - uses: sdkman/sdkman-action@main
+        id: sdkman
 
       - name: Build module
         uses: gradle/actions/setup-gradle@v3
