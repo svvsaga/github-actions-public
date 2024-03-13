@@ -130,6 +130,8 @@ jobs:
           arguments: shadowJar -P${{ inputs.version_property }}=${{ inputs.app_version }}
           build-root-directory: ${{ inputs.app_root }}
           gradle-version: current
+        env:
+          JAVA_HOME: /home/runner/.sdkman/candidates/java/current
 
       - name: Zip jars
         run: find . -type f -name "*.jar" -exec bash -c 'zip -j `basename {}`.zip {}' \;
