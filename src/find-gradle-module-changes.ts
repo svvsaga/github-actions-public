@@ -9,7 +9,7 @@ async function run(): Promise<void> {
     const ignoreModulesRegex = core.getInput('ignore_modules_regex')
     const cwd = core.getInput('cwd') || '.'
     const { matrix, hasResults } = await createMatrixForAffectedModules(
-      'gradle',
+      'build.gradle.kts',
       {
         ignoreModules,
         ignoreModulesRegex,
