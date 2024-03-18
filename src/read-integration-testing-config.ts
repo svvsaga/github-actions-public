@@ -63,8 +63,10 @@ async function run(): Promise<void> {
 
     const res = await readIntTestingConfig(projectRoot, 'inttest.config.json')
     if (!res) {
-      core.setFailed('No integration testing config file found')
+      core.setOutput('testingConfig', false)
+      core.warning('No integration testing config file found')
     } else {
+      core.setOutput('testingConfig', true)
       const {
         environment,
         workloadIdentityProjectId,
